@@ -34,9 +34,7 @@
   </a>
 </p>
 
----
-
-📊 **system_monitor --stats**
+## 📊 ```system_monitor --stats```
 
 <div style="display: flex; flex-wrap: wrap; gap: 10px;">
 
