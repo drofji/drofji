@@ -34,6 +34,12 @@
   </a>
 </p>
 
+## 💬 ```tail -f /dev/jokes```
+
+<p align="left">
+  <a href="https://readme-jokes.vercel.app"><img align="center" src="https://readme-jokes.vercel.app/api" alt="README Jokes"></a>
+</p>
+
 ## 📊 ```system_monitor --stats```
 
 <div style="display: flex; flex-wrap: wrap; gap: 10px;">
@@ -45,9 +51,3 @@
   <img src="https://github-readme-activity-graph.vercel.app/graph?username=drofji&bg_color=282c34&color=FDFD96&line=FDFD96&point=FFFFFF&area_color=79FE96&border_radius=10&title_color=FDFD96&hide_border=true" width="100%" />
 
 </div>
-
-## 💬 ```tail -f /dev/jokes```
-
-<p align="left">
-  <a href="https://readme-jokes.vercel.app"><img align="center" src="https://readme-jokes.vercel.app/api" alt="README Jokes"></a>
-</p>
