@@ -8,13 +8,13 @@
 }
 ```
 
-## 🛠 **stack.trace()**
+## 🛠 ```stack.trace(me)```
 
 ```json
 ["Python", "C/C++", "PHP", "Django", "Git", "JavaScript"]
 ```
 
-## 🌐 **HTTP_GET /social_links**
+## 🌐 ```HTTP_GET /social_links```
 
 <p align="left">
   <a href="https://linkedin.com/in/alechries/" target="_blank">
