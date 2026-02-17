@@ -1,16 +1,20 @@
-## Hi there 👋
+### About Me:
+  Software Developer
+  
+### Let's get in touch
+<div>
+<!--   <a href="https://web.facebook.com/" target="_blank"><img src="https://img.icons8.com/fluency/96/000000/facebook.png"/></a> -->
+  <a href="https://twitter.com/" target="_blank"><img src="https://img.icons8.com/color/96/000000/twitter--v1.png"/></a>
+  <a href="https://linkedin.com/in/alechries/" target="_blank"><img src="https://img.icons8.com/fluency/96/000000/linkedin.png"/></a>
+<!--   <a href="mailto:user1@gmail.com"><img src="https://img.icons8.com/color/96/000000/gmail-new.png"/></a> -->
+  <a href="https://t.me/" target="_blank"><img src="https://img.icons8.com/color-glass/96/000000/telegram-app.png"/></a>
+</div>
 
-<!--
-**drofji/drofji** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
 
-Here are some ideas to get you started:
+## 🔥 My contribution streak
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+<p align="center">
+  <a href="https://github.com/drofji/github-readme-streak-stats">
+    <img src="https://github-readme-streak-stats.herokuapp.com/?user=drofji#version3"/>
+  </a>
+</p>
