@@ -1,4 +1,4 @@
-# 👨‍💻 <Human status="Building things" />
+# 👨‍💻 `<Human status="Building things" />`
 
 ```json
 {
@@ -32,13 +32,13 @@
 
 📊 **system_monitor --stats**
 
-<div align="center">
+<div style="display: flex; flex-wrap: wrap; gap: 10px;">
 
   <img src="https://github-readme-stats-eight-theta.vercel.app/api/top-langs/?username=drofji&langs_count=12&layout=compact&theme=onedark&hide_border=true" height="180px" />
 
-  <img src="https://github-readme-streak-stats.herokuapp.com/?user=drofji&theme=onedark&hide_border=true" width="85%" />
+  <img src="https://github-readme-streak-stats.herokuapp.com/?user=drofji&theme=onedark&hide_border=true" height="180px" />
 
-  <img src="https://github-readme-activity-graph.vercel.app/graph?username=drofji&bg_color=282c34&color=FDFD96&line=FDFD96&point=FFFFFF&area_color=79FE96&border_radius=10&title_color=FDFD96&hide_border=true" width="85%" />
+  <img src="https://github-readme-activity-graph.vercel.app/graph?username=drofji&bg_color=282c34&color=FDFD96&line=FDFD96&point=FFFFFF&area_color=79FE96&border_radius=10&title_color=FDFD96&hide_border=true" width="100%" />
 
 </div>
 
