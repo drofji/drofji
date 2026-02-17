@@ -32,8 +32,9 @@
   <a href="https://drofji.github.io/cv-builder/" target="_blank">
     <img src="https://img.shields.io/badge/My_CV-FF5722?style=for-the-badge&logo=googledocs&logoColor=white" />
   </a>
-
-  <img src="http://estruyf-github.azurewebsites.net/api/VisitorHit?user=drofji&countColor=%237B1E7B" alt="Visitor Count" />
+  <a href="https://github.com/drofji/" target="_blank">
+    <img src="http://estruyf-github.azurewebsites.net/api/VisitorHit?user=drofji&countColor=%237B1E7B" alt="Visitor Count" />
+  </a>
 </p>
 </p>
 
