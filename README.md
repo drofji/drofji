@@ -1,4 +1,4 @@
-# 👨‍💻 `<Human status="Building things" />`
+## 👨‍💻 ```<Human status="Building things" />```
 
 ```json
 {
@@ -8,7 +8,13 @@
 }
 ```
 
-🌐 **HTTP_GET /social_links**
+## 🛠 **stack.trace()**
+
+```json
+["Python", "C/C++", "PHP", "Django", "Git", "JavaScript"]
+```
+
+## 🌐 **HTTP_GET /social_links**
 
 <p align="left">
   <a href="https://linkedin.com/in/alechries/" target="_blank">
@@ -44,8 +50,3 @@
 
 ---
 
-🛠 **stack.trace()**
-
-```json
-["JavaScript", "TypeScript", "React", "Node.js", "Git"]
-```
