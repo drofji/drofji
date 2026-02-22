@@ -1,4 +1,4 @@
-## 🚀 HTTP_GET /github_pages
+## 🚀 ```HTTP_GET /github_pages```
 
 <p align="left">
   <a href="https://drofji.github.io/cv-builder/" target="_blank">
