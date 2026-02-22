@@ -1,18 +1,13 @@
-## 👨‍💻 ```<Human status="Building things" />```
+## 🚀 HTTP_GET /github_pages
 
-```json
-{
-  "role": "Software Developer",
-  "skills": ["Frontend", "Backend", "Architecture"],
-  "location": "Cyberspace"
-}
-```
-
-## 🛠 ```stack.trace(me)```
-
-```json
-["Python", "C/C++", "PHP", "Django", "Git", "JavaScript"]
-```
+<p align="left">
+  <a href="https://drofji.github.io/cv-builder/" target="_blank">
+    <img src="https://img.shields.io/badge/CV_Builder-FF5722?style=for-the-badge&logo=googledocs&logoColor=white" />
+  </a>
+  <a href="https://drofji.github.io/qa-flashcards/" target="_blank">
+    <img src="https://img.shields.io/badge/Flashcards_App-4CAF50?style=for-the-badge&logo=anki&logoColor=white" />
+  </a>
+</p>
 
 ## 🌐 ```HTTP_GET /social_links```
 
@@ -28,6 +23,22 @@
   </a>
 </p>
 </p>
+
+## 👨‍💻 ```<Human status="Building things" />```
+
+```json
+{
+  "role": "Software Developer",
+  "skills": ["Frontend", "Backend", "Architecture"],
+  "location": "Cyberspace"
+}
+```
+
+## 🛠 ```stack.trace(me)```
+
+```json
+["Python", "C/C++", "PHP", "Django", "Git", "JavaScript"]
+```
 
 ## 💬 ```tail -f /dev/jokes```
 
