@@ -5,7 +5,7 @@
     <img src="https://img.shields.io/badge/CV_Builder-FF5722?style=for-the-badge&logo=googledocs&logoColor=white" />
   </a>
   <a href="https://drofji.github.io/qa-flashcards/" target="_blank">
-    <img src="https://img.shields.io/badge/Flashcards_App-4CAF50?style=for-the-badge&logo=anki&logoColor=white" />
+    <img src="https://img.shields.io/badge/QA_Flashcards-4CAF50?style=for-the-badge&logo=anki&logoColor=white" />
   </a>
 </p>
 
