@@ -1,6 +1,9 @@
-## 🚀 ```HTTP_GET /github_pages```
+## 🚀 Projects
 
 <p align="left">
+  <a href="https://drofji.github.io/apprenticeship-report-generator/" target="_blank">
+    <img src="https://img.shields.io/badge/Apprenticeship_Report-2196F3?style=for-the-badge&logo=python&logoColor=white" />
+  </a>
   <a href="https://drofji.github.io/cv-builder/" target="_blank">
     <img src="https://img.shields.io/badge/CV_Builder-FF5722?style=for-the-badge&logo=googledocs&logoColor=white" />
   </a>
@@ -9,7 +12,7 @@
   </a>
 </p>
 
-## 🌐 ```HTTP_GET /social_links```
+## 🌐 Social Links
 
 <p align="left">
   <a href="https://linkedin.com/in/alechries/" target="_blank">
@@ -22,9 +25,8 @@
     <img src="http://estruyf-github.azurewebsites.net/api/VisitorHit?user=drofji&countColor=%237B1E7B" alt="Visitor Count" />
   </a>
 </p>
-</p>
 
-## 👨‍💻 ```<Human status="Building things" />```
+## 👨‍💻 About Me
 
 ```json
 {
