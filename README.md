@@ -1,13 +1,3 @@
-## 👨‍💻 About Me
-
-```json
-{
-  "role": "Software Developer",
-  "skills": ["Frontend", "Backend", "Architecture"],
-  "location": "Cyberspace"
-}
-```
-
 ## 🚀 MVP-Tools
 
 <p align="left">
