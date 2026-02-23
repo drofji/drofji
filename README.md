@@ -1,4 +1,4 @@
-## 🚀 Projects
+## 🚀 MVP-Projects
 
 <p align="left">
   <a href="https://drofji.github.io/apprenticeship-report-generator/" target="_blank">
