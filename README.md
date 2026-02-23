@@ -1,17 +1,3 @@
-## 🚀 MVP-Projects
-
-<p align="left">
-  <a href="https://drofji.github.io/apprenticeship-report-generator/" target="_blank">
-    <img src="https://img.shields.io/badge/Apprenticeship_Report-2196F3?style=for-the-badge&logo=python&logoColor=white" />
-  </a>
-  <a href="https://drofji.github.io/cv-builder/" target="_blank">
-    <img src="https://img.shields.io/badge/CV_Builder-FF5722?style=for-the-badge&logo=googledocs&logoColor=white" />
-  </a>
-  <a href="https://drofji.github.io/qa-flashcards/" target="_blank">
-    <img src="https://img.shields.io/badge/QA_Flashcards-4CAF50?style=for-the-badge&logo=anki&logoColor=white" />
-  </a>
-</p>
-
 ## 🌐 Social Links
 
 <p align="left">
@@ -36,19 +22,21 @@
 }
 ```
 
-## 🛠 ```stack.trace(me)```
-
-```json
-["Python", "C/C++", "PHP", "Django", "Git", "JavaScript"]
-```
-
-## 💬 ```tail -f /dev/jokes```
+## 🚀 MVP-Tools
 
 <p align="left">
-  <a href="https://readme-jokes.vercel.app"><img align="center" src="https://readme-jokes.vercel.app/api" alt="README Jokes"></a>
+  <a href="https://drofji.github.io/apprenticeship-report-generator/" target="_blank">
+    <img src="https://img.shields.io/badge/Apprenticeship_Report-2196F3?style=for-the-badge&logo=python&logoColor=white" />
+  </a>
+  <a href="https://drofji.github.io/cv-builder/" target="_blank">
+    <img src="https://img.shields.io/badge/CV_Builder-FF5722?style=for-the-badge&logo=googledocs&logoColor=white" />
+  </a>
+  <a href="https://drofji.github.io/qa-flashcards/" target="_blank">
+    <img src="https://img.shields.io/badge/QA_Flashcards-4CAF50?style=for-the-badge&logo=anki&logoColor=white" />
+  </a>
 </p>
 
-## 📊 ```system_monitor --stats```
+## 📊 Stats
 
 <div style="display: flex; flex-wrap: wrap; gap: 10px;">
 
