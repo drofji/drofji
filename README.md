@@ -1,4 +1,15 @@
-## 🚀 MVP-Tools
+
+# 📦 Opensource Packages
+
+<p align="left">
+  <a href="https://github.com/drofji/django-snapadmin" target="_blank">
+    <img src="https://img.shields.io/badge/Django_SnapAdmin-00BCD4?style=for-the-badge&logo=django&logoColor=white" />
+  </a>
+</p>
+
+---
+
+# 🚀 MVP-Tools
 
 <p align="left">
   <a href="https://drofji.github.io/apprenticeship-report-generator/" target="_blank">
@@ -14,7 +25,7 @@
 
 ---
 
-## 🛠 CRM/CMS Projects
+# 🛠 CRM/CMS Projects
 
 <p align="left">
   <a href="https://github.com/drofji/myhouse24-crm" target="_blank">
@@ -30,7 +41,7 @@
 
 ---
 
-## 🎓 Learning / Pet Projects
+# 🎓 Learning / Pet Projects
 
 <p align="left">
   <a href="https://github.com/drofji/hhbk-project-pygame" target="_blank">
@@ -38,15 +49,5 @@
   </a>
   <a href="https://github.com/drofji/designpatterns" target="_blank">
     <img src="https://img.shields.io/badge/DesignPatterns-009688?style=for-the-badge&logo=codepen&logoColor=white" />
-  </a>
-</p>
-
----
-
-## 📦 Opensource Packages
-
-<p align="left">
-  <a href="https://github.com/drofji/django-snapadmin" target="_blank">
-    <img src="https://img.shields.io/badge/Django_SnapAdmin-00BCD4?style=for-the-badge&logo=django&logoColor=white" />
   </a>
 </p>
