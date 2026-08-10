@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Bahnhof der Wörter — немецкие карточки</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #12161d;
+    --panel: #1b212b;
+    --panel-2: #212836;
+    --amber: #eab04a;
+    --amber-dim: #8a672f;
+    --green: #4f9d6e;
+    --red: #d1495b;
+    --ink: #f2ede0;
+    --ink-dim: #9aa3b2;
+    --rule: #2c3444;
+    --male: #6fa8ff;
+    --neut: #7bd88f;
+    --fem: #ff93a8;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 50% -10%, #1b2230 0%, var(--bg) 55%);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    display:flex;
+    justify-content:center;
+    padding:18px 14px 40px;
+  }
+  .app{ width:100%; max-width:430px; }
+
+  header{ text-align:center; margin-bottom:16px; }
+  .eyebrow{
+    font-family:'Space Mono',monospace;
+    letter-spacing:.25em;
+    font-size:11px;
+    color:var(--amber-dim);
+    text-transform:uppercase;
+  }
+  h1{
+    font-family:'Space Mono',monospace;
+    font-size:22px;
+    margin:6px 0 2px;
+    color:var(--amber);
+    letter-spacing:.02em;
+  }
+  .sub{ font-size:12.5px; color:var(--ink-dim); }
+
+  /* today / all-time stats panel */
+  .stats-panel{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:10px;
+    margin-top:16px;
+  }
+  .stats-block{
+    background:var(--panel);
+    border:1px solid var(--rule);
+    border-radius:10px;
+    padding:10px 12px;
+    text-align:center;
+  }
+  .stats-label{
+    font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.15em;
+    text-transform:uppercase; color:var(--ink-dim);
+  }
+  .stats-value{
+    font-family:'Space Mono',monospace; font-weight:700; font-size:22px;
+    color:var(--amber); margin:2px 0;
+  }
+  .stats-sub{ font-family:'Space Mono',monospace; font-size:11px; color:var(--ink-dim); }
+  .stats-sub .ok-text{ color:var(--green); }
+  .stats-sub .bad-text{ color:var(--red); }
+
+  .seen-badge{
+    font-family:'Space Mono',monospace;
+    font-size:9px;
+    letter-spacing:.08em;
+    padding:2px 9px;
+    border-radius:10px;
+    text-transform:uppercase;
+    background:rgba(79,157,110,.15);
+    border:1px solid var(--green);
+    color:var(--green);
+  }
+  .seen-badge.seen{
+    background:rgba(154,163,178,.12);
+    border-color:var(--ink-dim);
+    color:var(--ink-dim);
+  }
+
+  /* category filter chips */
+  .chips{
+    display:flex; flex-wrap:wrap; gap:7px;
+    justify-content:center;
+    margin:14px 0 0;
+  }
+  .chip{
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    letter-spacing:.03em;
+    padding:7px 12px;
+    border-radius:20px;
+    border:1px solid var(--rule);
+    background:var(--panel);
+    color:var(--ink-dim);
+    cursor:pointer;
+    user-select:none;
+    transition: all .15s ease;
+  }
+  .chip.active{
+    background: rgba(234,176,74,.14);
+    border-color: var(--amber-dim);
+    color: var(--amber);
+  }
+  .chip:active{ transform:scale(.95); }
+
+  /* overall progress bar styled like a platform indicator */
+  .track{
+    margin:16px 0 20px;
+    background:var(--panel);
+    border:1px solid var(--rule);
+    border-radius:10px;
+    padding:10px 12px;
+  }
+  .track-top{
+    display:flex; justify-content:space-between; align-items:baseline;
+    font-family:'Space Mono',monospace; font-size:12px; color:var(--ink-dim);
+    margin-bottom:8px;
+  }
+  .track-top b{ color:var(--amber); font-size:14px; }
+  .bar{ height:6px; background:var(--rule); border-radius:4px; overflow:hidden; }
+  .bar-fill{ height:100%; background:linear-gradient(90deg,var(--amber-dim),var(--amber)); width:0%; transition:width .4s ease; }
+
+  /* split-flap board card */
+  .board{
+    background: var(--panel);
+    border:1px solid var(--rule);
+    border-radius:14px;
+    padding:22px 18px 18px;
+    box-shadow: 0 20px 40px -20px rgba(0,0,0,.6);
+    position:relative;
+    overflow:hidden;
+  }
+  .board::before{
+    content:"";
+    position:absolute; inset:0;
+    background: repeating-linear-gradient(180deg, rgba(255,255,255,.015) 0px, rgba(255,255,255,.015) 1px, transparent 1px, transparent 3px);
+    pointer-events:none;
+  }
+  .label-row{
+    display:flex; justify-content:space-between; align-items:center;
+    font-family:'Space Mono',monospace; font-size:10.5px; color:var(--ink-dim);
+    letter-spacing:.15em; text-transform:uppercase; margin-bottom:10px;
+  }
+  .flap{
+    background: #0e1218;
+    border:1px solid var(--rule);
+    border-radius:8px;
+    padding:26px 14px;
+    text-align:center;
+    min-height:92px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .flap-word{
+    font-family:'Space Mono',monospace;
+    font-weight:700;
+    font-size:clamp(22px, 7vw, 30px);
+    color:var(--ink);
+    letter-spacing:.03em;
+    line-height:1.25;
+    word-break:break-word;
+  }
+
+  /* streak dots for current word */
+  .dots{ display:flex; justify-content:center; gap:8px; margin:14px 0 4px; }
+  .dot{
+    width:11px; height:11px; border-radius:50%;
+    border:1.5px solid var(--rule);
+    background:transparent;
+    transition: all .25s ease;
+  }
+  .dot.filled{ background:var(--amber); border-color:var(--amber); box-shadow:0 0 8px rgba(234,176,74,.6); }
+
+  .hint{ text-align:center; font-size:11.5px; color:var(--ink-dim); margin:6px 0 14px; font-family:'Space Mono',monospace;}
+
+  .flap-sub{
+    display:none;
+    text-align:center;
+    font-size:12.5px;
+    color:var(--ink-dim);
+    font-style:italic;
+    margin-top:8px;
+  }
+  .board[data-submode="case"] .flap-sub, .board[data-submode="verbprep"] .flap-sub{ display:block; }
+
+  .case-helper{ display:none; margin-bottom:14px; }
+  .board[data-submode="case"] .case-helper{ display:block; }
+  .case-table{
+    width:100%;
+    border-collapse:collapse;
+    background:#0e1218;
+    border:1px solid var(--rule);
+    border-radius:8px;
+    overflow:hidden;
+    font-family:'Space Mono',monospace;
+    font-size:12px;
+  }
+  .case-table th, .case-table td{
+    padding:7px 6px;
+    text-align:center;
+    border-bottom:1px solid var(--rule);
+    border-right:1px solid var(--rule);
+  }
+  .case-table th{ color:var(--ink-dim); font-weight:400; letter-spacing:.04em; }
+  .case-table td:first-child, .case-table th:first-child{ text-align:left; padding-left:10px; border-right:1px solid var(--rule); }
+  .case-table tr:last-child td{ border-bottom:none; }
+  .case-table td:last-child, .case-table th:last-child{ border-right:none; }
+  .gender-m{ color:var(--male); }
+  .gender-n{ color:var(--neut); }
+  .gender-f{ color:var(--fem); }
+
+  /* options styled as ticket stubs */
+  .options{ display:flex; flex-direction:column; gap:10px; }
+  .opt{
+    position:relative;
+    text-align:left;
+    background:var(--panel-2);
+    border:1px solid var(--rule);
+    border-radius:10px;
+    padding:14px 16px 14px 40px;
+    font-family:'Inter',sans-serif;
+    font-size:15.5px;
+    font-weight:600;
+    color:var(--ink);
+    cursor:pointer;
+    transition: transform .12s ease, border-color .15s ease, background .15s ease;
+  }
+  .opt::before{
+    content:"";
+    position:absolute; left:0; top:0; bottom:0; width:0;
+    border-left:2px dashed var(--rule);
+    left:26px;
+  }
+  .opt .idx{
+    position:absolute; left:12px; top:50%; transform:translateY(-50%);
+    font-family:'Space Mono',monospace; font-size:11px; color:var(--ink-dim);
+  }
+  .prep-case{ color:var(--ink-dim); font-size:.82em; font-weight:400; }
+  .opt:active{ transform:scale(.98); }
+  .opt:disabled{ cursor:default; }
+  .opt.correct{ border-color:var(--green); background:rgba(79,157,110,.18); color:#c9ecd6; }
+  .opt.wrong{ border-color:var(--red); background:rgba(209,73,91,.18); color:#f4c6cc; }
+  .opt.dim{ opacity:.45; }
+
+  .feedback{
+    min-height:20px;
+    text-align:center;
+    font-family:'Space Mono',monospace;
+    font-size:12.5px;
+    margin-top:12px;
+    color:var(--ink-dim);
+  }
+  .feedback.ok{ color:var(--green); }
+  .feedback.bad{ color:var(--red); }
+
+  /* sentence word-order puzzle */
+  .order-panel{ display:none; }
+  .board[data-mode="order"] .options{ display:none !important; }
+  .board[data-mode="order"] .order-panel{ display:block; }
+
+  .build-strip{
+    min-height:60px;
+    background:#0e1218;
+    border:1px dashed var(--rule);
+    border-radius:8px;
+    padding:10px;
+    display:flex; flex-wrap:wrap; gap:7px; align-content:flex-start;
+    margin-bottom:14px;
+  }
+  .build-placeholder{
+    font-family:'Space Mono',monospace; font-size:11.5px; color:var(--ink-dim); padding:6px 2px;
+  }
+  .token-pool{ display:flex; flex-wrap:wrap; gap:7px; margin-bottom:16px; }
+  .token-chip{
+    font-family:'Inter',sans-serif; font-weight:600; font-size:14px;
+    background:var(--panel-2); border:1px solid var(--rule); color:var(--ink);
+    border-radius:8px; padding:8px 12px; cursor:pointer;
+    transition: transform .1s ease, background .15s ease, border-color .15s ease;
+  }
+  .token-chip:active{ transform:scale(.94); }
+  .token-chip.placed{ background:rgba(234,176,74,.15); border-color:var(--amber-dim); color:var(--amber); }
+  .token-chip:disabled{ opacity:.5; cursor:default; }
+
+  .order-actions{ display:flex; gap:10px; margin-bottom:10px; }
+  .order-btn{
+    flex:1;
+    font-family:'Space Mono',monospace; font-size:12px; font-weight:700;
+    padding:11px; border-radius:10px; cursor:pointer; border:1px solid var(--rule);
+    background:var(--panel-2); color:var(--ink-dim);
+  }
+  .order-btn.primary{ background:var(--amber); color:#1b1204; border-color:var(--amber); }
+  .order-btn:disabled{ opacity:.4; cursor:default; }
+
+  .ru-hint{ text-align:center; font-size:12.5px; color:var(--ink-dim); font-style:italic; margin-top:2px; }
+
+  .order-next-wrap{ display:none; text-align:center; margin-top:14px; }
+  .order-next{
+    background:var(--amber); color:#1b1204; border:none; font-family:'Space Mono',monospace; font-weight:700;
+    padding:10px 22px; border-radius:22px; font-size:12.5px; cursor:pointer;
+  }
+
+  .footer-row{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-top:18px;
+  }
+  .stat{ font-family:'Space Mono',monospace; font-size:11px; color:var(--ink-dim); }
+  .reset{
+    background:none; border:1px solid var(--rule); color:var(--ink-dim);
+    font-family:'Space Mono',monospace; font-size:11px;
+    padding:7px 12px; border-radius:20px; cursor:pointer;
+  }
+  .reset:active{ transform:scale(.96); }
+
+  .done{
+    text-align:center; padding:40px 10px;
+  }
+  .done h2{ font-family:'Space Mono',monospace; color:var(--amber); font-size:22px; }
+  .done p{ color:var(--ink-dim); font-size:14px; }
+  .done button{
+    margin-top:16px;
+    background:var(--amber); color:#1b1204; border:none;
+    font-family:'Space Mono',monospace; font-weight:700;
+    padding:12px 22px; border-radius:24px; font-size:13px; cursor:pointer;
+  }
+
+  .storage-note{
+    text-align:center;
+    font-family:'Space Mono',monospace;
+    font-size:10.5px;
+    color:var(--amber-dim);
+    margin-top:10px;
+    min-height:14px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; }
+  }
+
+  /* Tablet and larger: wider canvas, roomier board, two-column options */
+  @media (min-width: 700px){
+    body{ padding:36px 24px 56px; }
+    .app{ max-width:760px; }
+
+    h1{ font-size:30px; }
+    .sub{ font-size:14px; max-width:520px; margin:0 auto; }
+    .eyebrow{ font-size:12px; }
+
+    .chips{ margin-top:20px; gap:10px; }
+    .chip{ font-size:12.5px; padding:9px 16px; }
+
+    .track{ padding:14px 18px; }
+    .track-top{ font-size:13px; }
+    .track-top b{ font-size:16px; }
+
+    .board{ padding:34px 34px 28px; border-radius:18px; }
+    .flap{ min-height:120px; padding:34px 24px; }
+    .flap-word{ font-size:clamp(28px, 3.4vw, 40px); }
+
+    .dots{ margin:20px 0 6px; }
+    .dot{ width:13px; height:13px; }
+
+    .hint{ font-size:13px; margin:8px 0 20px; }
+
+    .options{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+    }
+    .opt{ font-size:16.5px; padding:16px 18px 16px 44px; }
+
+    .feedback{ font-size:14px; margin-top:16px; }
+
+    .footer-row{ margin-top:24px; }
+    .stat, .reset{ font-size:12.5px; }
+  }
+
+  @media (min-width: 1100px){
+    .app{ max-width:900px; }
+    .flap-word{ font-size:clamp(30px, 2.8vw, 44px); }
+    .options{ grid-template-columns: 1fr 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="eyebrow">Wortschatz · Express</div>
+    <h1>BAHNHOF DER WÖRTER</h1>
+    <div class="sub">Выбирай немецкое слово или артикль по подсказке — 2 верных ответа подряд, и карточка «уезжает» из колоды</div>
+  </header>
+
+  <div class="stats-panel" id="statsPanel">
+    <div class="stats-block">
+      <div class="stats-label">Сегодня</div>
+      <div class="stats-value" id="todayShown">0</div>
+      <div class="stats-sub"><span class="ok-text" id="todayCorrect">0 ✓</span> · <span class="bad-text" id="todayWrong">0 ✗</span></div>
+    </div>
+    <div class="stats-block">
+      <div class="stats-label">Всего</div>
+      <div class="stats-value" id="allTimeShown">0</div>
+      <div class="stats-sub" id="allTimeLearned">0 / 0 выучено</div>
+    </div>
+  </div>
+
+  <div class="chips" id="chips"></div>
+
+  <div class="track">
+    <div class="track-top">
+      <span>ВЫУЧЕНО В ПОДБОРКЕ</span>
+      <span><b id="learnedCount">0</b> / <span id="totalCount">0</span></span>
+    </div>
+    <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+  </div>
+
+  <div id="quizArea">
+    <div class="board" id="board" data-mode="choice">
+      <div class="label-row">
+        <span id="genderLabel">RU</span>
+        <span class="seen-badge" id="seenBadge">Новая</span>
+        <span id="deckLabel">В КОЛОДЕ: 0</span>
+      </div>
+      <div class="flap"><div class="flap-word" id="ruWord">…</div></div>
+      <div class="flap-sub" id="flapSub"></div>
+      <div class="dots" id="dots"></div>
+      <div class="hint" id="hintText">нужно 2 верных ответа подряд</div>
+      <div class="case-helper" id="caseHelper"></div>
+      <div class="options" id="options"></div>
+
+      <div class="order-panel" id="orderPanel">
+        <div class="build-strip" id="buildStrip"></div>
+        <div class="token-pool" id="tokenPool"></div>
+        <div class="order-actions">
+          <button class="order-btn" id="undoBtn">← Стереть</button>
+          <button class="order-btn primary" id="checkBtn">Проверить</button>
+        </div>
+        <div class="ru-hint" id="ruHint"></div>
+      </div>
+
+      <div class="feedback" id="feedback"></div>
+      <div class="order-next-wrap" id="orderNextWrap">
+        <button class="order-next" id="orderNextBtn">Далее →</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="doneArea" style="display:none;" class="done">
+    <h2>ALLE AN BORD 🚆</h2>
+    <p>Вы выучили все слова в этой колоде.</p>
+    <button id="restartBtn">Начать заново</button>
+  </div>
+
+  <div class="footer-row">
+    <span class="stat" id="ok-tip">der/das/die — учи артикль вместе со словом</span>
+    <button class="reset" id="resetBtn">Сбросить прогресс</button>
+  </div>
+  <div class="storage-note" id="storageNote"></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  const RAW_DER = `
+Morgen|Утро
+Tag|День
+Abend|Вечер
+Herr|Господин
+Kollege|Коллега
+Freund|Друг
+Name|Имя, наименование
+Pass|Паспорт
+Deutschland|Германия
+Österreich|Австрия
+Russland|Россия
+Zoll|Таможня
+Anfang|Начало
+Bank|Банк
+Schein|Купюра, банкнот
+Umtauschkurs|Курс обмена
+Scheck|Чек
+Platz|Место
+Flughafen|Аэропорт
+Markt|Рынок, базар
+Bus|Автобус
+Fahrschein|Проездной
+Fahrer|Водитель
+Taxistand|Стоянка такси
+Schlüssel|Ключ
+Anzug|Костюм
+Tisch|Стол
+Stuhl|Стул
+Ober|Официант
+Teller|Тарелка
+Rest|Остаток
+Stock|Этаж, палка
+Augenblick|Мгновение
+Preis|Цена
+Brief|Письмо
+Schalter|Окошко
+Ausweis|Удостоверение
+Apparat|Аппарат
+Bahnhof|Вокзал
+Zug|Поезд
+Anschluss|Пересадка
+Bahnsteig|Перрон
+Zuschlag|Доплата
+Gepäckschein|Багажная квитанция
+Wagen|Транспортное средство
+Fahrplan|Расписание
+Flug|Полёт, рейс
+Flugplatz|Аэродром
+Führerschein|Водительские права
+Reifen|Шина, покрышка
+Motor|Мотор
+Arzt|Врач
+Schmerz|Боль
+Kopf|Голова
+Magen|Желудок
+Unfall|Случай
+Antrag|Заявление
+Aufenthaltstitel|Вид на жительство
+Mietvertrag|Договор аренды
+Vermieter|Арендодатель
+Mieter|Арендатор, квартиросъёмщик
+Umzug|Переезд
+Vertrag|Договор
+Nachweis|Подтверждение, справка
+Lebenslauf|Резюме, автобиография
+Arbeitsvertrag|Трудовой договор
+Lohn|Заработная плата
+Urlaub|Отпуск
+Feiertag|Праздничный день
+Kontostand|Остаток на счёте
+Hausarzt|Семейный врач
+Nachbar|Сосед
+Sachbearbeiter|Сотрудник ведомства
+Müll|Мусор
+Strom|Электричество
+Kindergarten|Детский сад
+Unterricht|Урок, занятие
+Kurs|Курс`;
+
+  const RAW_DAS = `
+Russisch|Русский (язык)
+Englisch|Английский (язык)
+Deutsch|Немецкий (язык)
+Gepäck|Багаж
+Geld|Деньги
+Kleingeld|Мелочь
+Viertel|Четверть
+Fünftel|Пятая часть
+Jahr|Год
+Stadion|Стадион
+Haus|Дом
+Krankenhaus|Больница
+Rathaus|Ратуша
+Arbeitsamt|Биржа труда
+Ende|Конец
+Taxi|Такси
+Hotel|Отель
+Zimmer|Комната
+Einzelzimmer|Одноместный номер
+Doppelzimmer|Двухместный номер
+Bad|Ванная
+WC|Туалет
+Frühstück|Завтрак
+Hemd|Рубашка
+Restaurant|Ресторан
+Menü|Меню, комплексный обед
+Gericht|Блюдо, суд
+Messer|Нож
+Löffel|Ложка
+Glas|Стекло, стакан
+Angebot|Предложение
+Geschäft|Магазин, дело
+Gerät|Прибор
+Gespräch|Разговор
+Gleis|Путь (жд)
+Fenster|Окно
+Bett|Кровать
+Flugzeug|Самолёт
+Flugticket|Авиабилет
+Übergepäck|Лишний багаж
+Wasser|Вода
+Büro|Бюро, офис
+Auto|Автомобиль
+Fahrzeug|Транспортное средство
+Licht|Свет
+Fieber|Температура
+Ausland|Заграница
+Fundbüro|Бюро находок
+Amt|Ведомство, учреждение
+Formular|Бланк, форма
+Konto|Счёт (банковский)
+Kindergeld|Пособие на детей
+Jobcenter|Джобцентр
+Gehalt|Зарплата
+Rezept|Рецепт
+Kind|Ребёнок
+Internet|Интернет`;
+
+  const RAW_DIE = `
+Nacht|Ночь
+Entschuldigung|Извинение
+Frau|Госпожа, жена, женщина
+Kollegin|Коллега (женщина)
+Freundin|Подруга
+Reise|Путешествие
+Ukraine|Украина
+Zollerklärung|Таможенная декларация
+Sache|Вещь, дело
+Tasche|Сумка, карман
+Zigarette|Сигарета
+Bank|Скамейка
+Währung|Валюта
+Karte|Карта, открытка
+Uhr|Час(ы), часы
+Zeit|Время
+Arbeit|Работа
+Strasse|Улица
+U-Bahn|Метро
+S-Bahn|Городская электричка
+Strassenbahn|Трамвай
+Station|Станция
+Mitte|Центр, середина
+Apotheke|Аптека
+Kreuzung|Перекрёсток
+Richtung|Направление
+Ecke|Угол
+Fahrt|Поездка
+Dusche|Душ
+Toilette|Туалет
+Rechnung|Счёт
+Gaststätte|Ресторан
+Speisekarte|Меню
+Gabel|Вилка
+Ware|Товар
+Abteilung|Отдел
+Kabine|Кабина
+Kasse|Касса
+Quittung|Квитанция
+Farbe|Краска, цвет
+Bekleidung|Одежда
+Wäsche|Бельё
+Post|Почта
+Luft|Воздух
+Marke|Марка
+Stunde|Час, урок
+Vorwahl|Код города
+Eisenbahn|Железная дорога
+Auskunft|Справочное бюро
+Fahrkarte|Проездной билет
+Gepäckaufbewahrung|Камера хранения
+Tür|Дверь
+Verspätung|Задержка, опоздание
+Gesellschaft|Общество, компания
+Maschine|Машина, механизм
+Abfertigung|Оформление
+Bordkarte|Посадочный талон
+Reihe|Ряд
+Linie|Линия, маршрут
+Tüte|Кулёк, пакет
+Arznei|Лекарство
+Autobahn|Автострада
+Polizei|Полиция
+Leitung|Руководство
+Schuld|Вина, долг
+Brücke|Мост
+Ordnung|Порядок
+Papiere|Бумаги, документы
+Panne|Поломка
+Stelle|Место
+Hilfe|Помощь
+Batterie|Аккумулятор
+Sprechstunde|Приёмные часы (у врача)
+Bremse|Тормоз
+Spritze|Шприц, укол
+Werkstatt|Мастерская
+Aufenthaltserlaubnis|Разрешение на пребывание
+Ausländerbehörde|Миграционная служба
+Anmeldung|Регистрация, запись
+Abmeldung|Снятие с учёта
+Miete|Арендная плата
+Kündigung|Расторжение договора, увольнение
+Nebenkosten|Коммунальные расходы
+Wohnung|Квартира
+Heizung|Отопление
+Unterschrift|Подпись
+Bescheinigung|Справка
+Versicherung|Страховка
+Krankenkasse|Медицинская страховая касса
+Arbeitsagentur|Агентство занятости
+Bewerbung|Заявка на работу, резюме
+Kündigungsfrist|Срок расторжения договора
+Steuer|Налог
+Überweisung|Денежный перевод
+Bankkarte|Банковская карта
+Grundschule|Начальная школа
+Ausbildung|Профессиональное обучение
+Impfung|Прививка
+Nachbarschaft|Соседство
+Familie|Семья
+Geburt|Рождение
+Ehe|Брак
+Scheidung|Развод
+Mülltrennung|Сортировка мусора
+Behörde|Ведомство, инстанция`;
+
+  // Verbs: infinitive | meaning (strong, weak and irregular verbs merged into one category)
+  const RAW_VERB = `
+sprechen|разговаривать
+stehen|стоять
+verstehen|понимать
+gehen|идти
+kommen|прийти
+bekommen|получать
+ankommen|прибывать
+nehmen|брать
+annehmen|принимать
+mitnehmen|брать с собой
+geben|давать
+aufgeben|оставлять, сдавать
+fahren|ехать
+abfahren|отъезжать
+schreiben|писать
+steigen|взбираться
+umsteigen|пересаживаться
+aussteigen|выходить
+lassen|позволять, оставлять
+halten|держать
+bleiben|оставаться
+trinken|пить
+sehen|видеть
+nachsehen|проверять, наблюдать
+bieten|предлагать
+anbieten|предлагать (нереальное)
+liegen|лежать
+rufen|звать
+aufrufen|вызывать
+anrufen|звонить
+ausrufen|восклицать
+schließen|закрывать
+schlafen|спать
+fliegen|летать
+abfliegen|отлетать
+beginnen|начинать
+helfen|помогать
+lesen|читать
+biegen|сгибать
+abbiegen|поворачивать
+ziehen|тянуть
+anziehen|надевать
+ausziehen|снимать
+stehlen|украсть, воровать
+finden|находить, искать
+entscheiden|решать
+verlieren|терять
+essen|кушать
+waschen|стирать, мыть
+gefallen|нравиться
+entschuldigen|извиняться
+vorstellen|представлять
+heißen|называться
+aufmachen|открывать
+zahlen|платить
+wechseln|менять
+einlösen|обналичивать
+kosten|стоить
+reisen|путешествовать
+umtauschen|обменивать
+warten|ждать
+entwerten|компостировать
+fragen|спрашивать
+bestellen|заказывать
+ausfüllen|заполнять
+reinigen|чистить
+wohnen|проживать
+abreisen|уезжать, отъезжать
+machen|делать
+bedienen|обслуживать
+wählen|выбирать, набирать
+schmecken|быть по вкусу
+kaufen|покупать
+wünschen|желать
+zeigen|показывать
+arbeiten|работать
+anprobieren|примерять
+passen|подходить
+packen|укладывать, паковать
+abholen|забирать, получать
+schicken|посылать
+öffnen|открывать
+anschnallen|пристёгивать(ся)
+dauern|длиться
+einstellen|настраивать, регулировать
+tanken|заправляться
+reparieren|чинить, ремонтировать
+glauben|думать, полагать
+stellen|ставить
+überprüfen|проверять
+abschleppen|отбуксировать
+stimmen|быть верным, соответствовать
+rauchen|курить
+landen|приземляться
+verkaufen|продавать
+bremsen|тормозить
+legen|класть
+passieren|случаться
+verletzen|повреждать, ранить
+wiederholen|повторять
+möchten|хотеть бы
+antworten|отвечать
+reservieren|бронировать
+telefonieren|говорить по телефону
+ausrichten|передавать (сообщение)
+hören|слышать
+buchen|бронировать
+führen|вести
+parken|парковаться
+wecken|будить
+sagen|сказать, говорить
+fühlen|чувствовать
+besetzen|занимать
+fehlen|не хватать
+empfehlen|рекомендовать
+mögen|желать, любить
+wollen|желать, хотеть
+müssen|быть должным
+sollen|быть обязанным
+dürfen|мочь, разрешать
+können|мочь
+kennen|знать
+nennen|называть
+brennen|гореть
+rennen|бежать, мчаться
+wenden|поворачивать, обращать
+senden|посылать
+denken|думать
+sein|быть
+haben|иметь
+werden|стать, становиться
+wissen|знать
+tun|делать
+bringen|приносить
+sich bewerben|подавать заявление о приёме на работу
+kündigen|увольнять(ся), расторгать договор
+beantragen|подавать заявление (на что-то)
+sich anmelden|регистрироваться
+sich abmelden|сниматься с учёта
+unterschreiben|подписывать
+vereinbaren|договариваться, согласовывать
+sich informieren|узнавать, получать информацию
+teilnehmen|принимать участие
+sich erkundigen|справляться, узнавать
+sich kümmern|заботиться (о ком-то/чём-то)
+erledigen|выполнять, улаживать
+funktionieren|работать, функционировать
+vermieten|сдавать в аренду
+mieten|снимать, арендовать
+überweisen|переводить (деньги)
+sparen|экономить, копить
+verdienen|зарабатывать
+umziehen|переезжать
+sich einigen|договориться
+sich freuen|радоваться
+sich ärgern|злиться
+sich vorbereiten|готовиться
+beraten|консультировать
+betreuen|ухаживать, заботиться
+versichern|страховать
+impfen|делать прививку
+untersuchen|обследовать, осматривать
+behandeln|лечить, обращаться
+erhalten|получать
+ausstellen|выдавать (документ)
+prüfen|проверять
+gelten|действовать, быть действительным
+verlängern|продлевать
+ablaufen|истекать (о сроке)
+sich verspäten|опаздывать
+trennen|разделять, сортировать
+sich engagieren|активно участвовать`;
+
+  const RAW_FRAGE = `
+woher|откуда
+wohin|куда
+wo|где
+wie|как
+wer|кто
+wofür|зачем
+wieviel|сколько
+was|что
+wann|когда
+womit|чем, с помощью чего
+warum|почему
+wen|кого
+welche|какая, который
+wozu|для чего`;
+
+  const RAW_PREP = `
+bis|до|Akk.
+ohne|без|Akk.
+für|для|Akk.
+um|вокруг, в (о времени)|Akk.
+durch|через, из-за|Akk.
+gegen|против, к (времени)|Akk.
+in|в|Akk./Dat.
+an|у, на (вертикальной пов.)|Akk./Dat.
+auf|на (горизонтальной пов.)|Akk./Dat.
+neben|рядом, около|Akk./Dat.
+hinter|позади|Akk./Dat.
+über|над, о (чём-то)|Akk./Dat.
+unter|под, среди|Akk./Dat.
+vor|перед|Akk./Dat.
+zwischen|между|Akk./Dat.
+von|от|Dat.
+zu|к|Dat.
+seit|с (какого-то момента)|Dat.
+aus|из|Dat.
+mit|с|Dat.
+nach|после, в направлении|Dat.
+bei|у, при|Dat.
+ab|начиная с|Dat.
+gegenüber|напротив, по сравнению с|Dat.
+außer|кроме|Dat.`;
+
+  const RAW_OTHER = `
+jetzt|сейчас, в данный момент
+nun|теперь, итак
+also|значит, итак
+gleich|сразу, в тот же миг
+sofort|немедленно
+bald|скоро, вскоре
+während|в течение, пока
+wahr|правда, истинный
+wahrlich|истинно
+recht|верно, правда же
+genau|точно, верно
+richtig|правильно, верно
+wirklich|действительно
+möglich|возможно
+vielleicht|может быть
+darum|поэтому, потому
+aber|но, же
+nur|только
+jedoch|однако
+sondern|а (после отрицания)
+sehr|очень
+so|так
+sowie|так же, как и
+dass|что, чтобы
+weil|потому что, так как
+hier|здесь
+dort|там, туда
+da|вот, тут, там
+zuerst|во-первых, сначала
+je|когда-либо
+solch|такой
+nebenan|рядом, по соседству
+damit|тем, чтобы
+davor|перед этим
+davon|об этом, о том
+darauf|на это, затем
+dabei|при этом
+danach|после этого, затем
+dafür|для этого
+dann|тогда
+daneben|рядом, кроме того
+damals|тогда, в то время
+oft|часто
+manchmal|иногда
+immer|всегда
+bevor|прежде чем
+na|ну
+früh|рано
+spät|поздно`;
+
+  // Sentence word-order tasks.
+  // Format per line: tokens (space-separated, punctuation as its own token) | decoy tokens (comma-separated, "-" if none) | Russian translation | tense | type
+  const RAW_ORDER = `
+Ich fahre jeden Tag mit dem Bus zur Arbeit .|den,der|Я каждый день езжу на автобусе на работу.|Präsens|Aussage
+Er kauft im Supermarkt frisches Gemüse .|frischen,frische|Он покупает в супермаркете свежие овощи.|Präsens|Aussage
+Meine Schwester wohnt seit zwei Jahren in dieser Stadt .|diese,diesen|Моя сестра уже два года живёт в этом городе.|Präsens|Aussage
+Heute fahre ich mit dem Auto zur Arbeit .|den,das|Сегодня я еду на машине на работу.|Präsens|Aussage
+Weil es heute regnet , bleibe ich zu Hause .|bleibt,bleiben|Так как сегодня идёт дождь, я остаюсь дома.|Präsens|Aussage
+Wann fährt der nächste Zug nach Berlin ?|den,dem|Когда отправляется следующий поезд в Берлин?|Präsens|Frage
+Kommst du heute Abend mit uns ins Kino ?|im,in|Ты пойдёшь сегодня вечером с нами в кино?|Präsens|Frage
+Ich habe gestern einen langen Brief geschrieben .|ein,einem,lange|Вчера я написал(а) длинное письмо.|Perfekt|Aussage
+Wir sind letztes Jahr nach Italien gefahren .|haben,hatten|В прошлом году мы ездили в Италию.|Perfekt|Aussage
+Meine Eltern haben das neue Auto schon verkauft .|den,neuen|Мои родители уже продали новую машину.|Perfekt|Aussage
+Letzte Woche habe ich meinen Chef getroffen .|mein,meinem|На прошлой неделе я встретил(а) своего начальника.|Perfekt|Aussage
+Hast du den Termin beim Arzt schon vereinbart ?|der,dem|Ты уже договорился(-лась) о приёме у врача?|Perfekt|Frage
+Wann bist du nach Deutschland gekommen ?|hast,hattest|Когда ты приехал(а) в Германию?|Perfekt|Frage
+Weil ich die Prüfung bestanden habe , bin ich sehr glücklich .|hat,hatte|Так как я сдал(а) экзамен, я очень счастлив(а).|Perfekt|Aussage`;
+
+  // Verbs with fixed prepositions (Rektion der Verben): verb | preposition | case | Russian meaning
+  const RAW_VERBPREP = `
+warten|auf|Akk.|ждать (кого-то/что-то)
+sich freuen|auf|Akk.|радоваться (предстоящему)
+sich freuen|über|Akk.|радоваться (уже случившемуся)
+denken|an|Akk.|думать о
+sich erinnern|an|Akk.|вспоминать о
+sich interessieren|für|Akk.|интересоваться
+sich bedanken|für|Akk.|благодарить за
+sich entschuldigen|für|Akk.|извиняться за
+sich bewerben|um|Akk.|подавать заявку на
+bitten|um|Akk.|просить о
+sich kümmern|um|Akk.|заботиться о
+teilnehmen|an|Dat.|участвовать в
+helfen|bei|Dat.|помогать в
+sich fürchten|vor|Dat.|бояться
+abhängen|von|Dat.|зависеть от
+träumen|von|Dat.|мечтать о
+erzählen|von|Dat.|рассказывать о
+gehören|zu|Dat.|принадлежать, относиться к
+einladen|zu|Dat.|приглашать на
+gratulieren|zu|Dat.|поздравлять с
+bestehen|aus|Dat.|состоять из
+bestehen|auf|Dat.|настаивать на
+sich verlassen|auf|Akk.|полагаться на
+achten|auf|Akk.|обращать внимание на
+diskutieren|über|Akk.|обсуждать
+nachdenken|über|Akk.|размышлять о
+sich beschäftigen|mit|Dat.|заниматься (чем-то)
+rechnen|mit|Dat.|рассчитывать на
+sich verabreden|mit|Dat.|договариваться о встрече с
+leiden|an|Dat.|страдать (болезнью)`;
+
+  function parseBlock(raw, article, cat){
+    return raw.split("\n").map(l=>l.trim()).filter(Boolean).map(line=>{
+      const [word, ru, caseTag] = line.split("|");
+      const obj = { article, word, ru, cat };
+      if(caseTag) obj.caseTag = caseTag;
+      return obj;
+    });
+  }
+
+  const baseWords = [
+    ...parseBlock(RAW_DER,"der","noun"),
+    ...parseBlock(RAW_DAS,"das","noun"),
+    ...parseBlock(RAW_DIE,"die","noun"),
+    ...parseBlock(RAW_VERB,"","verb"),
+    ...parseBlock(RAW_FRAGE,"","frage"),
+    ...parseBlock(RAW_PREP,"","prep"),
+    ...parseBlock(RAW_OTHER,"","other"),
+  ].map((w,i)=>({...w, id:"w"+i}));
+
+  // Article-by-case declension deck, built from the noun list.
+  const GENDER_MAP = { der:'m', das:'n', die:'f' };
+  const ARTICLE_TABLE = {
+    m: { Nominativ:'der', Akkusativ:'den', Dativ:'dem' },
+    n: { Nominativ:'das', Akkusativ:'das', Dativ:'dem' },
+    f: { Nominativ:'die', Akkusativ:'die', Dativ:'der' },
+  };
+  const CASES = ['Nominativ','Akkusativ','Dativ'];
+
+  const caseWords = baseWords
+    .filter(w=>w.cat==="noun")
+    .map(w=>({
+      id: "case-" + w.id,
+      word: w.word,
+      ru: w.ru,
+      article: "",
+      cat: "case",
+      gender: GENDER_MAP[w.article],
+    }));
+
+  function parseOrderBlock(raw){
+    return raw.split("\n").map(l=>l.trim()).filter(Boolean).map((line,i)=>{
+      const [tokensStr, decoysStr, ru, tense, type] = line.split("|");
+      const tokens = tokensStr.trim().split(/\s+/).filter(Boolean);
+      const decoys = (decoysStr && decoysStr !== "-") ? decoysStr.split(",").map(s=>s.trim()).filter(Boolean) : [];
+      return { id:"order"+i, tokens, decoys, ru, tense, type, cat:"order" };
+    });
+  }
+
+  function parseVerbPrepBlock(raw){
+    return raw.split("\n").map(l=>l.trim()).filter(Boolean).map((line,i)=>{
+      const [verb, prep, caseTag, ru] = line.split("|");
+      return { id:"vp"+i, verb, word: prep, prep, caseTag, ru, article:"", cat:"verbprep" };
+    });
+  }
+
+  const orderWords = parseOrderBlock(RAW_ORDER);
+  const verbPrepWords = parseVerbPrepBlock(RAW_VERBPREP);
+
+  let ALL = [...baseWords, ...caseWords, ...orderWords, ...verbPrepWords];
+
+  function makeQuestion(word){
+    if(word.cat !== "case") return word;
+    const caseName = CASES[Math.floor(Math.random()*CASES.length)];
+    const correctArticle = ARTICLE_TABLE[word.gender][caseName];
+    return { ...word, caseName, correctArticle };
+  }
+
+  const CATEGORIES = [
+    {key:"noun", label:"Существительные"},
+    {key:"case", label:"Артикль: падежи"},
+    {key:"verb", label:"Глаголы"},
+    {key:"verbprep", label:"Глагол + предлог"},
+    {key:"frage", label:"Вопрос. слова"},
+    {key:"prep", label:"Предлоги"},
+    {key:"other", label:"Прочее"},
+    {key:"order", label:"Порядок слов"},
+  ];
+
+  const NEED_STREAK = 2;
+  const TOTAL = ALL.length;
+  let selectedCats = new Set(CATEGORIES.filter(c=>!["case","order","verbprep"].includes(c.key)).map(c=>c.key));
+
+  let streaks = {};   // id -> current correct streak
+  let learned = {};   // id -> true
+  let shownIds = {};  // id -> true, ever displayed
+  let pendingReview = {}; // id -> renderCount tick at which it becomes pickable again
+  let renderCount = 0;    // total cards displayed this-and-past sessions (used for spacing)
+  let allTimeShown = 0;   // total answers submitted, all time
+  let today = {
+    date: "",
+    shown: 0,
+    correctIds: {},   // id -> true, answered correctly at least once today
+    wrong: 0,
+  };
+  let currentId = null;
+  let currentQuestion = null;
+  let currentOptions = [];
+  let locked = false;
+
+  function todayKey(){
+    const d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+  }
+
+  function ensureTodayFresh(){
+    const key = todayKey();
+    if(today.date !== key){
+      today = { date: key, shown: 0, correctIds: {}, wrong: 0 };
+    }
+  }
+
+  const els = {
+    learnedCount: document.getElementById('learnedCount'),
+    totalCount: document.getElementById('totalCount'),
+    barFill: document.getElementById('barFill'),
+    ruWord: document.getElementById('ruWord'),
+    dots: document.getElementById('dots'),
+    options: document.getElementById('options'),
+    feedback: document.getElementById('feedback'),
+    deckLabel: document.getElementById('deckLabel'),
+    quizArea: document.getElementById('quizArea'),
+    doneArea: document.getElementById('doneArea'),
+    resetBtn: document.getElementById('resetBtn'),
+    restartBtn: document.getElementById('restartBtn'),
+    chips: document.getElementById('chips'),
+    storageNote: document.getElementById('storageNote'),
+    board: document.getElementById('board'),
+    genderLabel: document.getElementById('genderLabel'),
+    hintText: document.getElementById('hintText'),
+    flapSub: document.getElementById('flapSub'),
+    caseHelper: document.getElementById('caseHelper'),
+    orderPanel: document.getElementById('orderPanel'),
+    buildStrip: document.getElementById('buildStrip'),
+    tokenPool: document.getElementById('tokenPool'),
+    undoBtn: document.getElementById('undoBtn'),
+    checkBtn: document.getElementById('checkBtn'),
+    ruHint: document.getElementById('ruHint'),
+    orderNextWrap: document.getElementById('orderNextWrap'),
+    orderNextBtn: document.getElementById('orderNextBtn'),
+    seenBadge: document.getElementById('seenBadge'),
+    todayShown: document.getElementById('todayShown'),
+    todayCorrect: document.getElementById('todayCorrect'),
+    todayWrong: document.getElementById('todayWrong'),
+    allTimeShown: document.getElementById('allTimeShown'),
+    allTimeLearned: document.getElementById('allTimeLearned'),
+  };
+
+  els.totalCount.textContent = TOTAL;
+
+  (function buildCaseHelper(){
+    const rows = [
+      {label:'der (m)', g:'m', cls:'gender-m'},
+      {label:'das (n)', g:'n', cls:'gender-n'},
+      {label:'die (f)', g:'f', cls:'gender-f'},
+    ];
+    let html = '<table class="case-table"><thead><tr><th></th><th>Nominativ</th><th>Akkusativ</th><th>Dativ</th></tr></thead><tbody>';
+    rows.forEach(r=>{
+      const t = ARTICLE_TABLE[r.g];
+      html += `<tr><td class="${r.cls}">${r.label}</td><td>${t.Nominativ}</td><td>${t.Akkusativ}</td><td>${t.Dativ}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    els.caseHelper.innerHTML = html;
+  })();
+
+  const STORE_KEY = "dw-progress-v4";
+  let storageAvailable = true;
+
+  function hasStorageApi(){
+    return typeof window !== "undefined" && window.storage
+      && typeof window.storage.get === "function"
+      && typeof window.storage.set === "function";
+  }
+
+  function showStorageNotice(){
+    if(els.storageNote && els.storageNote.textContent === ""){
+      els.storageNote.textContent = "Прогресс сохраняется только в этой сессии";
+    }
+  }
+
+  async function saveProgress(){
+    if(!storageAvailable || !hasStorageApi()) { showStorageNotice(); return; }
+    try{
+      const payload = {
+        streaks, learned, cats:[...selectedCats],
+        shownIds, pendingReview, renderCount, allTimeShown, today,
+      };
+      const res = await window.storage.set(STORE_KEY, JSON.stringify(payload), false);
+      if(!res){ storageAvailable = false; showStorageNotice(); }
+    }catch(e){
+      storageAvailable = false;
+      showStorageNotice();
+    }
+  }
+
+  async function loadProgress(){
+    if(!hasStorageApi()){ storageAvailable = false; showStorageNotice(); return; }
+    try{
+      const res = await window.storage.get(STORE_KEY, false);
+      if(res && res.value){
+        const data = JSON.parse(res.value);
+        streaks = data.streaks || {};
+        learned = data.learned || {};
+        shownIds = data.shownIds || {};
+        pendingReview = data.pendingReview || {};
+        renderCount = data.renderCount || 0;
+        allTimeShown = data.allTimeShown || 0;
+        today = data.today || { date:"", shown:0, correctIds:{}, wrong:0 };
+        if(Array.isArray(data.cats) && data.cats.length){
+          selectedCats = new Set(data.cats);
+        }
+      }
+    }catch(e){
+      // No saved progress yet, or the key doesn't exist — that's a normal first run, not an error.
+      streaks = {}; learned = {};
+    }
+    ensureTodayFresh();
+  }
+
+  function renderChips(){
+    els.chips.innerHTML = "";
+    CATEGORIES.forEach(c=>{
+      const chip = document.createElement('div');
+      chip.className = 'chip' + (selectedCats.has(c.key) ? ' active' : '');
+      chip.textContent = c.label;
+      chip.addEventListener('click', async ()=>{
+        if(selectedCats.has(c.key)){
+          if(selectedCats.size === 1) return; // keep at least one category active
+          selectedCats.delete(c.key);
+        } else {
+          selectedCats.add(c.key);
+        }
+        renderChips();
+        await saveProgress();
+        renderQuestion();
+      });
+      els.chips.appendChild(chip);
+    });
+  }
+
+  function activePool(){
+    return ALL.filter(w=>selectedCats.has(w.cat) && !learned[w.id]);
+  }
+
+  function selectionTotal(){
+    return ALL.filter(w=>selectedCats.has(w.cat)).length;
+  }
+
+  function selectionLearned(){
+    return ALL.filter(w=>selectedCats.has(w.cat) && learned[w.id]).length;
+  }
+
+  function isDelayed(id){
+    const due = pendingReview[id];
+    if(due === undefined) return false;
+    if(renderCount >= due){ delete pendingReview[id]; return false; }
+    return true;
+  }
+
+  // Cards that failed recently are held back until 10-15 other cards have been
+  // shown, so they resurface with some spacing instead of right away.
+  function pickablePool(){
+    const pool = activePool();
+    const ready = pool.filter(w=>!isDelayed(w.id));
+    return ready.length > 0 ? ready : pool;
+  }
+
+  function pickNextWord(){
+    const pool = pickablePool();
+    if(pool.length === 0) return null;
+    renderCount++;
+    if(pool.length === 1) return pool[0];
+    let candidate;
+    do{
+      candidate = pool[Math.floor(Math.random()*pool.length)];
+    }while(candidate.id === currentId);
+    return candidate;
+  }
+
+  function shuffle(arr){
+    for(let i=arr.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [arr[i],arr[j]]=[arr[j],arr[i]];
+    }
+    return arr;
+  }
+
+  const ARTICLE_GENDER_CLASS = { der:'gender-m', das:'gender-n', die:'gender-f' };
+
+  function plainLabelOf(w){
+    let plain = w.article ? `${w.article} ${w.word}` : w.word;
+    if(w.caseTag) plain += ` (+${w.caseTag})`;
+    return plain;
+  }
+
+  function buildOptions(question){
+    if(question.cat === "case"){
+      const forms = ["der","das","die","den","dem"];
+      return shuffle(forms.map(f=>({
+        id: question.id + "-" + f,
+        label: f,
+        plain: f,
+        isCorrect: f === question.correctArticle,
+      })));
+    }
+    let sameCat = ALL.filter(w=>w.cat===question.cat && w.id!==question.id);
+    const candidates = sameCat.length >= 4 ? sameCat : ALL.filter(w=>!["case","order","verbprep"].includes(w.cat) && w.id!==question.id);
+    shuffle(candidates);
+
+    const questionPlain = plainLabelOf(question);
+    const usedPlains = new Set([questionPlain]);
+    const distractors = [];
+    for(const w of candidates){
+      if(distractors.length >= 4) break;
+      const p = plainLabelOf(w);
+      if(usedPlains.has(p)) continue;
+      usedPlains.add(p);
+      distractors.push(w);
+    }
+    // Rare fallback if there aren't 4 distinct labels available: allow repeats rather than short options.
+    if(distractors.length < 4){
+      for(const w of candidates){
+        if(distractors.length >= 4) break;
+        if(!distractors.includes(w)) distractors.push(w);
+      }
+    }
+
+    const pool = [question, ...distractors];
+    return shuffle(pool.map(w=>{
+      let label = w.word;
+      if(w.article){
+        const cls = ARTICLE_GENDER_CLASS[w.article] || '';
+        label = `<span class="${cls}">${w.article}</span> ${w.word}`;
+      }
+      if(w.caseTag){
+        label += ` <span class="prep-case">(+${w.caseTag})</span>`;
+      }
+      return { id: w.id, label, plain: plainLabelOf(w), isCorrect: w.id === question.id };
+    }));
+  }
+
+  function renderDots(){
+    const streak = streaks[currentId] || 0;
+    els.dots.innerHTML = "";
+    for(let i=0;i<NEED_STREAK;i++){
+      const d = document.createElement('div');
+      d.className = 'dot' + (i < streak ? ' filled' : '');
+      els.dots.appendChild(d);
+    }
+  }
+
+  function renderStats(){
+    const learnedCount = selectionLearned();
+    const total = selectionTotal();
+    els.learnedCount.textContent = learnedCount;
+    els.totalCount.textContent = total;
+    els.barFill.style.width = (total ? (learnedCount/total*100) : 0).toFixed(1)+"%";
+    els.deckLabel.textContent = "В КОЛОДЕ: " + activePool().length;
+
+    ensureTodayFresh();
+    els.todayShown.textContent = today.shown;
+    els.todayCorrect.textContent = Object.keys(today.correctIds).length + " ✓";
+    els.todayWrong.textContent = today.wrong + " ✗";
+    els.allTimeShown.textContent = allTimeShown;
+    const allLearned = Object.keys(learned).length;
+    els.allTimeLearned.textContent = allLearned + " / " + ALL.length + " выучено";
+  }
+
+  function renderQuestion(){
+    const pool = activePool();
+    if(pool.length === 0){
+      els.quizArea.style.display = "none";
+      els.doneArea.style.display = "block";
+      return;
+    }
+    els.quizArea.style.display = "block";
+    els.doneArea.style.display = "none";
+
+    const picked = pickNextWord();
+    const question = makeQuestion(picked);
+    currentId = question.id;
+    currentQuestion = question;
+    locked = false;
+
+    const wasShownBefore = !!shownIds[question.id];
+    els.seenBadge.textContent = wasShownBefore ? "Повтор" : "Новая";
+    els.seenBadge.className = "seen-badge" + (wasShownBefore ? " seen" : "");
+    shownIds[question.id] = true;
+
+    els.feedback.textContent = "";
+    els.feedback.className = "feedback";
+    els.orderNextWrap.style.display = "none";
+    els.board.dataset.submode = question.cat;
+    renderDots();
+    renderStats();
+
+    if(question.cat === "order"){
+      els.board.dataset.mode = "order";
+      renderOrderQuestion(question);
+    } else {
+      els.board.dataset.mode = "choice";
+      els.hintText.textContent = "нужно 2 верных ответа подряд";
+      renderChoiceQuestion(question);
+    }
+  }
+
+  function renderChoiceQuestion(question){
+    currentOptions = buildOptions(question);
+
+    if(question.cat === "case"){
+      els.genderLabel.textContent = question.caseName.toUpperCase();
+      els.ruWord.textContent = question.word;
+      els.flapSub.textContent = "перевод: " + question.ru;
+    } else if(question.cat === "verbprep"){
+      els.genderLabel.textContent = "ГЛАГОЛ + ПРЕДЛОГ";
+      els.ruWord.textContent = question.verb + " ... ?";
+      els.flapSub.textContent = "перевод: " + question.ru;
+    } else {
+      els.genderLabel.textContent = "RU → DE";
+      els.ruWord.textContent = question.ru;
+      els.flapSub.textContent = "";
+    }
+
+    els.options.innerHTML = "";
+    currentOptions.forEach((opt, idx)=>{
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.dataset.correct = opt.isCorrect ? "1" : "0";
+      btn.innerHTML = `<span class="idx">${String(idx+1).padStart(2,'0')}</span>${opt.label}`;
+      btn.addEventListener('click', ()=>handleAnswer(opt, question, btn));
+      els.options.appendChild(btn);
+    });
+  }
+
+  function recordAnswer(question, isCorrect){
+    ensureTodayFresh();
+    today.shown++;
+    allTimeShown++;
+    if(isCorrect){
+      today.correctIds[question.id] = true;
+    } else {
+      today.wrong++;
+      // Hold this card back for 10-15 more cards before it can come up again.
+      pendingReview[question.id] = renderCount + 10 + Math.floor(Math.random()*6);
+    }
+  }
+
+  async function handleAnswer(chosen, question, btnEl){
+    if(locked) return;
+    locked = true;
+
+    const allBtns = Array.from(els.options.children);
+    allBtns.forEach(b=>b.disabled = true);
+
+    const isCorrect = !!chosen.isCorrect;
+    const correctOpt = currentOptions.find(o=>o.isCorrect);
+    recordAnswer(question, isCorrect);
+
+    if(isCorrect){
+      btnEl.classList.add('correct');
+      streaks[question.id] = (streaks[question.id]||0) + 1;
+      if(streaks[question.id] >= NEED_STREAK){
+        learned[question.id] = true;
+        els.feedback.textContent = "Верно! Слово выучено ✓";
+      } else {
+        els.feedback.textContent = "Верно! " + streaks[question.id] + "/" + NEED_STREAK;
+      }
+      els.feedback.className = "feedback ok";
+    } else {
+      btnEl.classList.add('wrong');
+      allBtns.forEach(b=>{
+        if(b.dataset.correct === "1"){ b.classList.add('correct'); }
+      });
+      streaks[question.id] = 0;
+      if(question.cat === "case"){
+        els.feedback.textContent = "Неверно. Правильно: " + (correctOpt ? correctOpt.plain : "") +
+          " " + question.word + " (" + question.caseName + ") — " + question.ru;
+      } else if(question.cat === "verbprep"){
+        els.feedback.textContent = "Неверно. Правильно: " + question.verb + " " +
+          (correctOpt ? correctOpt.plain : "") + " — " + question.ru;
+      } else {
+        els.feedback.textContent = "Неверно. Правильно: " + (correctOpt ? correctOpt.plain : "");
+      }
+      els.feedback.className = "feedback bad";
+    }
+
+    allBtns.forEach(b=>{ if(!b.classList.contains('correct') && !b.classList.contains('wrong')) b.classList.add('dim'); });
+
+    renderDots();
+    renderStats();
+    await saveProgress();
+
+    setTimeout(renderQuestion, isCorrect ? 700 : 1500);
+  }
+
+  // ---- Sentence word-order puzzle ----
+  let orderState = null;
+
+  function joinSentence(tokens){
+    const noSpaceBefore = new Set([",",".","?","!"]);
+    let s = "";
+    tokens.forEach((t,i)=>{
+      if(noSpaceBefore.has(t)){ s += t; }
+      else { s += (i===0 ? "" : " ") + t; }
+    });
+    return s;
+  }
+
+  function renderOrderQuestion(question){
+    els.hintText.textContent = "нажимай слова по порядку, чтобы собрать предложение";
+    const tag = [question.tense, question.type === "Frage" ? "Вопрос" : "Утверждение"].filter(Boolean);
+    els.genderLabel.textContent = tag.join(" · ").toUpperCase();
+    els.ruWord.textContent = "🧩 Собери предложение";
+    els.ruHint.textContent = "Перевод: " + question.ru;
+
+    const pool = shuffle([...question.tokens, ...question.decoys].map((tok,i)=>({tok, uid:i})));
+    orderState = { question, pool, built: [] };
+    renderOrderUI();
+  }
+
+  function renderOrderUI(){
+    els.buildStrip.innerHTML = "";
+    if(orderState.built.length === 0){
+      const ph = document.createElement('span');
+      ph.className = 'build-placeholder';
+      ph.textContent = "Твоё предложение появится здесь…";
+      els.buildStrip.appendChild(ph);
+    } else {
+      orderState.built.forEach((item, idx)=>{
+        const chip = document.createElement('button');
+        chip.className = 'token-chip placed';
+        chip.textContent = item.tok;
+        chip.addEventListener('click', ()=>{
+          orderState.built.splice(idx,1);
+          orderState.pool.push(item);
+          renderOrderUI();
+        });
+        els.buildStrip.appendChild(chip);
+      });
+    }
+
+    els.tokenPool.innerHTML = "";
+    orderState.pool.forEach((item, idx)=>{
+      const chip = document.createElement('button');
+      chip.className = 'token-chip';
+      chip.textContent = item.tok;
+      chip.addEventListener('click', ()=>{
+        orderState.pool.splice(idx,1);
+        orderState.built.push(item);
+        renderOrderUI();
+      });
+      els.tokenPool.appendChild(chip);
+    });
+
+    els.checkBtn.disabled = orderState.built.length !== orderState.question.tokens.length;
+    els.undoBtn.disabled = orderState.built.length === 0;
+  }
+
+  els.undoBtn.addEventListener('click', ()=>{
+    if(!orderState || orderState.built.length === 0) return;
+    const item = orderState.built.pop();
+    orderState.pool.push(item);
+    renderOrderUI();
+  });
+
+  els.checkBtn.addEventListener('click', async ()=>{
+    if(!orderState || locked) return;
+    const question = orderState.question;
+    const builtStr = orderState.built.map(i=>i.tok).join(" ");
+    const correctStr = question.tokens.join(" ");
+    const isCorrect = builtStr === correctStr;
+
+    locked = true;
+    els.checkBtn.disabled = true;
+    els.undoBtn.disabled = true;
+    Array.from(els.tokenPool.children).forEach(b=>b.disabled = true);
+    Array.from(els.buildStrip.children).forEach(b=>b.disabled = true);
+
+    recordAnswer(question, isCorrect);
+
+    if(isCorrect){
+      streaks[question.id] = (streaks[question.id]||0) + 1;
+      if(streaks[question.id] >= NEED_STREAK){
+        learned[question.id] = true;
+        els.feedback.textContent = "Верно! Предложение выучено ✓";
+      } else {
+        els.feedback.textContent = "Верно! " + streaks[question.id] + "/" + NEED_STREAK;
+      }
+      els.feedback.className = "feedback ok";
+      renderDots();
+      renderStats();
+      await saveProgress();
+      setTimeout(renderQuestion, 900);
+    } else {
+      streaks[question.id] = 0;
+      els.feedback.innerHTML = "Неверно. Правильно:<br><b>" + joinSentence(question.tokens) + "</b>";
+      els.feedback.className = "feedback bad";
+      renderDots();
+      renderStats();
+      await saveProgress();
+      els.orderNextWrap.style.display = "block";
+    }
+  });
+
+  els.orderNextBtn.addEventListener('click', renderQuestion);
+
+  function resetAllProgress(){
+    streaks = {};
+    learned = {};
+    shownIds = {};
+    pendingReview = {};
+    renderCount = 0;
+    allTimeShown = 0;
+    today = { date: todayKey(), shown: 0, correctIds: {}, wrong: 0 };
+  }
+
+  els.resetBtn.addEventListener('click', async ()=>{
+    resetAllProgress();
+    await saveProgress();
+    renderQuestion();
+  });
+
+  els.restartBtn.addEventListener('click', async ()=>{
+    resetAllProgress();
+    await saveProgress();
+    renderQuestion();
+  });
+
+  (async function init(){
+    await loadProgress();
+    renderChips();
+    renderQuestion();
+  })();
+
+})();
+</script>
+</body>
+</html>
