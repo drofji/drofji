@@ -3,157 +3,108 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Bahnhof der Wörter — немецкие карточки</title>
+<title>Bahnhof der Wörter — карточки для немецкого</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg: #12161d;
-    --panel: #1b212b;
-    --panel-2: #212836;
-    --amber: #eab04a;
-    --amber-dim: #8a672f;
-    --green: #4f9d6e;
-    --red: #d1495b;
-    --ink: #f2ede0;
-    --ink-dim: #9aa3b2;
-    --rule: #2c3444;
-    --male: #6fa8ff;
-    --neut: #7bd88f;
-    --fem: #ff93a8;
+  :root, [data-theme="dark"]{
+    --bg: #12161d; --panel: #1b212b; --panel-2: #212836; --flap-bg: #0e1218;
+    --amber: #eab04a; --amber-dim: #8a672f; --green: #4f9d6e; --red: #d1495b;
+    --ink: #f2ede0; --ink-dim: #9aa3b2; --rule: #2c3444;
+    --male: #6fa8ff; --neut: #7bd88f; --fem: #ff93a8;
+    --overlay: rgba(6,8,12,.72);
+  }
+  [data-theme="light"]{
+    --bg: #f4f5f7; --panel: #ffffff; --panel-2: #eef1f5; --flap-bg: #f7f8fa;
+    --amber: #c8791f; --amber-dim: #e0b473; --green: #2f8f57; --red: #c53a4c;
+    --ink: #1c2128; --ink-dim: #6b7280; --rule: #dde1e8;
+    --male: #2c6fd6; --neut: #1f9a5a; --fem: #d43e66;
+    --overlay: rgba(30,32,38,.55);
+  }
+  [data-theme="beige"]{
+    --bg: #f1e7d3; --panel: #fbf5e8; --panel-2: #efe2c4; --flap-bg: #f7efdd;
+    --amber: #a9631c; --amber-dim: #cf9a52; --green: #4a7a4c; --red: #b1483f;
+    --ink: #3b2f20; --ink-dim: #7a6a51; --rule: #ddcba1;
+    --male: #365f96; --neut: #4a7a4c; --fem: #a34a63;
+    --overlay: rgba(60,45,22,.55);
+  }
+  [data-theme="gray"]{
+    --bg: #e6e8eb; --panel: #f3f4f6; --panel-2: #e3e5e9; --flap-bg: #eceef1;
+    --amber: #8a6a1f; --amber-dim: #b79a4e; --green: #35785a; --red: #b1444f;
+    --ink: #23262b; --ink-dim: #6c7078; --rule: #cfd3d9;
+    --male: #33629c; --neut: #357855; --fem: #a3455f;
+    --overlay: rgba(20,22,26,.55);
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
   html,body{margin:0;padding:0;}
   body{
-    min-height:100vh;
-    background:
-      radial-gradient(circle at 50% -10%, #1b2230 0%, var(--bg) 55%);
-    color:var(--ink);
-    font-family:'Inter',sans-serif;
-    display:flex;
-    justify-content:center;
-    padding:18px 14px 40px;
+    min-height:100vh; background: var(--bg); color:var(--ink); font-family:'Inter',sans-serif;
+    display:flex; justify-content:center; padding:18px 14px 40px;
+    transition: background .2s ease, color .2s ease;
   }
   .app{ width:100%; max-width:430px; }
+  button{ font-family:inherit; }
+  input, select{ font-family:inherit; }
 
-  header{ text-align:center; margin-bottom:16px; }
-  .eyebrow{
-    font-family:'Space Mono',monospace;
-    letter-spacing:.25em;
-    font-size:11px;
-    color:var(--amber-dim);
-    text-transform:uppercase;
-  }
-  h1{
-    font-family:'Space Mono',monospace;
-    font-size:22px;
-    margin:6px 0 2px;
-    color:var(--amber);
-    letter-spacing:.02em;
-  }
+  header{ text-align:center; margin-bottom:14px; }
+  .eyebrow{ font-family:'Space Mono',monospace; letter-spacing:.25em; font-size:11px; color:var(--amber-dim); text-transform:uppercase; }
+  h1{ font-family:'Space Mono',monospace; font-size:22px; margin:6px 0 2px; color:var(--amber); letter-spacing:.02em; }
   .sub{ font-size:12.5px; color:var(--ink-dim); }
 
-  /* today / all-time stats panel */
-  .stats-panel{
-    display:grid;
-    grid-template-columns: 1fr 1fr;
-    gap:10px;
-    margin-top:16px;
+  .toolbar{ display:flex; flex-wrap:wrap; gap:7px; justify-content:center; margin-top:14px; }
+  .tool-btn{
+    font-family:'Space Mono',monospace; font-size:11px; padding:8px 12px; border-radius:20px;
+    border:1px solid var(--rule); background:var(--panel); color:var(--ink-dim); cursor:pointer;
+    display:flex; align-items:center; gap:5px;
   }
-  .stats-block{
-    background:var(--panel);
-    border:1px solid var(--rule);
-    border-radius:10px;
-    padding:10px 12px;
-    text-align:center;
+  .tool-btn:active{ transform:scale(.95); }
+  .tool-btn.accent{ background:rgba(234,176,74,.14); border-color:var(--amber-dim); color:var(--amber); }
+
+  .deck-row{ display:flex; gap:7px; overflow-x:auto; padding:14px 0 0; scrollbar-width:none; }
+  .deck-row::-webkit-scrollbar{ display:none; }
+  .deck-pill{
+    flex:0 0 auto; font-family:'Space Mono',monospace; font-size:12px; font-weight:700;
+    padding:9px 14px; border-radius:10px; border:1px solid var(--rule); background:var(--panel);
+    color:var(--ink-dim); cursor:pointer; white-space:nowrap;
   }
-  .stats-label{
-    font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.15em;
-    text-transform:uppercase; color:var(--ink-dim);
-  }
-  .stats-value{
-    font-family:'Space Mono',monospace; font-weight:700; font-size:22px;
-    color:var(--amber); margin:2px 0;
-  }
+  .deck-pill.active{ background:var(--amber); border-color:var(--amber); color:#1b1204; }
+  .deck-pill.add{ color:var(--amber); border-style:dashed; }
+
+  .stats-panel{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:16px; }
+  .stats-block{ background:var(--panel); border:1px solid var(--rule); border-radius:10px; padding:10px 12px; text-align:center; }
+  .stats-label{ font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.15em; text-transform:uppercase; color:var(--ink-dim); }
+  .stats-value{ font-family:'Space Mono',monospace; font-weight:700; font-size:22px; color:var(--amber); margin:2px 0; }
   .stats-sub{ font-family:'Space Mono',monospace; font-size:11px; color:var(--ink-dim); }
   .stats-sub .ok-text{ color:var(--green); }
   .stats-sub .bad-text{ color:var(--red); }
 
   .seen-badge{
-    font-family:'Space Mono',monospace;
-    font-size:9px;
-    letter-spacing:.08em;
-    padding:2px 9px;
-    border-radius:10px;
-    text-transform:uppercase;
-    background:rgba(79,157,110,.15);
-    border:1px solid var(--green);
-    color:var(--green);
+    font-family:'Space Mono',monospace; font-size:9px; letter-spacing:.08em; padding:2px 9px; border-radius:10px;
+    text-transform:uppercase; background:rgba(79,157,110,.15); border:1px solid var(--green); color:var(--green);
   }
-  .seen-badge.seen{
-    background:rgba(154,163,178,.12);
-    border-color:var(--ink-dim);
-    color:var(--ink-dim);
-  }
+  .seen-badge.seen{ background:rgba(154,163,178,.12); border-color:var(--ink-dim); color:var(--ink-dim); }
 
-  /* category filter chips */
-  .chips{
-    display:flex; flex-wrap:wrap; gap:7px;
-    justify-content:center;
-    margin:14px 0 0;
-  }
+  .chips{ display:flex; flex-wrap:wrap; gap:7px; justify-content:center; margin:14px 0 0; }
   .chip{
-    font-family:'Space Mono',monospace;
-    font-size:11px;
-    letter-spacing:.03em;
-    padding:7px 12px;
-    border-radius:20px;
-    border:1px solid var(--rule);
-    background:var(--panel);
-    color:var(--ink-dim);
-    cursor:pointer;
-    user-select:none;
+    font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.03em; padding:7px 12px; border-radius:20px;
+    border:1px solid var(--rule); background:var(--panel); color:var(--ink-dim); cursor:pointer; user-select:none;
     transition: all .15s ease;
   }
-  .chip.active{
-    background: rgba(234,176,74,.14);
-    border-color: var(--amber-dim);
-    color: var(--amber);
-  }
+  .chip.active{ background: rgba(234,176,74,.14); border-color: var(--amber-dim); color: var(--amber); }
   .chip:active{ transform:scale(.95); }
 
-  /* overall progress bar styled like a platform indicator */
-  .track{
-    margin:16px 0 20px;
-    background:var(--panel);
-    border:1px solid var(--rule);
-    border-radius:10px;
-    padding:10px 12px;
-  }
+  .track{ margin:16px 0 20px; background:var(--panel); border:1px solid var(--rule); border-radius:10px; padding:10px 12px; }
   .track-top{
     display:flex; justify-content:space-between; align-items:baseline;
-    font-family:'Space Mono',monospace; font-size:12px; color:var(--ink-dim);
-    margin-bottom:8px;
+    font-family:'Space Mono',monospace; font-size:12px; color:var(--ink-dim); margin-bottom:8px;
   }
   .track-top b{ color:var(--amber); font-size:14px; }
   .bar{ height:6px; background:var(--rule); border-radius:4px; overflow:hidden; }
   .bar-fill{ height:100%; background:linear-gradient(90deg,var(--amber-dim),var(--amber)); width:0%; transition:width .4s ease; }
 
-  /* split-flap board card */
   .board{
-    background: var(--panel);
-    border:1px solid var(--rule);
-    border-radius:14px;
-    padding:22px 18px 18px;
-    box-shadow: 0 20px 40px -20px rgba(0,0,0,.6);
-    position:relative;
-    overflow:hidden;
-  }
-  .board::before{
-    content:"";
-    position:absolute; inset:0;
-    background: repeating-linear-gradient(180deg, rgba(255,255,255,.015) 0px, rgba(255,255,255,.015) 1px, transparent 1px, transparent 3px);
-    pointer-events:none;
+    background: var(--panel); border:1px solid var(--rule); border-radius:14px; padding:22px 18px 18px;
+    box-shadow: 0 20px 40px -20px rgba(0,0,0,.35); position:relative; overflow:hidden;
   }
   .label-row{
     display:flex; justify-content:space-between; align-items:center;
@@ -161,64 +112,30 @@
     letter-spacing:.15em; text-transform:uppercase; margin-bottom:10px;
   }
   .flap{
-    background: #0e1218;
-    border:1px solid var(--rule);
-    border-radius:8px;
-    padding:26px 14px;
-    text-align:center;
-    min-height:92px;
-    display:flex; align-items:center; justify-content:center;
+    background: var(--flap-bg); border:1px solid var(--rule); border-radius:8px; padding:26px 14px;
+    text-align:center; min-height:92px; display:flex; align-items:center; justify-content:center;
   }
   .flap-word{
-    font-family:'Space Mono',monospace;
-    font-weight:700;
-    font-size:clamp(22px, 7vw, 30px);
-    color:var(--ink);
-    letter-spacing:.03em;
-    line-height:1.25;
-    word-break:break-word;
+    font-family:'Space Mono',monospace; font-weight:700; font-size:clamp(22px, 7vw, 30px);
+    color:var(--ink); letter-spacing:.03em; line-height:1.25; word-break:break-word;
   }
 
-  /* streak dots for current word */
   .dots{ display:flex; justify-content:center; gap:8px; margin:14px 0 4px; }
-  .dot{
-    width:11px; height:11px; border-radius:50%;
-    border:1.5px solid var(--rule);
-    background:transparent;
-    transition: all .25s ease;
-  }
-  .dot.filled{ background:var(--amber); border-color:var(--amber); box-shadow:0 0 8px rgba(234,176,74,.6); }
+  .dot{ width:11px; height:11px; border-radius:50%; border:1.5px solid var(--rule); background:transparent; transition: all .25s ease; }
+  .dot.filled{ background:var(--amber); border-color:var(--amber); box-shadow:0 0 8px rgba(234,176,74,.45); }
 
   .hint{ text-align:center; font-size:11.5px; color:var(--ink-dim); margin:6px 0 14px; font-family:'Space Mono',monospace;}
 
-  .flap-sub{
-    display:none;
-    text-align:center;
-    font-size:12.5px;
-    color:var(--ink-dim);
-    font-style:italic;
-    margin-top:8px;
-  }
+  .flap-sub{ display:none; text-align:center; font-size:12.5px; color:var(--ink-dim); font-style:italic; margin-top:8px; }
   .board[data-submode="case"] .flap-sub, .board[data-submode="verbprep"] .flap-sub{ display:block; }
 
   .case-helper{ display:none; margin-bottom:14px; }
   .board[data-submode="case"] .case-helper{ display:block; }
   .case-table{
-    width:100%;
-    border-collapse:collapse;
-    background:#0e1218;
-    border:1px solid var(--rule);
-    border-radius:8px;
-    overflow:hidden;
-    font-family:'Space Mono',monospace;
-    font-size:12px;
+    width:100%; border-collapse:collapse; background:var(--flap-bg); border:1px solid var(--rule);
+    border-radius:8px; overflow:hidden; font-family:'Space Mono',monospace; font-size:12px;
   }
-  .case-table th, .case-table td{
-    padding:7px 6px;
-    text-align:center;
-    border-bottom:1px solid var(--rule);
-    border-right:1px solid var(--rule);
-  }
+  .case-table th, .case-table td{ padding:7px 6px; text-align:center; border-bottom:1px solid var(--rule); border-right:1px solid var(--rule); }
   .case-table th{ color:var(--ink-dim); font-weight:400; letter-spacing:.04em; }
   .case-table td:first-child, .case-table th:first-child{ text-align:left; padding-left:10px; border-right:1px solid var(--rule); }
   .case-table tr:last-child td{ border-bottom:none; }
@@ -227,194 +144,223 @@
   .gender-n{ color:var(--neut); }
   .gender-f{ color:var(--fem); }
 
-  /* options styled as ticket stubs */
   .options{ display:flex; flex-direction:column; gap:10px; }
   .opt{
-    position:relative;
-    text-align:left;
-    background:var(--panel-2);
-    border:1px solid var(--rule);
-    border-radius:10px;
-    padding:14px 16px 14px 40px;
-    font-family:'Inter',sans-serif;
-    font-size:15.5px;
-    font-weight:600;
-    color:var(--ink);
-    cursor:pointer;
-    transition: transform .12s ease, border-color .15s ease, background .15s ease;
+    position:relative; text-align:left; background:var(--panel-2); border:1px solid var(--rule); border-radius:10px;
+    padding:14px 16px 14px 40px; font-family:'Inter',sans-serif; font-size:15.5px; font-weight:600; color:var(--ink);
+    cursor:pointer; transition: transform .12s ease, border-color .15s ease, background .15s ease;
   }
-  .opt::before{
-    content:"";
-    position:absolute; left:0; top:0; bottom:0; width:0;
-    border-left:2px dashed var(--rule);
-    left:26px;
-  }
-  .opt .idx{
-    position:absolute; left:12px; top:50%; transform:translateY(-50%);
-    font-family:'Space Mono',monospace; font-size:11px; color:var(--ink-dim);
-  }
+  .opt .idx{ position:absolute; left:12px; top:50%; transform:translateY(-50%); font-family:'Space Mono',monospace; font-size:11px; color:var(--ink-dim); }
   .prep-case{ color:var(--ink-dim); font-size:.82em; font-weight:400; }
   .opt:active{ transform:scale(.98); }
   .opt:disabled{ cursor:default; }
-  .opt.correct{ border-color:var(--green); background:rgba(79,157,110,.18); color:#c9ecd6; }
-  .opt.wrong{ border-color:var(--red); background:rgba(209,73,91,.18); color:#f4c6cc; }
+  .opt.correct{ border-color:var(--green); background:rgba(79,157,110,.16); color:var(--ink); }
+  .opt.wrong{ border-color:var(--red); background:rgba(209,73,91,.16); color:var(--ink); }
   .opt.dim{ opacity:.45; }
 
-  .feedback{
-    min-height:20px;
-    text-align:center;
-    font-family:'Space Mono',monospace;
-    font-size:12.5px;
-    margin-top:12px;
-    color:var(--ink-dim);
-  }
+  .feedback{ min-height:20px; text-align:center; font-family:'Space Mono',monospace; font-size:12.5px; margin-top:12px; color:var(--ink-dim); }
   .feedback.ok{ color:var(--green); }
   .feedback.bad{ color:var(--red); }
 
-  /* sentence word-order puzzle */
   .order-panel{ display:none; }
   .board[data-mode="order"] .options{ display:none !important; }
   .board[data-mode="order"] .order-panel{ display:block; }
-
   .build-strip{
-    min-height:60px;
-    background:#0e1218;
-    border:1px dashed var(--rule);
-    border-radius:8px;
-    padding:10px;
-    display:flex; flex-wrap:wrap; gap:7px; align-content:flex-start;
-    margin-bottom:14px;
+    min-height:60px; background:var(--flap-bg); border:1px dashed var(--rule); border-radius:8px;
+    padding:10px; display:flex; flex-wrap:wrap; gap:7px; align-content:flex-start; margin-bottom:14px;
   }
-  .build-placeholder{
-    font-family:'Space Mono',monospace; font-size:11.5px; color:var(--ink-dim); padding:6px 2px;
-  }
+  .build-placeholder{ font-family:'Space Mono',monospace; font-size:11.5px; color:var(--ink-dim); padding:6px 2px; }
   .token-pool{ display:flex; flex-wrap:wrap; gap:7px; margin-bottom:16px; }
   .token-chip{
-    font-family:'Inter',sans-serif; font-weight:600; font-size:14px;
-    background:var(--panel-2); border:1px solid var(--rule); color:var(--ink);
-    border-radius:8px; padding:8px 12px; cursor:pointer;
-    transition: transform .1s ease, background .15s ease, border-color .15s ease;
+    font-family:'Inter',sans-serif; font-weight:600; font-size:14px; background:var(--panel-2); border:1px solid var(--rule);
+    color:var(--ink); border-radius:8px; padding:8px 12px; cursor:pointer;
   }
-  .token-chip:active{ transform:scale(.94); }
   .token-chip.placed{ background:rgba(234,176,74,.15); border-color:var(--amber-dim); color:var(--amber); }
-  .token-chip:disabled{ opacity:.5; cursor:default; }
-
+  .token-chip:disabled{ opacity:.5; }
   .order-actions{ display:flex; gap:10px; margin-bottom:10px; }
   .order-btn{
-    flex:1;
-    font-family:'Space Mono',monospace; font-size:12px; font-weight:700;
-    padding:11px; border-radius:10px; cursor:pointer; border:1px solid var(--rule);
-    background:var(--panel-2); color:var(--ink-dim);
+    flex:1; font-family:'Space Mono',monospace; font-size:12px; font-weight:700; padding:11px; border-radius:10px;
+    cursor:pointer; border:1px solid var(--rule); background:var(--panel-2); color:var(--ink-dim);
   }
   .order-btn.primary{ background:var(--amber); color:#1b1204; border-color:var(--amber); }
-  .order-btn:disabled{ opacity:.4; cursor:default; }
-
+  .order-btn:disabled{ opacity:.4; }
   .ru-hint{ text-align:center; font-size:12.5px; color:var(--ink-dim); font-style:italic; margin-top:2px; }
-
   .order-next-wrap{ display:none; text-align:center; margin-top:14px; }
   .order-next{
     background:var(--amber); color:#1b1204; border:none; font-family:'Space Mono',monospace; font-weight:700;
     padding:10px 22px; border-radius:22px; font-size:12.5px; cursor:pointer;
   }
 
-  .footer-row{
-    display:flex; justify-content:space-between; align-items:center;
-    margin-top:18px;
-  }
-  .stat{ font-family:'Space Mono',monospace; font-size:11px; color:var(--ink-dim); }
-  .reset{
-    background:none; border:1px solid var(--rule); color:var(--ink-dim);
-    font-family:'Space Mono',monospace; font-size:11px;
-    padding:7px 12px; border-radius:20px; cursor:pointer;
-  }
-  .reset:active{ transform:scale(.96); }
-
-  .done{
-    text-align:center; padding:40px 10px;
-  }
+  .done{ text-align:center; padding:40px 10px; }
   .done h2{ font-family:'Space Mono',monospace; color:var(--amber); font-size:22px; }
   .done p{ color:var(--ink-dim); font-size:14px; }
   .done button{
-    margin-top:16px;
-    background:var(--amber); color:#1b1204; border:none;
-    font-family:'Space Mono',monospace; font-weight:700;
-    padding:12px 22px; border-radius:24px; font-size:13px; cursor:pointer;
+    margin-top:16px; background:var(--amber); color:#1b1204; border:none; font-family:'Space Mono',monospace;
+    font-weight:700; padding:12px 22px; border-radius:24px; font-size:13px; cursor:pointer;
   }
 
-  .storage-note{
-    text-align:center;
-    font-family:'Space Mono',monospace;
-    font-size:10.5px;
-    color:var(--amber-dim);
-    margin-top:10px;
-    min-height:14px;
+  .footer-row{ display:flex; justify-content:space-between; align-items:center; margin-top:18px; }
+  .stat{ font-family:'Space Mono',monospace; font-size:11px; color:var(--ink-dim); }
+  .reset{
+    background:none; border:1px solid var(--rule); color:var(--ink-dim); font-family:'Space Mono',monospace;
+    font-size:11px; padding:7px 12px; border-radius:20px; cursor:pointer;
   }
+  .storage-note{ text-align:center; font-family:'Space Mono',monospace; font-size:10.5px; color:var(--amber-dim); margin-top:10px; min-height:14px; }
 
-  @media (prefers-reduced-motion: reduce){
-    *{ transition:none !important; }
+  .modal-overlay{ display:none; position:fixed; inset:0; background:var(--overlay); z-index:100; align-items:flex-end; justify-content:center; }
+  .modal-overlay.show{ display:flex; }
+  .modal-card{
+    background:var(--panel); width:100%; max-width:460px; border-radius:18px 18px 0 0; padding:20px 18px 26px;
+    max-height:88vh; overflow-y:auto; border:1px solid var(--rule); border-bottom:none; position:relative;
   }
-
-  /* Tablet and larger: wider canvas, roomier board, two-column options */
-  @media (min-width: 700px){
-    body{ padding:36px 24px 56px; }
-    .app{ max-width:760px; }
-
-    h1{ font-size:30px; }
-    .sub{ font-size:14px; max-width:520px; margin:0 auto; }
-    .eyebrow{ font-size:12px; }
-
-    .chips{ margin-top:20px; gap:10px; }
-    .chip{ font-size:12.5px; padding:9px 16px; }
-
-    .track{ padding:14px 18px; }
-    .track-top{ font-size:13px; }
-    .track-top b{ font-size:16px; }
-
-    .board{ padding:34px 34px 28px; border-radius:18px; }
-    .flap{ min-height:120px; padding:34px 24px; }
-    .flap-word{ font-size:clamp(28px, 3.4vw, 40px); }
-
-    .dots{ margin:20px 0 6px; }
-    .dot{ width:13px; height:13px; }
-
-    .hint{ font-size:13px; margin:8px 0 20px; }
-
-    .options{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:12px;
-    }
-    .opt{ font-size:16.5px; padding:16px 18px 16px 44px; }
-
-    .feedback{ font-size:14px; margin-top:16px; }
-
-    .footer-row{ margin-top:24px; }
-    .stat, .reset{ font-size:12.5px; }
+  @media (min-width:700px){
+    .modal-overlay{ align-items:center; padding:20px; }
+    .modal-card{ border-radius:18px; border-bottom:1px solid var(--rule); max-height:80vh; }
   }
-
-  @media (min-width: 1100px){
-    .app{ max-width:900px; }
-    .flap-word{ font-size:clamp(30px, 2.8vw, 44px); }
-    .options{ grid-template-columns: 1fr 1fr 1fr; }
+  .modal-title{ font-family:'Space Mono',monospace; font-weight:700; font-size:17px; color:var(--amber); margin:0 0 4px; }
+  .modal-desc{ font-size:12.5px; color:var(--ink-dim); margin:0 0 16px; }
+  .field-label{
+    font-family:'Space Mono',monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--ink-dim); margin:14px 0 6px;
   }
+  .field-label:first-of-type{ margin-top:0; }
+  .text-input{
+    width:100%; background:var(--flap-bg); border:1px solid var(--rule); color:var(--ink);
+    border-radius:8px; padding:11px 12px; font-size:15px; outline:none;
+  }
+  .text-input:focus{ border-color:var(--amber-dim); }
+  .select-input{
+    width:100%; background:var(--flap-bg); border:1px solid var(--rule); color:var(--ink);
+    border-radius:8px; padding:11px 12px; font-size:14px; outline:none;
+  }
+  .gender-btns{ display:flex; gap:8px; }
+  .gender-btn{
+    flex:1; padding:12px 6px; border-radius:10px; border:1px solid var(--rule); background:var(--flap-bg);
+    color:var(--ink-dim); font-family:'Space Mono',monospace; font-weight:700; font-size:13px; cursor:pointer;
+  }
+  .gender-btn.sel-m.active{ background:rgba(111,168,255,.18); border-color:var(--male); color:var(--male); }
+  .gender-btn.sel-n.active{ background:rgba(123,216,143,.18); border-color:var(--neut); color:var(--neut); }
+  .gender-btn.sel-f.active{ background:rgba(255,147,168,.18); border-color:var(--fem); color:var(--fem); }
+  .type-btns{ display:flex; gap:8px; flex-wrap:wrap; }
+  .type-btn{
+    padding:9px 14px; border-radius:20px; border:1px solid var(--rule); background:var(--flap-bg);
+    color:var(--ink-dim); font-family:'Space Mono',monospace; font-size:12px; cursor:pointer;
+  }
+  .type-btn.active{ background:rgba(234,176,74,.16); border-color:var(--amber-dim); color:var(--amber); }
+  .modal-actions{ display:flex; gap:10px; margin-top:18px; }
+  .btn-primary{
+    flex:1; background:var(--amber); color:#1b1204; border:none; border-radius:22px; padding:13px;
+    font-family:'Space Mono',monospace; font-weight:700; font-size:13px; cursor:pointer;
+  }
+  .btn-secondary{
+    flex:1; background:none; border:1px solid var(--rule); color:var(--ink-dim); border-radius:22px; padding:13px;
+    font-family:'Space Mono',monospace; font-weight:700; font-size:13px; cursor:pointer;
+  }
+  .btn-danger{ background:rgba(209,73,91,.15); border:1px solid var(--red); color:var(--red); }
+  .modal-close{ position:absolute; top:14px; right:16px; background:none; border:none; color:var(--ink-dim); font-size:20px; cursor:pointer; line-height:1; }
+
+  .manage-toolbar{ display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
+  .filter-row{ display:flex; gap:7px; flex-wrap:wrap; }
+  .filter-chip{
+    font-family:'Space Mono',monospace; font-size:10.5px; padding:6px 10px; border-radius:16px;
+    border:1px solid var(--rule); background:var(--flap-bg); color:var(--ink-dim); cursor:pointer;
+  }
+  .filter-chip.active{ background:rgba(234,176,74,.16); border-color:var(--amber-dim); color:var(--amber); }
+  .word-row{ display:flex; align-items:center; gap:10px; padding:10px 8px; border-bottom:1px solid var(--rule); }
+  .word-row:last-child{ border-bottom:none; }
+  .word-status-dot{ width:9px; height:9px; border-radius:50%; flex:0 0 auto; }
+  .word-status-dot.learned{ background:var(--green); }
+  .word-status-dot.half{ background:var(--amber); }
+  .word-status-dot.new{ background:var(--rule); border:1px solid var(--ink-dim); }
+  .word-main{ flex:1; min-width:0; }
+  .word-de{ font-family:'Space Mono',monospace; font-size:13.5px; font-weight:700; }
+  .word-ru{ font-size:11.5px; color:var(--ink-dim); }
+  .word-tag{ font-family:'Space Mono',monospace; font-size:9px; color:var(--ink-dim); text-transform:uppercase; }
+  .word-actions{ display:flex; gap:6px; flex:0 0 auto; }
+  .icon-btn{ background:none; border:1px solid var(--rule); color:var(--ink-dim); border-radius:8px; padding:6px 8px; cursor:pointer; font-size:13px; }
+  .icon-btn.danger{ color:var(--red); border-color:var(--red); }
+  .empty-note{ text-align:center; color:var(--ink-dim); font-size:12.5px; padding:20px 0; }
+
+  .lang-grid, .theme-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:6px; }
+  .pick-card{ border:1px solid var(--rule); background:var(--flap-bg); border-radius:12px; padding:14px 10px; text-align:center; cursor:pointer; color:var(--ink); }
+  .pick-card.sel{ border-color:var(--amber); background:rgba(234,176,74,.12); }
+  .pick-card .flag{ font-size:22px; display:block; margin-bottom:4px; }
+  .theme-swatch{ width:100%; height:34px; border-radius:8px; margin-bottom:6px; border:1px solid var(--rule); }
+  .support-links{ display:flex; flex-direction:column; gap:10px; margin:16px 0; }
+  .support-link{
+    display:flex; align-items:center; gap:12px; padding:13px 14px; border-radius:12px;
+    border:1px solid var(--rule); background:var(--flap-bg); color:var(--ink); text-decoration:none;
+  }
+  .support-link svg{ flex:0 0 auto; }
+  .support-link .stxt b{ display:block; font-size:13.5px; }
+  .support-link .stxt span{ font-size:11px; color:var(--ink-dim); }
+
+  input[type=file]{ display:none; }
 </style>
 </head>
 <body>
-<div class="app">
+
+<!-- ONBOARDING: language + theme -->
+<div class="modal-overlay" id="onboardLangModal">
+  <div class="modal-card">
+    <div class="modal-title" id="obLangTitle">Choose your language</div>
+    <div class="modal-desc" id="obLangDesc">Interface language / translations from German</div>
+    <div class="lang-grid" id="langGrid"></div>
+    <div class="field-label" id="obThemeLabel">Theme</div>
+    <div class="theme-grid" id="themeGrid"></div>
+    <div class="modal-actions">
+      <button class="btn-primary" id="langNextBtn">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ONBOARDING: support the developer -->
+<div class="modal-overlay" id="onboardSupportModal">
+  <div class="modal-card">
+    <div class="modal-title" id="obSupportTitle">Support the developer</div>
+    <div class="modal-desc" id="obSupportDesc">This app is free. If you like it, a follow means a lot.</div>
+    <div class="support-links">
+      <a class="support-link" href="https://www.linkedin.com/in/alex-wiese" target="_blank" rel="noopener">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="#0A66C2"><rect width="24" height="24" rx="5"/><path fill="#fff" d="M7.2 9.4H4.4V19H7.2V9.4ZM5.8 8.2A1.6 1.6 0 1 0 5.8 5a1.6 1.6 0 0 0 0 3.2ZM19.6 19h-2.8v-5.1c0-1.2-.4-2-1.5-2-.8 0-1.3.6-1.5 1.1-.1.2-.1.5-.1.7V19H10.9s0-8.9 0-9.6h2.8v1.4c.4-.6 1-1.5 2.6-1.5 1.9 0 3.3 1.2 3.3 3.9V19Z"/></svg>
+        <span class="stxt"><b id="obLinkedinLabel">Connect on LinkedIn</b><span>linkedin.com/in/alex-wiese</span></span>
+      </a>
+      <a class="support-link" href="https://github.com/drofji" target="_blank" rel="noopener">
+        <svg width="30" height="30" viewBox="0 0 24 24"><rect width="24" height="24" rx="5" fill="#161B22"/><path fill="#fff" d="M12 4.2c-4.3 0-7.8 3.5-7.8 7.8 0 3.4 2.2 6.4 5.3 7.4.4.1.5-.2.5-.4v-1.5c-2.2.5-2.6-1-2.6-1-.4-.9-.9-1.1-.9-1.1-.7-.5.1-.5.1-.5.8.1 1.2.8 1.2.8.7 1.2 1.9.9 2.3.7.1-.5.3-.9.5-1.1-1.8-.2-3.6-.9-3.6-3.9 0-.9.3-1.6.8-2.1-.1-.2-.4-1 .1-2.1 0 0 .7-.2 2.2.8a7.6 7.6 0 0 1 4 0c1.5-1 2.2-.8 2.2-.8.4 1.1.2 1.9.1 2.1.5.5.8 1.2.8 2.1 0 3-1.8 3.7-3.6 3.9.3.3.6.8.6 1.6v2.4c0 .2.1.5.6.4 3.1-1 5.3-4 5.3-7.4 0-4.3-3.5-7.8-7.9-7.8Z"/></svg>
+        <span class="stxt"><b id="obGithubLabel">Follow on GitHub</b><span>github.com/drofji</span></span>
+      </a>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary" id="supportDoneBtn">Start learning →</button>
+    </div>
+  </div>
+</div>
+
+<div class="app" id="appRoot">
   <header>
     <div class="eyebrow">Wortschatz · Express</div>
     <h1>BAHNHOF DER WÖRTER</h1>
-    <div class="sub">Выбирай немецкое слово или артикль по подсказке — 2 верных ответа подряд, и карточка «уезжает» из колоды</div>
+    <div class="sub" id="subText">Выбирай немецкое слово или артикль по подсказке — 2 верных ответа подряд, и карточка «уезжает» из колоды</div>
   </header>
+
+  <div class="toolbar">
+    <button class="tool-btn" id="manageBtn">📋 <span id="btnManageLabel">Слова</span></button>
+    <button class="tool-btn" id="addWordBtn">➕ <span id="btnAddWordLabel">Слово</span></button>
+    <button class="tool-btn" id="exportBtn">⬆️ <span id="btnExportLabel">Экспорт</span></button>
+    <button class="tool-btn" id="importBtn">⬇️ <span id="btnImportLabel">Импорт</span></button>
+    <button class="tool-btn" id="settingsBtn">⚙️</button>
+  </div>
+  <input type="file" id="importFile" accept=".csv,text/csv">
+
+  <div class="deck-row" id="deckRow"></div>
 
   <div class="stats-panel" id="statsPanel">
     <div class="stats-block">
-      <div class="stats-label">Сегодня</div>
+      <div class="stats-label" id="statsTodayLabel">Сегодня</div>
       <div class="stats-value" id="todayShown">0</div>
       <div class="stats-sub"><span class="ok-text" id="todayCorrect">0 ✓</span> · <span class="bad-text" id="todayWrong">0 ✗</span></div>
     </div>
     <div class="stats-block">
-      <div class="stats-label">Всего</div>
+      <div class="stats-label" id="statsAllLabel">Всего</div>
       <div class="stats-value" id="allTimeShown">0</div>
       <div class="stats-sub" id="allTimeLearned">0 / 0 выучено</div>
     </div>
@@ -424,7 +370,7 @@
 
   <div class="track">
     <div class="track-top">
-      <span>ВЫУЧЕНО В ПОДБОРКЕ</span>
+      <span id="learnedInSelLabel">ВЫУЧЕНО В ПОДБОРКЕ</span>
       <span><b id="learnedCount">0</b> / <span id="totalCount">0</span></span>
     </div>
     <div class="bar"><div class="bar-fill" id="barFill"></div></div>
@@ -463,7 +409,7 @@
 
   <div id="doneArea" style="display:none;" class="done">
     <h2>ALLE AN BORD 🚆</h2>
-    <p>Вы выучили все слова в этой колоде.</p>
+    <p id="doneText">Вы выучили все слова в этой подборке.</p>
     <button id="restartBtn">Начать заново</button>
   </div>
 
@@ -474,9 +420,215 @@
   <div class="storage-note" id="storageNote"></div>
 </div>
 
+<!-- MANAGE / WORD LIST MODAL -->
+<div class="modal-overlay" id="manageModal">
+  <div class="modal-card">
+    <button class="modal-close" data-close="manageModal">×</button>
+    <div class="modal-title" id="manageTitle">Слова</div>
+    <div class="manage-toolbar">
+      <input class="text-input" id="searchInput" placeholder="Поиск слова или перевода…">
+      <div class="filter-row" id="typeFilterRow"></div>
+      <div class="filter-row" id="statusFilterRow"></div>
+    </div>
+    <div id="wordList"></div>
+  </div>
+</div>
+
+<!-- ADD WORD MODAL -->
+<div class="modal-overlay" id="addWordModal">
+  <div class="modal-card">
+    <button class="modal-close" data-close="addWordModal">×</button>
+    <div class="modal-title" id="addWordTitle">Новое слово</div>
+    <div class="modal-desc" id="addWordDesc">Добавь слово в текущий раздел</div>
+    <div class="field-label" id="fieldTypeLabel">Тип</div>
+    <div class="type-btns" id="typeBtns"></div>
+    <div class="field-label" id="fieldGenderLabel" style="display:none;">Род</div>
+    <div class="gender-btns" id="genderBtns" style="display:none;">
+      <button class="gender-btn sel-m" data-g="der">der</button>
+      <button class="gender-btn sel-n" data-g="das">das</button>
+      <button class="gender-btn sel-f" data-g="die">die</button>
+    </div>
+    <div class="field-label" id="fieldWordLabel">Слово (по-немецки)</div>
+    <input class="text-input" id="newWordInput" placeholder="Beispiel">
+    <div class="field-label" id="fieldTrLabel">Перевод</div>
+    <input class="text-input" id="newTrInput" placeholder="пример">
+    <div class="modal-actions">
+      <button class="btn-secondary" data-close="addWordModal" id="cancelAddWord">Отмена</button>
+      <button class="btn-primary" id="saveWordBtn">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- CREATE DECK MODAL -->
+<div class="modal-overlay" id="createDeckModal">
+  <div class="modal-card">
+    <button class="modal-close" data-close="createDeckModal">×</button>
+    <div class="modal-title" id="createDeckTitle">Новый раздел</div>
+    <div class="field-label" id="fieldDeckNameLabel">Название</div>
+    <input class="text-input" id="deckNameInput" placeholder="Мой словарь">
+    <div class="modal-actions">
+      <button class="btn-secondary" data-close="createDeckModal" id="cancelCreateDeck">Отмена</button>
+      <button class="btn-primary" id="saveDeckBtn">Создать</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXPORT MODAL -->
+<div class="modal-overlay" id="exportModal">
+  <div class="modal-card">
+    <button class="modal-close" data-close="exportModal">×</button>
+    <div class="modal-title" id="exportTitle">Экспорт</div>
+    <div class="field-label" id="exportScopeLabel">Что экспортировать</div>
+    <div id="exportDeckList"></div>
+    <div class="field-label" id="exportModeLabel">Содержимое (для своих разделов)</div>
+    <div class="type-btns" id="exportModeBtns">
+      <button class="type-btn active" data-mode="full" id="exportModeFullBtn">Материал + прогресс</button>
+      <button class="type-btn" data-mode="material" id="exportModeMaterialBtn">Только материал</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary" id="doExportBtn">Скачать CSV</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DELETE MODAL -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-card">
+    <div class="modal-title" id="confirmTitle">Удалить слово?</div>
+    <div class="modal-desc" id="confirmDesc">Это действие нельзя отменить.</div>
+    <div class="modal-actions">
+      <button class="btn-secondary" data-close="confirmModal" id="confirmCancelBtn">Отмена</button>
+      <button class="btn-primary btn-danger" id="confirmDeleteBtn">Удалить</button>
+    </div>
+  </div>
+</div>
+
+<!-- IMPORT RESULT MODAL -->
+<div class="modal-overlay" id="importResultModal">
+  <div class="modal-card">
+    <button class="modal-close" data-close="importResultModal">×</button>
+    <div class="modal-title" id="importResultTitle">Импорт завершён</div>
+    <div class="modal-desc" id="importResultText"></div>
+    <div class="modal-actions">
+      <button class="btn-primary" data-close="importResultModal">OK</button>
+    </div>
+  </div>
+</div>
+
 <script>
 (function(){
   "use strict";
+
+  // ---------------- i18n ----------------
+  const STRINGS = {
+    ru: {
+      appSub: "Выбирай немецкое слово или артикль по подсказке — 2 верных ответа подряд, и карточка «уезжает» из колоды",
+      manageBtn:"Слова", addWordBtn:"Слово", exportBtn:"Экспорт", importBtn:"Импорт",
+      today:"Сегодня", allTime:"Всего", learnedSuffix:"выучено", learnedInSel:"ВЫУЧЕНО В ПОДБОРКЕ",
+      newBadge:"Новая", seenBadge:"Повтор", deckLabel:"В КОЛОДЕ",
+      hintChoice:"нужно 2 верных ответа подряд", hintOrder:"нажимай слова по порядку, чтобы собрать предложение",
+      doneTitle:"ALLE AN BORD 🚆", doneText:"Вы выучили все слова в этой подборке.", restart:"Начать заново",
+      resetProgress:"Сбросить прогресс", tip:"der/das/die — учи артикль вместе со словом",
+      manageTitle:"Слова", search:"Поиск слова или перевода…",
+      filterAll:"Все", filterLearned:"Выучено", filterHalf:"Наполовину", filterNew:"Не пройдено",
+      typeNoun:"Существительные", typeVerb:"Глаголы", typeOther:"Другое", typeCase:"Артикль: падежи",
+      typeVerbprep:"Глагол+предлог", typeFrage:"Вопрос. слова", typePrep:"Предлоги", typeOrder:"Порядок слов",
+      colEdit:"✎", colDelete:"🗑", confirmDeleteTitle:"Удалить слово?", confirmDeleteText:"Это действие нельзя отменить.",
+      cancel:"Отмена", delete:"Удалить", save:"Сохранить", create:"Создать",
+      addWordTitle:"Новое слово", addWordDesc:"Добавь слово в текущий раздел", fieldType:"Тип", fieldGender:"Род",
+      fieldWord:"Слово (по-немецки)", fieldTr:"Перевод",
+      createDeckTitle:"Новый раздел", fieldDeckName:"Название",
+      exportTitle:"Экспорт", exportScope:"Что экспортировать", exportMode:"Содержимое (для своих разделов)",
+      exportFull:"Материал + прогресс", exportMaterial:"Только материал", downloadCsv:"Скачать CSV",
+      importResultTitle:"Импорт завершён", basicName:"Базовый",
+      basicExportNote:"Базовый — только прогресс (материал встроен в приложение)",
+      empty:"Здесь пока пусто", newDeckPill:"+ Раздел", settingsTitle:"Настройки",
+      storageSession:"Прогресс сохраняется только в этой сессии",
+      storageLocal:"Прогресс сохраняется в этом браузере на устройстве",
+      correctFull:"Верно! Слово выучено ✓", correctN:"Верно! ",
+      wrongPrefix:"Неверно. Правильно: ",
+      genderQCorrect:"Правильно: ",
+      obLangTitle:"Выбери язык", obLangDesc:"Язык интерфейса и переводов с немецкого",
+      obThemeLabel:"Тема оформления", next:"Далее →",
+      obSupportTitle:"Поддержать разработчика",
+      obSupportDesc:"Приложение бесплатное. Если понравилось — буду рад коннекту и подписке.",
+      linkedinLabel:"Добавиться в LinkedIn", githubLabel:"Подписаться на GitHub",
+      startLearning:"Начать обучение →",
+      composePrompt:"🧩 Собери предложение", translationPrefix:"перевод: ",
+    },
+    uk: {
+      appSub: "Обирай німецьке слово чи артикль за підказкою — 2 правильні відповіді підряд, і картка «їде» з колоди",
+      manageBtn:"Слова", addWordBtn:"Слово", exportBtn:"Експорт", importBtn:"Імпорт",
+      today:"Сьогодні", allTime:"Всього", learnedSuffix:"вивчено", learnedInSel:"ВИВЧЕНО В ПІДБІРЦІ",
+      newBadge:"Нова", seenBadge:"Повтор", deckLabel:"У КОЛОДІ",
+      hintChoice:"потрібні 2 правильні відповіді підряд", hintOrder:"тисни слова по порядку, щоб скласти речення",
+      doneTitle:"ALLE AN BORD 🚆", doneText:"Ви вивчили всі слова в цій підбірці.", restart:"Почати заново",
+      resetProgress:"Скинути прогрес", tip:"der/das/die — вчи артикль разом зі словом",
+      manageTitle:"Слова", search:"Пошук слова або перекладу…",
+      filterAll:"Всі", filterLearned:"Вивчено", filterHalf:"Наполовину", filterNew:"Не пройдено",
+      typeNoun:"Іменники", typeVerb:"Дієслова", typeOther:"Інше", typeCase:"Артикль: відмінки",
+      typeVerbprep:"Дієслово+прийменник", typeFrage:"Питальні слова", typePrep:"Прийменники", typeOrder:"Порядок слів",
+      colEdit:"✎", colDelete:"🗑", confirmDeleteTitle:"Видалити слово?", confirmDeleteText:"Цю дію не можна скасувати.",
+      cancel:"Скасувати", delete:"Видалити", save:"Зберегти", create:"Створити",
+      addWordTitle:"Нове слово", addWordDesc:"Додай слово в поточний розділ", fieldType:"Тип", fieldGender:"Рід",
+      fieldWord:"Слово (німецькою)", fieldTr:"Переклад",
+      createDeckTitle:"Новий розділ", fieldDeckName:"Назва",
+      exportTitle:"Експорт", exportScope:"Що експортувати", exportMode:"Вміст (для власних розділів)",
+      exportFull:"Матеріал + прогрес", exportMaterial:"Тільки матеріал", downloadCsv:"Завантажити CSV",
+      importResultTitle:"Імпорт завершено", basicName:"Базовий",
+      basicExportNote:"Базовий — лише прогрес (матеріал вбудований у застосунок)",
+      empty:"Тут поки що пусто", newDeckPill:"+ Розділ", settingsTitle:"Налаштування",
+      storageSession:"Прогрес зберігається лише в цій сесії",
+      storageLocal:"Прогрес зберігається в цьому браузері на пристрої",
+      correctFull:"Правильно! Слово вивчено ✓", correctN:"Правильно! ",
+      wrongPrefix:"Неправильно. Правильна відповідь: ",
+      genderQCorrect:"Правильно: ",
+      obLangTitle:"Обери мову", obLangDesc:"Мова інтерфейсу та перекладів з німецької",
+      obThemeLabel:"Тема оформлення", next:"Далі →",
+      obSupportTitle:"Підтримати розробника",
+      obSupportDesc:"Застосунок безкоштовний. Якщо сподобався — буду радий конекту й підписці.",
+      linkedinLabel:"Додати в LinkedIn", githubLabel:"Підписатись на GitHub",
+      startLearning:"Почати навчання →",
+      composePrompt:"🧩 Склади речення", translationPrefix:"переклад: ",
+    },
+    en: {
+      appSub: "Pick the German word or article by the hint — 2 correct answers in a row and the card leaves the deck",
+      manageBtn:"Words", addWordBtn:"Word", exportBtn:"Export", importBtn:"Import",
+      today:"Today", allTime:"All-time", learnedSuffix:"learned", learnedInSel:"LEARNED IN SELECTION",
+      newBadge:"New", seenBadge:"Repeat", deckLabel:"IN DECK",
+      hintChoice:"need 2 correct answers in a row", hintOrder:"tap the words in order to build the sentence",
+      doneTitle:"ALLE AN BORD 🚆", doneText:"You've learned every word in this selection.", restart:"Start over",
+      resetProgress:"Reset progress", tip:"der/das/die — learn the article together with the word",
+      manageTitle:"Words", search:"Search word or translation…",
+      filterAll:"All", filterLearned:"Learned", filterHalf:"Halfway", filterNew:"Not started",
+      typeNoun:"Nouns", typeVerb:"Verbs", typeOther:"Other", typeCase:"Article: cases",
+      typeVerbprep:"Verb+preposition", typeFrage:"Question words", typePrep:"Prepositions", typeOrder:"Word order",
+      colEdit:"✎", colDelete:"🗑", confirmDeleteTitle:"Delete word?", confirmDeleteText:"This can't be undone.",
+      cancel:"Cancel", delete:"Delete", save:"Save", create:"Create",
+      addWordTitle:"New word", addWordDesc:"Add a word to the current section", fieldType:"Type", fieldGender:"Gender",
+      fieldWord:"Word (German)", fieldTr:"Translation",
+      createDeckTitle:"New section", fieldDeckName:"Name",
+      exportTitle:"Export", exportScope:"What to export", exportMode:"Content (for your own sections)",
+      exportFull:"Material + progress", exportMaterial:"Material only", downloadCsv:"Download CSV",
+      importResultTitle:"Import complete", basicName:"Basic",
+      basicExportNote:"Basic — progress only (material is built into the app)",
+      empty:"Nothing here yet", newDeckPill:"+ Section", settingsTitle:"Settings",
+      storageSession:"Progress is only saved for this session",
+      storageLocal:"Progress is saved in this browser on this device",
+      correctFull:"Correct! Word learned ✓", correctN:"Correct! ",
+      wrongPrefix:"Incorrect. Correct answer: ",
+      genderQCorrect:"Correct: ",
+      obLangTitle:"Choose your language", obLangDesc:"Interface language and translations from German",
+      obThemeLabel:"Theme", next:"Next →",
+      obSupportTitle:"Support the developer",
+      obSupportDesc:"This app is free. If you like it, a follow means a lot.",
+      linkedinLabel:"Connect on LinkedIn", githubLabel:"Follow on GitHub",
+      startLearning:"Start learning →",
+      composePrompt:"🧩 Build the sentence", translationPrefix:"translation: ",
+    },
+  };
+  let uiLang = "ru";
+  function t(key){ return (STRINGS[uiLang] && STRINGS[uiLang][key]) || STRINGS.ru[key] || key; }
 
   const RAW_DER = `
 Morgen|Утро
@@ -1044,6 +1196,8 @@ rechnen|mit|Dat.|рассчитывать на
 sich verabreden|mit|Dat.|договариваться о встрече с
 leiden|an|Dat.|страдать (болезнью)`;
 
+
+  // ---------------- parsing helpers ----------------
   function parseBlock(raw, article, cat){
     return raw.split("\n").map(l=>l.trim()).filter(Boolean).map(line=>{
       const [word, ru, caseTag] = line.split("|");
@@ -1063,7 +1217,6 @@ leiden|an|Dat.|страдать (болезнью)`;
     ...parseBlock(RAW_OTHER,"","other"),
   ].map((w,i)=>({...w, id:"w"+i}));
 
-  // Article-by-case declension deck, built from the noun list.
   const GENDER_MAP = { der:'m', das:'n', die:'f' };
   const ARTICLE_TABLE = {
     m: { Nominativ:'der', Akkusativ:'den', Dativ:'dem' },
@@ -1075,11 +1228,7 @@ leiden|an|Dat.|страдать (болезнью)`;
   const caseWords = baseWords
     .filter(w=>w.cat==="noun")
     .map(w=>({
-      id: "case-" + w.id,
-      word: w.word,
-      ru: w.ru,
-      article: "",
-      cat: "case",
+      id: "case-" + w.id, word: w.word, ru: w.ru, article: "", cat: "case",
       gender: GENDER_MAP[w.article],
     }));
 
@@ -1102,246 +1251,198 @@ leiden|an|Dat.|страдать (болезнью)`;
   const orderWords = parseOrderBlock(RAW_ORDER);
   const verbPrepWords = parseVerbPrepBlock(RAW_VERBPREP);
 
-  let ALL = [...baseWords, ...caseWords, ...orderWords, ...verbPrepWords];
+  const BASIC_DECK_ID = "basic";
+  const basicAllWords = [...baseWords, ...caseWords, ...orderWords, ...verbPrepWords]
+    .map(w=>({...w, deckId: BASIC_DECK_ID}));
 
-  function makeQuestion(word){
-    if(word.cat !== "case") return word;
-    const caseName = CASES[Math.floor(Math.random()*CASES.length)];
-    const correctArticle = ARTICLE_TABLE[word.gender][caseName];
-    return { ...word, caseName, correctArticle };
-  }
+  const BASIC_CATEGORIES = [
+    {key:"noun", tKey:"typeNoun"},
+    {key:"case", tKey:"typeCase"},
+    {key:"verb", tKey:"typeVerb"},
+    {key:"verbprep", tKey:"typeVerbprep"},
+    {key:"frage", tKey:"typeFrage"},
+    {key:"prep", tKey:"typePrep"},
+    {key:"other", tKey:"typeOther"},
+    {key:"order", tKey:"typeOrder"},
+  ];
+  // Categories that represent standalone "words" a person can browse/manage
+  // (case/order are derived quiz modes, not separate editable vocabulary items).
+  const LISTABLE_BASIC_CATS = ["noun","verb","verbprep","frage","prep","other"];
 
-  const CATEGORIES = [
-    {key:"noun", label:"Существительные"},
-    {key:"case", label:"Артикль: падежи"},
-    {key:"verb", label:"Глаголы"},
-    {key:"verbprep", label:"Глагол + предлог"},
-    {key:"frage", label:"Вопрос. слова"},
-    {key:"prep", label:"Предлоги"},
-    {key:"other", label:"Прочее"},
-    {key:"order", label:"Порядок слов"},
+  // Custom decks: types kept simple on purpose (no sentences/cases/prepositions —
+  // those need curated grammar data that doesn't make sense for free-form entries).
+  const CUSTOM_TYPES = [
+    {key:"noun", tKey:"typeNoun"},
+    {key:"verb", tKey:"typeVerb"},
+    {key:"other", tKey:"typeOther"},
   ];
 
-  const NEED_STREAK = 2;
-  const TOTAL = ALL.length;
-  let selectedCats = new Set(CATEGORIES.filter(c=>!["case","order","verbprep"].includes(c.key)).map(c=>c.key));
+  // ---------------- multi-deck state ----------------
+  let customDecks = {};   // id -> {id, name}
+  let customWords = {};   // deckId -> [ {id, cat, article, word, ru} ]
+  let currentDeckId = BASIC_DECK_ID;
+  let ALL = basicAllWords;
 
-  let streaks = {};   // id -> current correct streak
-  let learned = {};   // id -> true
-  let shownIds = {};  // id -> true, ever displayed
-  let pendingReview = {}; // id -> renderCount tick at which it becomes pickable again
-  let renderCount = 0;    // total cards displayed this-and-past sessions (used for spacing)
-  let allTimeShown = 0;   // total answers submitted, all time
-  let today = {
-    date: "",
-    shown: 0,
-    correctIds: {},   // id -> true, answered correctly at least once today
-    wrong: 0,
-  };
+  function allDeckIds(){ return [BASIC_DECK_ID, ...Object.keys(customDecks)]; }
+  function deckName(id){ return id === BASIC_DECK_ID ? t("basicName") : (customDecks[id] ? customDecks[id].name : id); }
+
+  function wordsForDeck(id){
+    if(id === BASIC_DECK_ID) return basicAllWords;
+    return (customWords[id] || []).map(w=>({...w, deckId:id}));
+  }
+
+  function categoriesForDeck(id){
+    if(id === BASIC_DECK_ID) return BASIC_CATEGORIES;
+    const present = new Set(wordsForDeck(id).map(w=>w.cat));
+    return CUSTOM_TYPES.filter(c=>present.has(c.key) || true); // always offer all 3 as filters
+  }
+
+  function listableCatsForDeck(id){
+    return id === BASIC_DECK_ID ? LISTABLE_BASIC_CATS : CUSTOM_TYPES.map(c=>c.key);
+  }
+
+  function switchDeck(id){
+    currentDeckId = id;
+    ALL = wordsForDeck(id);
+    selectedCats = new Set(categoriesForDeck(id).map(c=>c.key));
+    currentId = null;
+    renderDeckRow();
+    renderChips();
+    renderQuestion();
+  }
+
+  // ---------------- practice/progress state (ids are unique across all decks) ----------------
+  const NEED_STREAK = 2;
+  let selectedCats = new Set(BASIC_CATEGORIES.map(c=>c.key));
+
+  let streaks = {};
+  let learned = {};
+  let shownIds = {};
+  let pendingReview = {};
+  let renderCount = 0;
+  let allTimeShown = 0;
+  let today = { date:"", shown:0, correctIds:{}, wrong:0 };
   let currentId = null;
   let currentQuestion = null;
   let currentOptions = [];
   let locked = false;
+  let theme = "dark";
+  let onboarded = false;
 
   function todayKey(){
     const d = new Date();
     return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
   }
-
   function ensureTodayFresh(){
     const key = todayKey();
-    if(today.date !== key){
-      today = { date: key, shown: 0, correctIds: {}, wrong: 0 };
-    }
+    if(today.date !== key){ today = { date:key, shown:0, correctIds:{}, wrong:0 }; }
   }
 
-  const els = {
-    learnedCount: document.getElementById('learnedCount'),
-    totalCount: document.getElementById('totalCount'),
-    barFill: document.getElementById('barFill'),
-    ruWord: document.getElementById('ruWord'),
-    dots: document.getElementById('dots'),
-    options: document.getElementById('options'),
-    feedback: document.getElementById('feedback'),
-    deckLabel: document.getElementById('deckLabel'),
-    quizArea: document.getElementById('quizArea'),
-    doneArea: document.getElementById('doneArea'),
-    resetBtn: document.getElementById('resetBtn'),
-    restartBtn: document.getElementById('restartBtn'),
-    chips: document.getElementById('chips'),
-    storageNote: document.getElementById('storageNote'),
-    board: document.getElementById('board'),
-    genderLabel: document.getElementById('genderLabel'),
-    hintText: document.getElementById('hintText'),
-    flapSub: document.getElementById('flapSub'),
-    caseHelper: document.getElementById('caseHelper'),
-    orderPanel: document.getElementById('orderPanel'),
-    buildStrip: document.getElementById('buildStrip'),
-    tokenPool: document.getElementById('tokenPool'),
-    undoBtn: document.getElementById('undoBtn'),
-    checkBtn: document.getElementById('checkBtn'),
-    ruHint: document.getElementById('ruHint'),
-    orderNextWrap: document.getElementById('orderNextWrap'),
-    orderNextBtn: document.getElementById('orderNextBtn'),
-    seenBadge: document.getElementById('seenBadge'),
-    todayShown: document.getElementById('todayShown'),
-    todayCorrect: document.getElementById('todayCorrect'),
-    todayWrong: document.getElementById('todayWrong'),
-    allTimeShown: document.getElementById('allTimeShown'),
-    allTimeLearned: document.getElementById('allTimeLearned'),
-  };
-
-  els.totalCount.textContent = TOTAL;
-
-  (function buildCaseHelper(){
-    const rows = [
-      {label:'der (m)', g:'m', cls:'gender-m'},
-      {label:'das (n)', g:'n', cls:'gender-n'},
-      {label:'die (f)', g:'f', cls:'gender-f'},
-    ];
-    let html = '<table class="case-table"><thead><tr><th></th><th>Nominativ</th><th>Akkusativ</th><th>Dativ</th></tr></thead><tbody>';
-    rows.forEach(r=>{
-      const t = ARTICLE_TABLE[r.g];
-      html += `<tr><td class="${r.cls}">${r.label}</td><td>${t.Nominativ}</td><td>${t.Akkusativ}</td><td>${t.Dativ}</td></tr>`;
-    });
-    html += '</tbody></table>';
-    els.caseHelper.innerHTML = html;
-  })();
-
-  const STORE_KEY = "dw-progress-v4";
+  // ---------------- storage (cloud -> localStorage -> session, with v4 migration) ----------------
+  const STORE_KEY = "dw-progress-v5";
+  const OLD_STORE_KEY = "dw-progress-v4";
   const PING_KEY = STORE_KEY + "-ping";
-  let storageMode = "session"; // 'cloud' | 'local' | 'session'
+  let storageMode = "session";
 
   function hasStorageApi(){
     return typeof window !== "undefined" && window.storage
-      && typeof window.storage.get === "function"
-      && typeof window.storage.set === "function";
+      && typeof window.storage.get === "function" && typeof window.storage.set === "function";
   }
-
   function hasLocalStorage(){
     try{
       if(typeof localStorage === "undefined") return false;
       const k = "__dw_test__";
-      localStorage.setItem(k, "1");
-      localStorage.removeItem(k);
+      localStorage.setItem(k,"1"); localStorage.removeItem(k);
       return true;
     }catch(e){ return false; }
   }
-
   function showStorageNotice(){
     if(!els.storageNote) return;
-    if(storageMode === "local"){
-      els.storageNote.textContent = "Прогресс сохраняется в этом браузере на устройстве";
-    } else if(storageMode === "session"){
-      els.storageNote.textContent = "Прогресс сохраняется только в этой сессии";
-    } else {
-      els.storageNote.textContent = "";
-    }
+    if(storageMode === "local"){ els.storageNote.textContent = t("storageLocal"); }
+    else if(storageMode === "session"){ els.storageNote.textContent = t("storageSession"); }
+    else { els.storageNote.textContent = ""; }
   }
-
-  // Cloud storage (window.storage) is tried first — it works inside the claude.ai
-  // artifact runtime and syncs across devices. If it's unavailable or errors out
-  // (e.g. the file was opened directly in a phone browser, outside that runtime),
-  // we fall back to this browser's localStorage, which still persists on this
-  // device between visits. Only if neither works do we fall back to session-only.
   async function detectStorageMode(){
     if(hasStorageApi()){
       try{
         const res = await window.storage.set(PING_KEY, JSON.stringify({t:Date.now()}), false);
         if(res) return "cloud";
-      }catch(e){ /* fall through to local */ }
+      }catch(e){ /* fall through */ }
     }
     if(hasLocalStorage()) return "local";
     return "session";
   }
-
   function buildPayload(){
     return JSON.stringify({
-      streaks, learned, cats:[...selectedCats],
-      shownIds, pendingReview, renderCount, allTimeShown, today,
+      version:5, streaks, learned, shownIds, pendingReview, renderCount, allTimeShown, today,
+      selectedCats:[...selectedCats], currentDeckId, customDecks, customWords, uiLang, theme, onboarded,
     });
   }
-
   async function saveProgress(){
     const payload = buildPayload();
-
     if(storageMode === "cloud"){
       try{
         const res = await window.storage.set(STORE_KEY, payload, false);
-        if(res){ return; }
+        if(res) return;
       }catch(e){ /* degrade below */ }
       storageMode = hasLocalStorage() ? "local" : "session";
     }
-
     if(storageMode === "local"){
-      try{
-        localStorage.setItem(STORE_KEY, payload);
-        showStorageNotice();
-        return;
-      }catch(e){
-        storageMode = "session";
-      }
+      try{ localStorage.setItem(STORE_KEY, payload); showStorageNotice(); return; }
+      catch(e){ storageMode = "session"; }
     }
-
     showStorageNotice();
   }
 
-  function applyProgressData(raw){
-    if(!raw) return;
-    try{
-      const data = JSON.parse(raw);
-      streaks = data.streaks || {};
-      learned = data.learned || {};
-      shownIds = data.shownIds || {};
-      pendingReview = data.pendingReview || {};
-      renderCount = data.renderCount || 0;
-      allTimeShown = data.allTimeShown || 0;
-      today = data.today || { date:"", shown:0, correctIds:{}, wrong:0 };
-      if(Array.isArray(data.cats) && data.cats.length){
-        selectedCats = new Set(data.cats);
-      }
-    }catch(e){ /* corrupted or empty — start fresh */ }
+  function applyProgressData(data, isLegacy){
+    if(!data) return;
+    streaks = data.streaks || {};
+    learned = data.learned || {};
+    shownIds = data.shownIds || {};
+    pendingReview = data.pendingReview || {};
+    renderCount = data.renderCount || 0;
+    allTimeShown = data.allTimeShown || 0;
+    today = data.today || { date:"", shown:0, correctIds:{}, wrong:0 };
+    if(!isLegacy){
+      if(Array.isArray(data.selectedCats) && data.selectedCats.length){ selectedCats = new Set(data.selectedCats); }
+      if(data.currentDeckId) currentDeckId = data.currentDeckId;
+      customDecks = data.customDecks || {};
+      customWords = data.customWords || {};
+      if(data.uiLang) uiLang = data.uiLang;
+      if(data.theme) theme = data.theme;
+      onboarded = !!data.onboarded;
+    }
+  }
+
+  async function readKey(key){
+    if(storageMode === "cloud"){
+      try{ const res = await window.storage.get(key, false); return (res && res.value) ? res.value : null; }
+      catch(e){ return null; }
+    }
+    if(storageMode === "local"){
+      try{ return localStorage.getItem(key); }catch(e){ return null; }
+    }
+    return null;
   }
 
   async function loadProgress(){
     storageMode = await detectStorageMode();
-
-    if(storageMode === "cloud"){
-      try{
-        const res = await window.storage.get(STORE_KEY, false);
-        if(res && res.value) applyProgressData(res.value);
-      }catch(e){
-        // No saved progress yet under this key — normal on first run.
+    let raw = await readKey(STORE_KEY);
+    if(raw){
+      try{ applyProgressData(JSON.parse(raw), false); }catch(e){ /* corrupted, start fresh */ }
+    } else {
+      // No v5 data yet — migrate an existing v4 user's progress so nothing is lost.
+      const legacyRaw = await readKey(OLD_STORE_KEY);
+      if(legacyRaw){
+        try{ applyProgressData(JSON.parse(legacyRaw), true); await saveProgress(); }catch(e){ /* ignore */ }
       }
-    } else if(storageMode === "local"){
-      try{
-        applyProgressData(localStorage.getItem(STORE_KEY));
-      }catch(e){ /* ignore */ }
     }
-
     showStorageNotice();
     ensureTodayFresh();
-  }
-
-  function renderChips(){
-    els.chips.innerHTML = "";
-    CATEGORIES.forEach(c=>{
-      const chip = document.createElement('div');
-      chip.className = 'chip' + (selectedCats.has(c.key) ? ' active' : '');
-      chip.textContent = c.label;
-      chip.addEventListener('click', async ()=>{
-        if(selectedCats.has(c.key)){
-          if(selectedCats.size === 1) return; // keep at least one category active
-          selectedCats.delete(c.key);
-        } else {
-          selectedCats.add(c.key);
-        }
-        renderChips();
-        await saveProgress();
-        renderQuestion();
-      });
-      els.chips.appendChild(chip);
-    });
+    ALL = wordsForDeck(currentDeckId);
+    if(!selectedCats || selectedCats.size === 0){
+      selectedCats = new Set(categoriesForDeck(currentDeckId).map(c=>c.key));
+    }
   }
 
   function activePool(){
@@ -1392,6 +1493,90 @@ leiden|an|Dat.|страдать (болезнью)`;
   }
 
   const ARTICLE_GENDER_CLASS = { der:'gender-m', das:'gender-n', die:'gender-f' };
+
+  const els = {
+    learnedCount: document.getElementById('learnedCount'),
+    totalCount: document.getElementById('totalCount'),
+    barFill: document.getElementById('barFill'),
+    ruWord: document.getElementById('ruWord'),
+    dots: document.getElementById('dots'),
+    options: document.getElementById('options'),
+    feedback: document.getElementById('feedback'),
+    deckLabel: document.getElementById('deckLabel'),
+    quizArea: document.getElementById('quizArea'),
+    doneArea: document.getElementById('doneArea'),
+    resetBtn: document.getElementById('resetBtn'),
+    restartBtn: document.getElementById('restartBtn'),
+    chips: document.getElementById('chips'),
+    storageNote: document.getElementById('storageNote'),
+    board: document.getElementById('board'),
+    genderLabel: document.getElementById('genderLabel'),
+    hintText: document.getElementById('hintText'),
+    flapSub: document.getElementById('flapSub'),
+    caseHelper: document.getElementById('caseHelper'),
+    orderPanel: document.getElementById('orderPanel'),
+    buildStrip: document.getElementById('buildStrip'),
+    tokenPool: document.getElementById('tokenPool'),
+    undoBtn: document.getElementById('undoBtn'),
+    checkBtn: document.getElementById('checkBtn'),
+    ruHint: document.getElementById('ruHint'),
+    orderNextWrap: document.getElementById('orderNextWrap'),
+    orderNextBtn: document.getElementById('orderNextBtn'),
+    seenBadge: document.getElementById('seenBadge'),
+    todayShown: document.getElementById('todayShown'),
+    todayCorrect: document.getElementById('todayCorrect'),
+    todayWrong: document.getElementById('todayWrong'),
+    allTimeShown: document.getElementById('allTimeShown'),
+    allTimeLearned: document.getElementById('allTimeLearned'),
+    deckRow: document.getElementById('deckRow'),
+    manageBtn: document.getElementById('manageBtn'),
+    addWordBtn: document.getElementById('addWordBtn'),
+    exportBtn: document.getElementById('exportBtn'),
+    importBtn: document.getElementById('importBtn'),
+    settingsBtn: document.getElementById('settingsBtn'),
+    importFile: document.getElementById('importFile'),
+    searchInput: document.getElementById('searchInput'),
+    typeFilterRow: document.getElementById('typeFilterRow'),
+    statusFilterRow: document.getElementById('statusFilterRow'),
+    wordList: document.getElementById('wordList'),
+    typeBtns: document.getElementById('typeBtns'),
+    genderBtns: document.getElementById('genderBtns'),
+    fieldGenderLabel: document.getElementById('fieldGenderLabel'),
+    newWordInput: document.getElementById('newWordInput'),
+    newTrInput: document.getElementById('newTrInput'),
+    saveWordBtn: document.getElementById('saveWordBtn'),
+    deckNameInput: document.getElementById('deckNameInput'),
+    saveDeckBtn: document.getElementById('saveDeckBtn'),
+    exportDeckList: document.getElementById('exportDeckList'),
+    exportModeBtns: document.getElementById('exportModeBtns'),
+    doExportBtn: document.getElementById('doExportBtn'),
+    confirmDeleteBtn: document.getElementById('confirmDeleteBtn'),
+    confirmDesc: document.getElementById('confirmDesc'),
+    importResultText: document.getElementById('importResultText'),
+    langGrid: document.getElementById('langGrid'),
+    themeGrid: document.getElementById('themeGrid'),
+    langNextBtn: document.getElementById('langNextBtn'),
+    supportDoneBtn: document.getElementById('supportDoneBtn'),
+    onboardLangModal: document.getElementById('onboardLangModal'),
+    onboardSupportModal: document.getElementById('onboardSupportModal'),
+  };
+
+  els.totalCount.textContent = 0;
+
+  (function buildCaseHelper(){
+    const rows = [
+      {label:'der (m)', g:'m', cls:'gender-m'},
+      {label:'das (n)', g:'n', cls:'gender-n'},
+      {label:'die (f)', g:'f', cls:'gender-f'},
+    ];
+    let html = '<table class="case-table"><thead><tr><th></th><th>Nominativ</th><th>Akkusativ</th><th>Dativ</th></tr></thead><tbody>';
+    rows.forEach(r=>{
+      const tt = ARTICLE_TABLE[r.g];
+      html += `<tr><td class="${r.cls}">${r.label}</td><td>${tt.Nominativ}</td><td>${tt.Akkusativ}</td><td>${tt.Dativ}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    els.caseHelper.innerHTML = html;
+  })();
 
   function plainLabelOf(w){
     let plain = w.article ? `${w.article} ${w.word}` : w.word;
@@ -1461,15 +1646,16 @@ leiden|an|Dat.|страдать (болезнью)`;
     els.learnedCount.textContent = learnedCount;
     els.totalCount.textContent = total;
     els.barFill.style.width = (total ? (learnedCount/total*100) : 0).toFixed(1)+"%";
-    els.deckLabel.textContent = "В КОЛОДЕ: " + activePool().length;
+    els.deckLabel.textContent = t("deckLabel") + ": " + activePool().length;
 
     ensureTodayFresh();
     els.todayShown.textContent = today.shown;
     els.todayCorrect.textContent = Object.keys(today.correctIds).length + " ✓";
     els.todayWrong.textContent = today.wrong + " ✗";
     els.allTimeShown.textContent = allTimeShown;
+    const grandTotal = allDeckIds().reduce((s,id)=>s+wordsForDeck(id).length,0);
     const allLearned = Object.keys(learned).length;
-    els.allTimeLearned.textContent = allLearned + " / " + ALL.length + " выучено";
+    els.allTimeLearned.textContent = allLearned + " / " + grandTotal + " " + t("learnedSuffix");
   }
 
   function renderQuestion(){
@@ -1483,13 +1669,14 @@ leiden|an|Dat.|страдать (болезнью)`;
     els.doneArea.style.display = "none";
 
     const picked = pickNextWord();
+    if(!picked) return;
     const question = makeQuestion(picked);
     currentId = question.id;
     currentQuestion = question;
     locked = false;
 
     const wasShownBefore = !!shownIds[question.id];
-    els.seenBadge.textContent = wasShownBefore ? "Повтор" : "Новая";
+    els.seenBadge.textContent = wasShownBefore ? t("seenBadge") : t("newBadge");
     els.seenBadge.className = "seen-badge" + (wasShownBefore ? " seen" : "");
     shownIds[question.id] = true;
 
@@ -1505,7 +1692,7 @@ leiden|an|Dat.|страдать (болезнью)`;
       renderOrderQuestion(question);
     } else {
       els.board.dataset.mode = "choice";
-      els.hintText.textContent = "нужно 2 верных ответа подряд";
+      els.hintText.textContent = t("hintChoice");
       renderChoiceQuestion(question);
     }
   }
@@ -1516,13 +1703,13 @@ leiden|an|Dat.|страдать (болезнью)`;
     if(question.cat === "case"){
       els.genderLabel.textContent = question.caseName.toUpperCase();
       els.ruWord.textContent = question.word;
-      els.flapSub.textContent = "перевод: " + question.ru;
+      els.flapSub.textContent = t("translationPrefix") + question.ru;
     } else if(question.cat === "verbprep"){
-      els.genderLabel.textContent = "ГЛАГОЛ + ПРЕДЛОГ";
+      els.genderLabel.textContent = t("typeVerbprep").toUpperCase();
       els.ruWord.textContent = question.verb + " ... ?";
-      els.flapSub.textContent = "перевод: " + question.ru;
+      els.flapSub.textContent = t("translationPrefix") + question.ru;
     } else {
-      els.genderLabel.textContent = "RU → DE";
+      els.genderLabel.textContent = "DE ⇄ " + uiLang.toUpperCase();
       els.ruWord.textContent = question.ru;
       els.flapSub.textContent = "";
     }
@@ -1546,7 +1733,6 @@ leiden|an|Dat.|страдать (болезнью)`;
       today.correctIds[question.id] = true;
     } else {
       today.wrong++;
-      // Hold this card back for 10-15 more cards before it can come up again.
       pendingReview[question.id] = renderCount + 10 + Math.floor(Math.random()*6);
     }
   }
@@ -1567,9 +1753,9 @@ leiden|an|Dat.|страдать (болезнью)`;
       streaks[question.id] = (streaks[question.id]||0) + 1;
       if(streaks[question.id] >= NEED_STREAK){
         learned[question.id] = true;
-        els.feedback.textContent = "Верно! Слово выучено ✓";
+        els.feedback.textContent = t("correctFull");
       } else {
-        els.feedback.textContent = "Верно! " + streaks[question.id] + "/" + NEED_STREAK;
+        els.feedback.textContent = t("correctN") + streaks[question.id] + "/" + NEED_STREAK;
       }
       els.feedback.className = "feedback ok";
     } else {
@@ -1579,13 +1765,13 @@ leiden|an|Dat.|страдать (болезнью)`;
       });
       streaks[question.id] = 0;
       if(question.cat === "case"){
-        els.feedback.textContent = "Неверно. Правильно: " + (correctOpt ? correctOpt.plain : "") +
+        els.feedback.textContent = t("wrongPrefix") + (correctOpt ? correctOpt.plain : "") +
           " " + question.word + " (" + question.caseName + ") — " + question.ru;
       } else if(question.cat === "verbprep"){
-        els.feedback.textContent = "Неверно. Правильно: " + question.verb + " " +
+        els.feedback.textContent = t("wrongPrefix") + question.verb + " " +
           (correctOpt ? correctOpt.plain : "") + " — " + question.ru;
       } else {
-        els.feedback.textContent = "Неверно. Правильно: " + (correctOpt ? correctOpt.plain : "");
+        els.feedback.textContent = t("wrongPrefix") + (correctOpt ? correctOpt.plain : "");
       }
       els.feedback.className = "feedback bad";
     }
@@ -1605,19 +1791,19 @@ leiden|an|Dat.|страдать (болезнью)`;
   function joinSentence(tokens){
     const noSpaceBefore = new Set([",",".","?","!"]);
     let s = "";
-    tokens.forEach((t,i)=>{
-      if(noSpaceBefore.has(t)){ s += t; }
-      else { s += (i===0 ? "" : " ") + t; }
+    tokens.forEach((tk,i)=>{
+      if(noSpaceBefore.has(tk)){ s += tk; }
+      else { s += (i===0 ? "" : " ") + tk; }
     });
     return s;
   }
 
   function renderOrderQuestion(question){
-    els.hintText.textContent = "нажимай слова по порядку, чтобы собрать предложение";
-    const tag = [question.tense, question.type === "Frage" ? "Вопрос" : "Утверждение"].filter(Boolean);
+    els.hintText.textContent = t("hintOrder");
+    const tag = [question.tense, question.type].filter(Boolean);
     els.genderLabel.textContent = tag.join(" · ").toUpperCase();
-    els.ruWord.textContent = "🧩 Собери предложение";
-    els.ruHint.textContent = "Перевод: " + question.ru;
+    els.ruWord.textContent = t("composePrompt");
+    els.ruHint.textContent = t("translationPrefix") + question.ru;
 
     const pool = shuffle([...question.tokens, ...question.decoys].map((tok,i)=>({tok, uid:i})));
     orderState = { question, pool, built: [] };
@@ -1629,7 +1815,7 @@ leiden|an|Dat.|страдать (болезнью)`;
     if(orderState.built.length === 0){
       const ph = document.createElement('span');
       ph.className = 'build-placeholder';
-      ph.textContent = "Твоё предложение появится здесь…";
+      ph.textContent = "…";
       els.buildStrip.appendChild(ph);
     } else {
       orderState.built.forEach((item, idx)=>{
@@ -1688,9 +1874,9 @@ leiden|an|Dat.|страдать (болезнью)`;
       streaks[question.id] = (streaks[question.id]||0) + 1;
       if(streaks[question.id] >= NEED_STREAK){
         learned[question.id] = true;
-        els.feedback.textContent = "Верно! Предложение выучено ✓";
+        els.feedback.textContent = t("correctFull");
       } else {
-        els.feedback.textContent = "Верно! " + streaks[question.id] + "/" + NEED_STREAK;
+        els.feedback.textContent = t("correctN") + streaks[question.id] + "/" + NEED_STREAK;
       }
       els.feedback.className = "feedback ok";
       renderDots();
@@ -1699,7 +1885,7 @@ leiden|an|Dat.|страдать (болезнью)`;
       setTimeout(renderQuestion, 900);
     } else {
       streaks[question.id] = 0;
-      els.feedback.innerHTML = "Неверно. Правильно:<br><b>" + joinSentence(question.tokens) + "</b>";
+      els.feedback.innerHTML = t("wrongPrefix") + "<br><b>" + joinSentence(question.tokens) + "</b>";
       els.feedback.className = "feedback bad";
       renderDots();
       renderStats();
@@ -1711,31 +1897,600 @@ leiden|an|Dat.|страдать (болезнью)`;
   els.orderNextBtn.addEventListener('click', renderQuestion);
 
   function resetAllProgress(){
-    streaks = {};
-    learned = {};
-    shownIds = {};
-    pendingReview = {};
-    renderCount = 0;
-    allTimeShown = 0;
-    today = { date: todayKey(), shown: 0, correctIds: {}, wrong: 0 };
+    streaks = {}; learned = {}; shownIds = {}; pendingReview = {};
+    renderCount = 0; allTimeShown = 0;
+    today = { date: todayKey(), shown:0, correctIds:{}, wrong:0 };
   }
 
+  // ---------------- theme ----------------
+  function applyTheme(name){
+    theme = name;
+    document.documentElement.setAttribute('data-theme', name);
+  }
+
+  // ---------------- static UI text (i18n) ----------------
+  function setText(id, key){
+    const el = document.getElementById(id);
+    if(el) el.textContent = t(key);
+  }
+  function applyI18nToStaticEls(){
+    setText('subText','appSub');
+    setText('btnManageLabel','manageBtn');
+    setText('btnAddWordLabel','addWordBtn');
+    setText('btnExportLabel','exportBtn');
+    setText('btnImportLabel','importBtn');
+    setText('statsTodayLabel','today');
+    setText('statsAllLabel','allTime');
+    setText('learnedInSelLabel','learnedInSel');
+    setText('doneText','doneText');
+    setText('restartBtn','restart');
+    setText('resetBtn','resetProgress');
+    setText('ok-tip','tip');
+    els.undoBtn.textContent = "← " + (uiLang==='en'?'Erase':uiLang==='uk'?'Стерти':'Стереть');
+    els.checkBtn.textContent = uiLang==='en'?'Check':uiLang==='uk'?'Перевірити':'Проверить';
+    setText('manageTitle','manageTitle');
+    if(els.searchInput) els.searchInput.placeholder = t('search');
+    setText('addWordTitle','addWordTitle');
+    setText('addWordDesc','addWordDesc');
+    setText('fieldTypeLabel','fieldType');
+    setText('fieldGenderLabel','fieldGender');
+    setText('fieldWordLabel','fieldWord');
+    setText('fieldTrLabel','fieldTr');
+    setText('cancelAddWord','cancel');
+    setText('saveWordBtn','save');
+    setText('createDeckTitle','createDeckTitle');
+    setText('fieldDeckNameLabel','fieldDeckName');
+    setText('cancelCreateDeck','cancel');
+    setText('saveDeckBtn','create');
+    setText('exportTitle','exportTitle');
+    setText('exportScopeLabel','exportScope');
+    setText('exportModeLabel','exportMode');
+    setText('exportModeFullBtn','exportFull');
+    setText('exportModeMaterialBtn','exportMaterial');
+    setText('doExportBtn','downloadCsv');
+    setText('confirmTitle','confirmDeleteTitle');
+    setText('confirmDesc','confirmDeleteText');
+    setText('confirmCancelBtn','cancel');
+    setText('confirmDeleteBtn','delete');
+    setText('importResultTitle','importResultTitle');
+    setText('obLangTitle','obLangTitle');
+    setText('obLangDesc','obLangDesc');
+    setText('obThemeLabel','obThemeLabel');
+    setText('langNextBtn','next');
+    setText('obSupportTitle','obSupportTitle');
+    setText('obSupportDesc','obSupportDesc');
+    setText('obLinkedinLabel','linkedinLabel');
+    setText('obGithubLabel','githubLabel');
+    setText('supportDoneBtn','startLearning');
+  }
+
+  // ---------------- deck switcher ----------------
+  function renderDeckRow(){
+    els.deckRow.innerHTML = "";
+    allDeckIds().forEach(id=>{
+      const pill = document.createElement('button');
+      pill.className = 'deck-pill' + (id === currentDeckId ? ' active' : '');
+      pill.textContent = deckName(id);
+      pill.addEventListener('click', ()=>{
+        if(id !== currentDeckId) switchDeck(id);
+      });
+      els.deckRow.appendChild(pill);
+    });
+    const addPill = document.createElement('button');
+    addPill.className = 'deck-pill add';
+    addPill.textContent = t('newDeckPill');
+    addPill.addEventListener('click', ()=> openModal('createDeckModal'));
+    els.deckRow.appendChild(addPill);
+  }
+
+  function createCustomDeck(name){
+    const id = "c" + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+    customDecks[id] = { id, name: name.trim() || t('newDeckPill') };
+    customWords[id] = [];
+    return id;
+  }
+
+  // ---------------- category chips (deck-aware) ----------------
+  function renderChips(){
+    els.chips.innerHTML = "";
+    const cats = categoriesForDeck(currentDeckId);
+    cats.forEach(c=>{
+      const chip = document.createElement('div');
+      chip.className = 'chip' + (selectedCats.has(c.key) ? ' active' : '');
+      chip.textContent = t(c.tKey);
+      chip.addEventListener('click', async ()=>{
+        if(selectedCats.has(c.key)){
+          if(selectedCats.size === 1) return;
+          selectedCats.delete(c.key);
+        } else {
+          selectedCats.add(c.key);
+        }
+        renderChips();
+        await saveProgress();
+        renderQuestion();
+      });
+      els.chips.appendChild(chip);
+    });
+  }
+
+  // ---------------- manage / word list ----------------
+  let manageState = { search:"", typeFilter:"all", statusFilter:"all" };
+  let editingWordId = null;
+  let pendingDeleteWordId = null;
+
+  function wordStatus(id){
+    if(learned[id]) return "learned";
+    if((streaks[id]||0) >= 1) return "half";
+    return "new";
+  }
+  function wordDisplayLabel(w){
+    if(w.cat === "verbprep") return (w.verb||"") + " " + w.word + (w.caseTag ? " (+"+w.caseTag+")" : "");
+    return (w.article ? w.article + " " : "") + w.word;
+  }
+  function matchesSearch(w, q){
+    if(!q) return true;
+    q = q.toLowerCase();
+    const hay = [w.word, w.ru, w.verb||""].join(" ").toLowerCase();
+    return hay.includes(q);
+  }
+
+  function renderManageFilters(){
+    const cats = listableCatsForDeck(currentDeckId).map(key=>{
+      const src = currentDeckId===BASIC_DECK_ID ? BASIC_CATEGORIES : CUSTOM_TYPES;
+      const found = src.find(c=>c.key===key);
+      return found || {key, tKey:"typeOther"};
+    });
+    els.typeFilterRow.innerHTML = "";
+    const allChip = document.createElement('div');
+    allChip.className = 'filter-chip' + (manageState.typeFilter==='all' ? ' active' : '');
+    allChip.textContent = t('filterAll');
+    allChip.addEventListener('click', ()=>{ manageState.typeFilter='all'; renderManageFilters(); renderManageList(); });
+    els.typeFilterRow.appendChild(allChip);
+    cats.forEach(c=>{
+      const chip = document.createElement('div');
+      chip.className = 'filter-chip' + (manageState.typeFilter===c.key ? ' active' : '');
+      chip.textContent = t(c.tKey);
+      chip.addEventListener('click', ()=>{ manageState.typeFilter=c.key; renderManageFilters(); renderManageList(); });
+      els.typeFilterRow.appendChild(chip);
+    });
+
+    els.statusFilterRow.innerHTML = "";
+    [["all","filterAll"],["learned","filterLearned"],["half","filterHalf"],["new","filterNew"]].forEach(([key,label])=>{
+      const chip = document.createElement('div');
+      chip.className = 'filter-chip' + (manageState.statusFilter===key ? ' active' : '');
+      chip.textContent = t(label);
+      chip.addEventListener('click', ()=>{ manageState.statusFilter=key; renderManageFilters(); renderManageList(); });
+      els.statusFilterRow.appendChild(chip);
+    });
+  }
+
+  function renderManageList(){
+    const listable = listableCatsForDeck(currentDeckId);
+    let words = wordsForDeck(currentDeckId).filter(w=>listable.includes(w.cat));
+    if(manageState.typeFilter !== "all") words = words.filter(w=>w.cat===manageState.typeFilter);
+    words = words.filter(w=>matchesSearch(w, manageState.search));
+    words = words.map(w=>({ w, status: wordStatus(w.id) }));
+    if(manageState.statusFilter !== "all") words = words.filter(x=>x.status===manageState.statusFilter);
+    const order = { learned:0, half:1, new:2 };
+    words.sort((a,b)=> order[a.status]-order[b.status]);
+
+    els.wordList.innerHTML = "";
+    if(words.length === 0){
+      const p = document.createElement('div');
+      p.className = 'empty-note';
+      p.textContent = t('empty');
+      els.wordList.appendChild(p);
+      return;
+    }
+
+    const isCustom = currentDeckId !== BASIC_DECK_ID;
+    words.forEach(({w,status})=>{
+      const row = document.createElement('div');
+      row.className = 'word-row';
+
+      const dot = document.createElement('div');
+      dot.className = 'word-status-dot ' + status;
+      row.appendChild(dot);
+
+      const main = document.createElement('div');
+      main.className = 'word-main';
+      const de = document.createElement('div');
+      de.className = 'word-de';
+      de.textContent = wordDisplayLabel(w);
+      const ru = document.createElement('div');
+      ru.className = 'word-ru';
+      ru.textContent = w.ru || "";
+      const tag = document.createElement('div');
+      tag.className = 'word-tag';
+      const src = currentDeckId===BASIC_DECK_ID ? BASIC_CATEGORIES : CUSTOM_TYPES;
+      const catInfo = src.find(c=>c.key===w.cat);
+      tag.textContent = catInfo ? t(catInfo.tKey) : w.cat;
+      main.appendChild(de); main.appendChild(ru); main.appendChild(tag);
+      row.appendChild(main);
+
+      if(isCustom){
+        const actions = document.createElement('div');
+        actions.className = 'word-actions';
+        const editBtn = document.createElement('button');
+        editBtn.className = 'icon-btn';
+        editBtn.textContent = t('colEdit');
+        editBtn.addEventListener('click', ()=> openEditWord(w));
+        const delBtn = document.createElement('button');
+        delBtn.className = 'icon-btn danger';
+        delBtn.textContent = t('colDelete');
+        delBtn.addEventListener('click', ()=>{
+          pendingDeleteWordId = w.id;
+          openModal('confirmModal');
+        });
+        actions.appendChild(editBtn); actions.appendChild(delBtn);
+        row.appendChild(actions);
+      }
+
+      els.wordList.appendChild(row);
+    });
+  }
+
+  els.confirmDeleteBtn.addEventListener('click', async ()=>{
+    if(pendingDeleteWordId){
+      const id = pendingDeleteWordId;
+      customWords[currentDeckId] = (customWords[currentDeckId]||[]).filter(w=>w.id!==id);
+      delete streaks[id]; delete learned[id]; delete shownIds[id]; delete pendingReview[id];
+      pendingDeleteWordId = null;
+      ALL = wordsForDeck(currentDeckId);
+      await saveProgress();
+      renderManageList();
+      renderStats();
+    }
+    closeModal('confirmModal');
+  });
+
+  // ---------------- generic modal open/close ----------------
+  function openModal(id){ document.getElementById(id).classList.add('show'); }
+  function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+  document.querySelectorAll('[data-close]').forEach(b=>{
+    b.addEventListener('click', ()=> closeModal(b.dataset.close));
+  });
+  document.querySelectorAll('.modal-overlay').forEach(ov=>{
+    if(ov.id.startsWith('onboard')) return; // onboarding must be completed via its buttons
+    ov.addEventListener('click', (e)=>{ if(e.target===ov) closeModal(ov.id); });
+  });
+
+  // ---------------- add / edit word ----------------
+  let newWordType = 'noun';
+  let newWordGender = 'der';
+
+  function renderTypeBtns(selected){
+    els.typeBtns.innerHTML = "";
+    CUSTOM_TYPES.forEach(c=>{
+      const b = document.createElement('button');
+      b.className = 'type-btn' + (c.key===selected ? ' active' : '');
+      b.textContent = t(c.tKey);
+      b.addEventListener('click', ()=>{
+        newWordType = c.key;
+        renderTypeBtns(newWordType);
+        const showGender = newWordType === 'noun';
+        els.fieldGenderLabel.style.display = showGender ? 'block' : 'none';
+        els.genderBtns.style.display = showGender ? 'flex' : 'none';
+      });
+      els.typeBtns.appendChild(b);
+    });
+  }
+  document.querySelectorAll('#genderBtns .gender-btn').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      newWordGender = b.dataset.g;
+      document.querySelectorAll('#genderBtns .gender-btn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+    });
+  });
+
+  function openAddWord(){
+    editingWordId = null;
+    newWordType = 'noun'; newWordGender = 'der';
+    els.newWordInput.value = ''; els.newTrInput.value = '';
+    renderTypeBtns(newWordType);
+    els.fieldGenderLabel.style.display = 'block';
+    els.genderBtns.style.display = 'flex';
+    document.querySelectorAll('#genderBtns .gender-btn').forEach(b=>b.classList.toggle('active', b.dataset.g===newWordGender));
+    openModal('addWordModal');
+  }
+  function openEditWord(w){
+    editingWordId = w.id;
+    newWordType = w.cat; newWordGender = w.article || 'der';
+    els.newWordInput.value = w.word || w.verb || '';
+    els.newTrInput.value = w.ru || '';
+    renderTypeBtns(newWordType);
+    const showGender = newWordType === 'noun';
+    els.fieldGenderLabel.style.display = showGender ? 'block' : 'none';
+    els.genderBtns.style.display = showGender ? 'flex' : 'none';
+    document.querySelectorAll('#genderBtns .gender-btn').forEach(b=>b.classList.toggle('active', b.dataset.g===newWordGender));
+    openModal('addWordModal');
+  }
+
+  els.addWordBtn.addEventListener('click', ()=>{
+    if(currentDeckId === BASIC_DECK_ID){ openModal('createDeckModal'); }
+    else{ openAddWord(); }
+  });
+
+  els.saveWordBtn.addEventListener('click', async ()=>{
+    const word = els.newWordInput.value.trim();
+    const tr = els.newTrInput.value.trim();
+    if(!word || !tr) return;
+    const arr = customWords[currentDeckId] || (customWords[currentDeckId] = []);
+    if(editingWordId){
+      const idx = arr.findIndex(w=>w.id===editingWordId);
+      if(idx >= 0){ arr[idx] = { ...arr[idx], cat:newWordType, article: newWordType==='noun'?newWordGender:'', word, ru:tr }; }
+    } else {
+      const id = "c:" + currentDeckId + ":" + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+      arr.push({ id, cat:newWordType, article: newWordType==='noun'?newWordGender:'', word, ru:tr });
+    }
+    ALL = wordsForDeck(currentDeckId);
+    await saveProgress();
+    closeModal('addWordModal');
+    renderChips(); renderStats();
+    if(document.getElementById('manageModal').classList.contains('show')) renderManageList();
+  });
+
+  // ---------------- create deck ----------------
+  els.saveDeckBtn.addEventListener('click', async ()=>{
+    const name = els.deckNameInput.value.trim();
+    if(!name) return;
+    const id = createCustomDeck(name);
+    els.deckNameInput.value = "";
+    await saveProgress();
+    switchDeck(id);
+    closeModal('createDeckModal');
+    openAddWord();
+  });
+
+  // ---------------- manage screen open ----------------
+  els.manageBtn.addEventListener('click', ()=>{
+    manageState = { search:"", typeFilter:"all", statusFilter:"all" };
+    els.searchInput.value = "";
+    renderManageFilters();
+    renderManageList();
+    openModal('manageModal');
+  });
+  els.searchInput.addEventListener('input', ()=>{
+    manageState.search = els.searchInput.value;
+    renderManageList();
+  });
+
+  // ---------------- CSV export / import ----------------
+  function csvEscape(v){
+    v = String(v==null ? "" : v);
+    if(/[",\n]/.test(v)) return '"' + v.replace(/"/g,'""') + '"';
+    return v;
+  }
+  function toCsv(rows){ return rows.map(r=>r.map(csvEscape).join(",")).join("\r\n"); }
+  function parseCsv(text){
+    const rows = []; let row = [], field = "", inQuotes = false;
+    for(let i=0;i<text.length;i++){
+      const c = text[i];
+      if(inQuotes){
+        if(c === '"'){
+          if(text[i+1] === '"'){ field += '"'; i++; } else { inQuotes = false; }
+        } else { field += c; }
+      } else {
+        if(c === '"'){ inQuotes = true; }
+        else if(c === ','){ row.push(field); field=""; }
+        else if(c === '\n'){ row.push(field); rows.push(row); row=[]; field=""; }
+        else if(c === '\r'){ /* skip */ }
+        else { field += c; }
+      }
+    }
+    if(field.length || row.length){ row.push(field); rows.push(row); }
+    return rows;
+  }
+
+  function renderExportDeckList(){
+    els.exportDeckList.innerHTML = "";
+    allDeckIds().forEach(id=>{
+      const row = document.createElement('label');
+      row.style.cssText = "display:flex;align-items:center;gap:8px;padding:8px 2px;font-size:13px;";
+      const cb = document.createElement('input');
+      cb.type = 'checkbox'; cb.checked = true; cb.dataset.deck = id;
+      const span = document.createElement('span');
+      span.textContent = deckName(id) + (id===BASIC_DECK_ID ? " — " + t('basicExportNote') : "");
+      row.appendChild(cb); row.appendChild(span);
+      els.exportDeckList.appendChild(row);
+    });
+  }
+
+  let exportMode = 'full';
+  els.exportModeBtns.querySelectorAll('.type-btn').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      exportMode = b.dataset.mode;
+      els.exportModeBtns.querySelectorAll('.type-btn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+    });
+  });
+
+  function buildExportRows(deckIds, includeProgressForCustom){
+    const rows = [["id","deck","deckName","type","gender","word","translation","verb","prep","caseTag","streak","learned"]];
+    deckIds.forEach(id=>{
+      if(id === BASIC_DECK_ID){
+        wordsForDeck(id).forEach(w=>{
+          rows.push([w.id, id, deckName(id), "", "", "", "", "", "", "", streaks[w.id]||0, learned[w.id]?1:0]);
+        });
+      } else {
+        wordsForDeck(id).forEach(w=>{
+          rows.push([
+            w.id, id, deckName(id), w.cat, w.article||"", w.word||"", w.ru||"",
+            w.verb||"", w.prep||"", w.caseTag||"",
+            includeProgressForCustom ? (streaks[w.id]||0) : "",
+            includeProgressForCustom ? (learned[w.id]?1:0) : "",
+          ]);
+        });
+      }
+    });
+    return rows;
+  }
+
+  els.exportBtn.addEventListener('click', ()=>{ renderExportDeckList(); openModal('exportModal'); });
+
+  els.doExportBtn.addEventListener('click', ()=>{
+    const checked = Array.from(els.exportDeckList.querySelectorAll('input[type=checkbox]:checked')).map(cb=>cb.dataset.deck);
+    if(checked.length === 0) return;
+    const rows = buildExportRows(checked, exportMode === 'full');
+    const csv = toCsv(rows);
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'bahnhof-export.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    closeModal('exportModal');
+  });
+
+  els.importBtn.addEventListener('click', ()=> els.importFile.click());
+  els.importFile.addEventListener('change', async (e)=>{
+    const file = e.target.files[0];
+    if(!file){ return; }
+    const text = await file.text();
+    const rows = parseCsv(text);
+    els.importFile.value = "";
+    if(rows.length < 2) return;
+    const header = rows[0].map(h=>h.trim());
+    const idx = {}; header.forEach((h,i)=>idx[h]=i);
+    const get = (row,k)=> idx[k]!==undefined ? (row[idx[k]]||"") : "";
+
+    let addedWords=0, updatedProgress=0, newDecks=0;
+    for(let r=1;r<rows.length;r++){
+      const row = rows[r];
+      if(row.length < 2) continue;
+      const id = get(row,'id');
+      const deck = get(row,'deck') || BASIC_DECK_ID;
+      const dName = get(row,'deckName');
+      const streakVal = get(row,'streak');
+      const learnedVal = get(row,'learned');
+
+      if(deck === BASIC_DECK_ID){
+        if(id && basicAllWords.find(w=>w.id===id)){
+          if(streakVal!=="") streaks[id] = parseInt(streakVal,10)||0;
+          if(learnedVal!=="") learned[id] = (learnedVal==="1"||learnedVal==="true");
+          updatedProgress++;
+        }
+        continue;
+      }
+      if(!customDecks[deck]){
+        customDecks[deck] = { id:deck, name: dName || deck };
+        customWords[deck] = [];
+        newDecks++;
+      }
+      const word = get(row,'word');
+      if(word){
+        const arr = customWords[deck];
+        let w = id ? arr.find(x=>x.id===id) : null;
+        if(!w){
+          w = { id: id || ("c:"+deck+":"+Date.now().toString(36)+Math.random().toString(36).slice(2,6)),
+                cat: get(row,'type')||'other', article: get(row,'gender')||'', word, ru: get(row,'translation') };
+          arr.push(w);
+          addedWords++;
+        } else {
+          w.cat = get(row,'type') || w.cat;
+          w.article = get(row,'gender') || w.article;
+          w.word = word;
+          w.ru = get(row,'translation');
+        }
+        if(get(row,'verb')) w.verb = get(row,'verb');
+        if(get(row,'prep')) w.prep = get(row,'prep');
+        if(get(row,'caseTag')) w.caseTag = get(row,'caseTag');
+        if(streakVal!==""){ streaks[w.id] = parseInt(streakVal,10)||0; updatedProgress++; }
+        if(learnedVal!=="") learned[w.id] = (learnedVal==="1"||learnedVal==="true");
+      }
+    }
+
+    ALL = wordsForDeck(currentDeckId);
+    await saveProgress();
+    renderDeckRow(); renderChips(); renderStats(); renderQuestion();
+    els.importResultText.textContent = "+" + addedWords + " · ~" + updatedProgress + " · +" + newDecks;
+    openModal('importResultModal');
+  });
+
+  // ---------------- onboarding ----------------
+  const LANG_OPTIONS = [
+    {key:'uk', flag:'🇺🇦', name:'Українська'},
+    {key:'ru', flag:'🇷🇺', name:'Русский'},
+    {key:'en', flag:'🇬🇧', name:'English'},
+  ];
+  const THEME_OPTIONS = [
+    {key:'dark', name:{ru:'Тёмная',uk:'Темна',en:'Dark'}, sw:'#12161d'},
+    {key:'light', name:{ru:'Светлая',uk:'Світла',en:'Light'}, sw:'#f4f5f7'},
+    {key:'beige', name:{ru:'Бежевая',uk:'Бежева',en:'Beige'}, sw:'#f1e7d3'},
+    {key:'gray', name:{ru:'Серая',uk:'Сіра',en:'Gray'}, sw:'#e6e8eb'},
+  ];
+  let obLang = 'ru', obTheme = 'dark', cameFromSettings = false;
+
+  function renderLangGrid(){
+    els.langGrid.innerHTML = "";
+    LANG_OPTIONS.forEach(o=>{
+      const c = document.createElement('div');
+      c.className = 'pick-card' + (obLang===o.key ? ' sel' : '');
+      c.innerHTML = `<span class="flag">${o.flag}</span>${o.name}`;
+      c.addEventListener('click', ()=>{ obLang=o.key; renderLangGrid(); renderThemeGrid(); });
+      els.langGrid.appendChild(c);
+    });
+  }
+  function renderThemeGrid(){
+    els.themeGrid.innerHTML = "";
+    THEME_OPTIONS.forEach(o=>{
+      const c = document.createElement('div');
+      c.className = 'pick-card' + (obTheme===o.key ? ' sel' : '');
+      c.innerHTML = `<div class="theme-swatch" style="background:${o.sw}"></div>${o.name[obLang]||o.name.ru}`;
+      c.addEventListener('click', ()=>{ obTheme=o.key; renderThemeGrid(); });
+      els.themeGrid.appendChild(c);
+    });
+  }
+
+  els.settingsBtn.addEventListener('click', ()=>{
+    cameFromSettings = true;
+    obLang = uiLang; obTheme = theme;
+    renderLangGrid(); renderThemeGrid();
+    openModal('onboardLangModal');
+  });
+
+  els.langNextBtn.addEventListener('click', async ()=>{
+    uiLang = obLang;
+    applyTheme(obTheme);
+    applyI18nToStaticEls();
+    renderDeckRow(); renderChips();
+    await saveProgress();
+    closeModal('onboardLangModal');
+    if(cameFromSettings){ cameFromSettings = false; }
+    else { openModal('onboardSupportModal'); }
+  });
+
+  els.supportDoneBtn.addEventListener('click', async ()=>{
+    onboarded = true;
+    await saveProgress();
+    closeModal('onboardSupportModal');
+  });
+
+  // ---------------- reset ----------------
   els.resetBtn.addEventListener('click', async ()=>{
     resetAllProgress();
     await saveProgress();
     renderQuestion();
   });
-
   els.restartBtn.addEventListener('click', async ()=>{
     resetAllProgress();
     await saveProgress();
     renderQuestion();
   });
 
+  // ---------------- init ----------------
   (async function init(){
     await loadProgress();
+    applyTheme(theme);
+    applyI18nToStaticEls();
+    renderDeckRow();
     renderChips();
     renderQuestion();
+    if(!onboarded){
+      obLang = uiLang; obTheme = theme;
+      renderLangGrid(); renderThemeGrid();
+      openModal('onboardLangModal');
+    }
   })();
 
 })();
