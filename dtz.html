@@ -51,14 +51,20 @@
   h1{ font-family:'Space Mono',monospace; font-size:22px; margin:6px 0 2px; color:var(--amber); letter-spacing:.02em; }
   .sub{ font-size:12.5px; color:var(--ink-dim); }
 
-  .toolbar{ display:flex; flex-wrap:wrap; gap:7px; justify-content:center; margin-top:14px; }
-  .tool-btn{
-    font-family:'Space Mono',monospace; font-size:11px; padding:8px 12px; border-radius:20px;
-    border:1px solid var(--rule); background:var(--panel); color:var(--ink-dim); cursor:pointer;
-    display:flex; align-items:center; gap:5px;
+  .toolbar{
+    display:flex; gap:2px; margin-top:14px;
+    background:var(--panel); border:1px solid var(--rule); border-radius:14px; padding:5px;
   }
-  .tool-btn:active{ transform:scale(.95); }
-  .tool-btn.accent{ background:rgba(234,176,74,.14); border-color:var(--amber-dim); color:var(--amber); }
+  .tool-btn{
+    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+    font-family:'Space Mono',monospace; font-size:8.5px; letter-spacing:.01em;
+    padding:8px 2px 7px; border-radius:10px; border:none;
+    background:none; color:var(--ink-dim); cursor:pointer;
+    transition: background .15s ease, color .15s ease;
+  }
+  .tool-btn .ic{ font-size:16px; line-height:1; }
+  .tool-btn:active{ transform:scale(.93); }
+  .tool-btn.accent{ background:rgba(234,176,74,.14); color:var(--amber); }
 
   .deck-row{ display:flex; gap:7px; overflow-x:auto; padding:14px 0 0; scrollbar-width:none; }
   .deck-row::-webkit-scrollbar{ display:none; }
@@ -66,6 +72,7 @@
     flex:0 0 auto; font-family:'Space Mono',monospace; font-size:12px; font-weight:700;
     padding:9px 14px; border-radius:10px; border:1px solid var(--rule); background:var(--panel);
     color:var(--ink-dim); cursor:pointer; white-space:nowrap;
+    transition: background .15s ease, color .15s ease, border-color .15s ease;
   }
   .deck-pill.active{ background:var(--amber); border-color:var(--amber); color:#1b1204; }
   .deck-pill.add{ color:var(--amber); border-style:dashed; }
@@ -119,6 +126,8 @@
     font-family:'Space Mono',monospace; font-weight:700; font-size:clamp(22px, 7vw, 30px);
     color:var(--ink); letter-spacing:.03em; line-height:1.25; word-break:break-word;
   }
+  @keyframes cardIn{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:translateY(0); } }
+  .board.card-anim{ animation: cardIn .28s cubic-bezier(.22,.85,.32,1); }
 
   .dots{ display:flex; justify-content:center; gap:8px; margin:14px 0 4px; }
   .dot{ width:11px; height:11px; border-radius:50%; border:1.5px solid var(--rule); background:transparent; transition: all .25s ease; }
@@ -207,12 +216,23 @@
   }
   .storage-note{ text-align:center; font-family:'Space Mono',monospace; font-size:10.5px; color:var(--amber-dim); margin-top:10px; min-height:14px; }
 
-  .modal-overlay{ display:none; position:fixed; inset:0; background:var(--overlay); z-index:100; align-items:flex-end; justify-content:center; }
-  .modal-overlay.show{ display:flex; }
+  .modal-overlay{
+    display:flex; position:fixed; inset:0; background:var(--overlay); z-index:100;
+    align-items:flex-end; justify-content:center;
+    opacity:0; visibility:hidden; pointer-events:none;
+    transition: opacity .22s ease, visibility 0s linear .22s;
+  }
+  .modal-overlay.show{
+    opacity:1; visibility:visible; pointer-events:auto;
+    transition: opacity .22s ease, visibility 0s linear 0s;
+  }
   .modal-card{
     background:var(--panel); width:100%; max-width:460px; border-radius:18px 18px 0 0; padding:20px 18px 26px;
     max-height:88vh; overflow-y:auto; border:1px solid var(--rule); border-bottom:none; position:relative;
+    transform: translateY(28px);
+    transition: transform .28s cubic-bezier(.22,.85,.32,1);
   }
+  .modal-overlay.show .modal-card{ transform: translateY(0); }
   @media (min-width:700px){
     .modal-overlay{ align-items:center; padding:20px; }
     .modal-card{ border-radius:18px; border-bottom:1px solid var(--rule); max-height:80vh; }
@@ -343,11 +363,11 @@
   </header>
 
   <div class="toolbar">
-    <button class="tool-btn" id="manageBtn">📋 <span id="btnManageLabel">Слова</span></button>
-    <button class="tool-btn" id="addWordBtn">➕ <span id="btnAddWordLabel">Слово</span></button>
-    <button class="tool-btn" id="exportBtn">⬆️ <span id="btnExportLabel">Экспорт</span></button>
-    <button class="tool-btn" id="importBtn">⬇️ <span id="btnImportLabel">Импорт</span></button>
-    <button class="tool-btn" id="settingsBtn">⚙️</button>
+    <button class="tool-btn" id="manageBtn"><span class="ic">📋</span><span id="btnManageLabel">Слова</span></button>
+    <button class="tool-btn" id="addWordBtn"><span class="ic">➕</span><span id="btnAddWordLabel">Слово</span></button>
+    <button class="tool-btn" id="exportBtn"><span class="ic">⬆️</span><span id="btnExportLabel">Экспорт</span></button>
+    <button class="tool-btn" id="importBtn"><span class="ic">⬇️</span><span id="btnImportLabel">Импорт</span></button>
+    <button class="tool-btn" id="settingsBtn"><span class="ic">⚙️</span><span id="btnSettingsLabel">Тема</span></button>
   </div>
   <input type="file" id="importFile" accept=".csv,text/csv">
 
@@ -542,7 +562,7 @@
       exportFull:"Материал + прогресс", exportMaterial:"Только материал", downloadCsv:"Скачать CSV",
       importResultTitle:"Импорт завершён", basicName:"Базовый",
       basicExportNote:"Базовый — только прогресс (материал встроен в приложение)",
-      empty:"Здесь пока пусто", newDeckPill:"+ Раздел", settingsTitle:"Настройки",
+      empty:"Здесь пока пусто", newDeckPill:"+ Раздел", settingsTitle:"Настройки", settingsBtnLabel:"Тема",
       storageSession:"Прогресс сохраняется только в этой сессии",
       storageLocal:"Прогресс сохраняется в этом браузере на устройстве",
       correctFull:"Верно! Слово выучено ✓", correctN:"Верно! ",
@@ -577,7 +597,7 @@
       exportFull:"Матеріал + прогрес", exportMaterial:"Тільки матеріал", downloadCsv:"Завантажити CSV",
       importResultTitle:"Імпорт завершено", basicName:"Базовий",
       basicExportNote:"Базовий — лише прогрес (матеріал вбудований у застосунок)",
-      empty:"Тут поки що пусто", newDeckPill:"+ Розділ", settingsTitle:"Налаштування",
+      empty:"Тут поки що пусто", newDeckPill:"+ Розділ", settingsTitle:"Налаштування", settingsBtnLabel:"Тема",
       storageSession:"Прогрес зберігається лише в цій сесії",
       storageLocal:"Прогрес зберігається в цьому браузері на пристрої",
       correctFull:"Правильно! Слово вивчено ✓", correctN:"Правильно! ",
@@ -612,7 +632,7 @@
       exportFull:"Material + progress", exportMaterial:"Material only", downloadCsv:"Download CSV",
       importResultTitle:"Import complete", basicName:"Basic",
       basicExportNote:"Basic — progress only (material is built into the app)",
-      empty:"Nothing here yet", newDeckPill:"+ Section", settingsTitle:"Settings",
+      empty:"Nothing here yet", newDeckPill:"+ Section", settingsTitle:"Settings", settingsBtnLabel:"Theme",
       storageSession:"Progress is only saved for this session",
       storageLocal:"Progress is saved in this browser on this device",
       correctFull:"Correct! Word learned ✓", correctN:"Correct! ",
@@ -1301,19 +1321,34 @@ leiden|an|Dat.|страдать (болезнью)`;
     return id === BASIC_DECK_ID ? LISTABLE_BASIC_CATS : CUSTOM_TYPES.map(c=>c.key);
   }
 
+  function defaultCatsForDeck(id){
+    const cats = categoriesForDeck(id);
+    if(id === BASIC_DECK_ID){
+      return cats.filter(c=>!["case","order","verbprep"].includes(c.key)).map(c=>c.key);
+    }
+    return cats.map(c=>c.key);
+  }
+
   function switchDeck(id){
     currentDeckId = id;
     ALL = wordsForDeck(id);
-    selectedCats = new Set(categoriesForDeck(id).map(c=>c.key));
+    selectedCats = new Set(defaultCatsForDeck(id));
     currentId = null;
     renderDeckRow();
     renderChips();
     renderQuestion();
   }
 
+  function makeQuestion(word){
+    if(word.cat !== "case") return word;
+    const caseName = CASES[Math.floor(Math.random()*CASES.length)];
+    const correctArticle = ARTICLE_TABLE[word.gender][caseName];
+    return { ...word, caseName, correctArticle };
+  }
+
   // ---------------- practice/progress state (ids are unique across all decks) ----------------
   const NEED_STREAK = 2;
-  let selectedCats = new Set(BASIC_CATEGORIES.map(c=>c.key));
+  let selectedCats = new Set(BASIC_CATEGORIES.filter(c=>!["case","order","verbprep"].includes(c.key)).map(c=>c.key));
 
   let streaks = {};
   let learned = {};
@@ -1675,6 +1710,10 @@ leiden|an|Dat.|страдать (болезнью)`;
     currentQuestion = question;
     locked = false;
 
+    els.board.classList.remove('card-anim');
+    void els.board.offsetWidth;
+    els.board.classList.add('card-anim');
+
     const wasShownBefore = !!shownIds[question.id];
     els.seenBadge.textContent = wasShownBefore ? t("seenBadge") : t("newBadge");
     els.seenBadge.className = "seen-badge" + (wasShownBefore ? " seen" : "");
@@ -1919,6 +1958,7 @@ leiden|an|Dat.|страдать (болезнью)`;
     setText('btnAddWordLabel','addWordBtn');
     setText('btnExportLabel','exportBtn');
     setText('btnImportLabel','importBtn');
+    setText('btnSettingsLabel','settingsBtnLabel');
     setText('statsTodayLabel','today');
     setText('statsAllLabel','allTime');
     setText('learnedInSelLabel','learnedInSel');
