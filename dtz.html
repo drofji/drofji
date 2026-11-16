@@ -272,6 +272,17 @@
   .opt.correct{ border-color:var(--green); background:rgba(85,179,124,.16); }
   .opt.wrong{ border-color:var(--red); background:rgba(224,86,104,.16); }
   .opt.dim{ opacity:.42; }
+  .opt.selected{ border-color:var(--accent); box-shadow:0 0 0 1px var(--accent) inset; }
+  .opt-confirm{
+    margin-top:4px; padding:13px; border-radius:11px; border:1px solid var(--accent);
+    background:var(--accent); color:var(--on-accent); font-size:14px; font-weight:700; cursor:pointer;
+  }
+  .opt-confirm:disabled{ opacity:.4; cursor:default; }
+  .list-btn .lb-text{ flex:1; }
+  .switch{ width:42px; height:24px; border-radius:12px; background:var(--rule); position:relative; flex-shrink:0; transition:background .15s ease; }
+  .switch::after{ content:""; position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:50%; background:var(--ink); transition:transform .15s ease; }
+  .switch.on{ background:var(--accent); }
+  .switch.on::after{ transform:translateX(18px); background:var(--on-accent); }
 
   .feedback{ min-height:20px; text-align:center; font-family:'Space Mono',monospace; font-size:12px; margin-top:12px; color:var(--ink-dim); }
   .feedback.ok{ color:var(--green); }
@@ -592,6 +603,11 @@
         <span class="lb-ic">🎨</span>
         <span><span id="btnSettingsLabel">Язык и тема</span><span class="lb-sub" id="settingsHint">интерфейс и оформление</span></span>
       </button>
+      <button class="list-btn" id="speechBtn" role="switch" aria-checked="true">
+        <span class="lb-ic">🔊</span>
+        <span class="lb-text"><span id="btnSpeechLabel">Озвучка</span><span class="lb-sub" id="speechHint">произносить немецкие слова и подтверждать выбор</span></span>
+        <span class="switch on" id="speechSwitch"></span>
+      </button>
       <button class="list-btn" id="supportBtn">
         <span class="lb-ic">💛</span>
         <span><span id="btnSupportLabel">Поддержать разработчика</span><span class="lb-sub">LinkedIn · GitHub</span></span>
@@ -732,7 +748,7 @@
       manageBtn:"Слова", addWordBtn:"Слово", exportBtn:"Экспорт", importBtn:"Импорт",
       today:"Сегодня", allTime:"Всего", learnedSuffix:"выучено", learnedInSel:"ВЫУЧЕНО В ПОДБОРКЕ",
       newBadge:"Новая", seenBadge:"Повтор", deckLabel:"В КОЛОДЕ",
-      hintChoice:"нужно 2 верных ответа подряд", hintOrder:"нажимай слова по порядку, чтобы собрать предложение",
+      hintChoice:"нужно 2 верных ответа подряд", speechLabel:"Озвучка", speechHint:"произносить немецкие слова и подтверждать выбор", confirmChoice:"Подтвердить", hintOrder:"нажимай слова по порядку, чтобы собрать предложение",
       doneTitle:"ALLE AN BORD 🚆", doneText:"Вы выучили все слова в этой подборке.", restart:"Начать заново",
       resetProgress:"Сбросить прогресс", tip:"der/das/die — учи артикль вместе со словом",
       manageTitle:"Слова", search:"Поиск слова или перевода…",
@@ -767,7 +783,7 @@
       manageBtn:"Слова", addWordBtn:"Слово", exportBtn:"Експорт", importBtn:"Імпорт",
       today:"Сьогодні", allTime:"Всього", learnedSuffix:"вивчено", learnedInSel:"ВИВЧЕНО В ПІДБІРЦІ",
       newBadge:"Нова", seenBadge:"Повтор", deckLabel:"У КОЛОДІ",
-      hintChoice:"потрібні 2 правильні відповіді підряд", hintOrder:"тисни слова по порядку, щоб скласти речення",
+      hintChoice:"потрібні 2 правильні відповіді підряд", speechLabel:"Озвучення", speechHint:"вимовляти німецькі слова та підтверджувати вибір", confirmChoice:"Підтвердити", hintOrder:"тисни слова по порядку, щоб скласти речення",
       doneTitle:"ALLE AN BORD 🚆", doneText:"Ви вивчили всі слова в цій підбірці.", restart:"Почати заново",
       resetProgress:"Скинути прогрес", tip:"der/das/die — вчи артикль разом зі словом",
       manageTitle:"Слова", search:"Пошук слова або перекладу…",
@@ -802,7 +818,7 @@
       manageBtn:"Words", addWordBtn:"Word", exportBtn:"Export", importBtn:"Import",
       today:"Today", allTime:"All-time", learnedSuffix:"learned", learnedInSel:"LEARNED IN SELECTION",
       newBadge:"New", seenBadge:"Repeat", deckLabel:"IN DECK",
-      hintChoice:"need 2 correct answers in a row", hintOrder:"tap the words in order to build the sentence",
+      hintChoice:"need 2 correct answers in a row", speechLabel:"Speech", speechHint:"pronounce German words and confirm your choice", confirmChoice:"Confirm", hintOrder:"tap the words in order to build the sentence",
       doneTitle:"ALLE AN BORD 🚆", doneText:"You've learned every word in this selection.", restart:"Start over",
       resetProgress:"Reset progress", tip:"der/das/die — learn the article together with the word",
       manageTitle:"Words", search:"Search word or translation…",
@@ -2404,6 +2420,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
   let currentOptions = [];
   let locked = false;
   let theme = "dark";
+  let speechOn = true;
   let onboarded = false;
 
   function todayKey(){
@@ -2452,7 +2469,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
   function buildPayload(){
     return JSON.stringify({
       version:5, streaks, learned, shownIds, pendingReview, renderCount, allTimeShown, today,
-      selectedCats:[...selectedCats], currentDeckId, customDecks, customWords, uiLang, theme, onboarded,
+      selectedCats:[...selectedCats], currentDeckId, customDecks, customWords, uiLang, theme, onboarded, speechOn,
     });
   }
   async function saveProgress(){
@@ -2487,6 +2504,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
       customWords = data.customWords || {};
       if(data.uiLang) uiLang = data.uiLang;
       if(data.theme) theme = data.theme;
+      if(typeof data.speechOn === 'boolean') speechOn = data.speechOn;
       onboarded = !!data.onboarded;
     }
   }
@@ -2782,6 +2800,52 @@ befähigen|zu|Dat.|давать возможность, квалифициров
     }
   }
 
+  // ---- Speech (German pronunciation via SpeechSynthesis) ----
+  const speechSupported = typeof window !== 'undefined' && 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+  let deVoice = null;
+  function pickGermanVoice(){
+    if(!speechSupported) return;
+    const voices = window.speechSynthesis.getVoices() || [];
+    deVoice = voices.find(v=>/^de[-_]DE/i.test(v.lang) && v.localService) || voices.find(v=>/^de[-_]DE/i.test(v.lang)) || voices.find(v=>/^de/i.test(v.lang)) || null;
+  }
+  if(speechSupported){
+    pickGermanVoice();
+    window.speechSynthesis.addEventListener && window.speechSynthesis.addEventListener('voiceschanged', pickGermanVoice);
+  }
+  function speechActive(){ return speechOn && speechSupported; }
+  function speakDe(text){
+    if(!speechActive() || !text) return;
+    const clean = String(text).replace(/\(\+[^)]*\)/g, "").replace(/\.\.\./g, "").replace(/\s+/g, " ").trim();
+    if(!clean) return;
+    try{
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(clean);
+      u.lang = "de-DE";
+      if(deVoice) u.voice = deVoice;
+      u.rate = 0.95;
+      window.speechSynthesis.speak(u);
+    }catch(e){ /* ignore */ }
+  }
+  // What to pronounce for an answer option: the German phrase in context.
+  function spokenTextOf(opt, question){
+    if(question.cat === "case") return opt.plain + " " + question.word;
+    if(question.cat === "verbprep") return question.verb + " " + opt.plain;
+    return opt.plain;
+  }
+  function renderSpeechToggle(){
+    const sw = document.getElementById('speechSwitch');
+    const btn = document.getElementById('speechBtn');
+    if(sw) sw.classList.toggle('on', speechOn);
+    if(btn) btn.setAttribute('aria-checked', speechOn ? "true" : "false");
+  }
+  document.getElementById('speechBtn').addEventListener('click', async ()=>{
+    speechOn = !speechOn;
+    if(!speechOn && speechSupported) window.speechSynthesis.cancel();
+    renderSpeechToggle();
+    if(currentQuestion && currentQuestion.cat !== "order" && !locked) renderChoiceQuestion(currentQuestion);
+    await saveProgress();
+  });
+
   function renderChoiceQuestion(question){
     currentOptions = buildOptions(question);
 
@@ -2805,9 +2869,28 @@ befähigen|zu|Dat.|давать возможность, квалифициров
       btn.className = 'opt';
       btn.dataset.correct = opt.isCorrect ? "1" : "0";
       btn.innerHTML = `<span class="idx">${String(idx+1).padStart(2,'0')}</span>${opt.label}`;
-      btn.addEventListener('click', ()=>handleAnswer(opt, question, btn));
+      btn.addEventListener('click', ()=>{
+        if(locked) return;
+        if(!speechActive()){ handleAnswer(opt, question, btn); return; }
+        speakDe(spokenTextOf(opt, question));
+        selectedOpt = { opt, btn };
+        Array.from(els.options.querySelectorAll('.opt')).forEach(b=>b.classList.toggle('selected', b===btn));
+        confirmBtn.disabled = false;
+      });
       els.options.appendChild(btn);
     });
+
+    let selectedOpt = null;
+    const confirmBtn = document.createElement('button');
+    confirmBtn.className = 'opt-confirm';
+    confirmBtn.textContent = t("confirmChoice");
+    confirmBtn.disabled = true;
+    confirmBtn.addEventListener('click', ()=>{
+      if(locked || !selectedOpt) return;
+      selectedOpt.btn.classList.remove('selected');
+      handleAnswer(selectedOpt.opt, question, selectedOpt.btn);
+    });
+    if(speechActive()) els.options.appendChild(confirmBtn);
   }
 
   function recordAnswer(question, isCorrect){
@@ -2826,8 +2909,10 @@ befähigen|zu|Dat.|давать возможность, квалифициров
     if(locked) return;
     locked = true;
 
-    const allBtns = Array.from(els.options.children);
+    const allBtns = Array.from(els.options.querySelectorAll('.opt'));
     allBtns.forEach(b=>b.disabled = true);
+    const confirmEl = els.options.querySelector('.opt-confirm');
+    if(confirmEl) confirmEl.style.display = "none";
 
     const isCorrect = !!chosen.isCorrect;
     const correctOpt = currentOptions.find(o=>o.isCorrect);
@@ -2859,6 +2944,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
         els.feedback.textContent = t("wrongPrefix") + (correctOpt ? correctOpt.plain : "");
       }
       els.feedback.className = "feedback bad";
+      if(correctOpt) speakDe(spokenTextOf(correctOpt, question));
     }
 
     allBtns.forEach(b=>{ if(!b.classList.contains('correct') && !b.classList.contains('wrong')) b.classList.add('dim'); });
@@ -2867,7 +2953,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
     renderStats();
     await saveProgress();
 
-    setTimeout(renderQuestion, isCorrect ? 700 : 1500);
+    setTimeout(renderQuestion, isCorrect ? (speechActive() ? 900 : 700) : (speechActive() ? 2200 : 1500));
   }
 
   // ---- Sentence word-order puzzle ----
@@ -2922,6 +3008,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
       chip.className = 'token-chip';
       chip.textContent = item.tok;
       chip.addEventListener('click', ()=>{
+        if(!/^[,.?!]$/.test(item.tok)) speakDe(item.tok);
         orderState.pool.splice(idx,1);
         orderState.built.push(item);
         renderOrderUI();
@@ -2966,12 +3053,14 @@ befähigen|zu|Dat.|давать возможность, квалифициров
       els.feedback.className = "feedback ok";
       renderDots();
       renderStats();
+      speakDe(joinSentence(question.tokens));
       await saveProgress();
-      setTimeout(renderQuestion, 900);
+      setTimeout(renderQuestion, speechActive() ? 1800 : 900);
     } else {
       streaks[question.id] = 0;
       els.feedback.innerHTML = t("wrongPrefix") + "<br><b>" + joinSentence(question.tokens) + "</b>";
       els.feedback.className = "feedback bad";
+      speakDe(joinSentence(question.tokens));
       renderDots();
       renderStats();
       await saveProgress();
@@ -3003,6 +3092,8 @@ befähigen|zu|Dat.|давать возможность, квалифициров
     setText('btnExportLabel','exportBtn');
     setText('btnImportLabel','importBtn');
     setText('btnSettingsLabel','settingsBtnLabel');
+    setText('btnSpeechLabel','speechLabel');
+    setText('speechHint','speechHint');
     setText('btnResetLabel','resetProgress');
     setText('btnSupportLabel','obSupportTitle');
     setText('navLearnLabel','navLearn');
@@ -3634,6 +3725,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
   (async function init(){
     await loadProgress();
     applyTheme(theme);
+    renderSpeechToggle();
     applyI18nToStaticEls();
     renderDeckRow();
     renderChips();
