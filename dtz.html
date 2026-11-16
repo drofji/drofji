@@ -737,7 +737,7 @@
       resetProgress:"Сбросить прогресс", tip:"der/das/die — учи артикль вместе со словом",
       manageTitle:"Слова", search:"Поиск слова или перевода…",
       filterAll:"Все", filterLearned:"Выучено", filterHalf:"Наполовину", filterNew:"Не пройдено",
-      typeNoun:"Существительные", typeVerb:"Глаголы", typeOther:"Другое", typeCase:"Артикль: падежи",
+      typeNoun:"Существительные", typeVerb:"Глаголы", typeAdj:"Прилагательные", typeOther:"Другое", typeCase:"Артикль: падежи",
       typeVerbprep:"Глагол+предлог", typeFrage:"Вопрос. слова", typePrep:"Предлоги", typeOrder:"Порядок слов",
       colEdit:"✎", colDelete:"🗑", confirmDeleteTitle:"Удалить слово?", confirmDeleteText:"Это действие нельзя отменить.",
       cancel:"Отмена", delete:"Удалить", save:"Сохранить", create:"Создать",
@@ -772,7 +772,7 @@
       resetProgress:"Скинути прогрес", tip:"der/das/die — вчи артикль разом зі словом",
       manageTitle:"Слова", search:"Пошук слова або перекладу…",
       filterAll:"Всі", filterLearned:"Вивчено", filterHalf:"Наполовину", filterNew:"Не пройдено",
-      typeNoun:"Іменники", typeVerb:"Дієслова", typeOther:"Інше", typeCase:"Артикль: відмінки",
+      typeNoun:"Іменники", typeVerb:"Дієслова", typeAdj:"Прикметники", typeOther:"Інше", typeCase:"Артикль: відмінки",
       typeVerbprep:"Дієслово+прийменник", typeFrage:"Питальні слова", typePrep:"Прийменники", typeOrder:"Порядок слів",
       colEdit:"✎", colDelete:"🗑", confirmDeleteTitle:"Видалити слово?", confirmDeleteText:"Цю дію не можна скасувати.",
       cancel:"Скасувати", delete:"Видалити", save:"Зберегти", create:"Створити",
@@ -807,7 +807,7 @@
       resetProgress:"Reset progress", tip:"der/das/die — learn the article together with the word",
       manageTitle:"Words", search:"Search word or translation…",
       filterAll:"All", filterLearned:"Learned", filterHalf:"Halfway", filterNew:"Not started",
-      typeNoun:"Nouns", typeVerb:"Verbs", typeOther:"Other", typeCase:"Article: cases",
+      typeNoun:"Nouns", typeVerb:"Verbs", typeAdj:"Adjectives", typeOther:"Other", typeCase:"Article: cases",
       typeVerbprep:"Verb+preposition", typeFrage:"Question words", typePrep:"Prepositions", typeOrder:"Word order",
       colEdit:"✎", colDelete:"🗑", confirmDeleteTitle:"Delete word?", confirmDeleteText:"This can't be undone.",
       cancel:"Cancel", delete:"Delete", save:"Save", create:"Create",
@@ -1094,11 +1094,11 @@ ankommen|прибывать
 nehmen|брать
 annehmen|принимать
 mitnehmen|брать с собой
-geben|давать
+geben|давать|Dat.+Akk.
 aufgeben|оставлять, сдавать
 fahren|ехать
 abfahren|отъезжать
-schreiben|писать
+schreiben|писать|Dat.+Akk.
 steigen|взбираться
 umsteigen|пересаживаться
 aussteigen|выходить
@@ -1108,8 +1108,8 @@ bleiben|оставаться
 trinken|пить
 sehen|видеть
 nachsehen|проверять, наблюдать
-bieten|предлагать
-anbieten|предлагать (нереальное)
+bieten|предлагать|Dat.+Akk.
+anbieten|предлагать (нереальное)|Dat.+Akk.
 liegen|лежать
 rufen|звать
 aufrufen|вызывать
@@ -1120,7 +1120,7 @@ schlafen|спать
 fliegen|летать
 abfliegen|отлетать
 beginnen|начинать
-helfen|помогать
+helfen|помогать|Dat.
 lesen|читать
 biegen|сгибать
 abbiegen|поворачивать
@@ -1133,7 +1133,7 @@ entscheiden|решать
 verlieren|терять
 essen|кушать
 waschen|стирать, мыть
-gefallen|нравиться
+gefallen|нравиться|Dat.
 entschuldigen|извиняться
 vorstellen|представлять
 heißen|называться
@@ -1155,37 +1155,37 @@ abreisen|уезжать, отъезжать
 machen|делать
 bedienen|обслуживать
 wählen|выбирать, набирать
-schmecken|быть по вкусу
+schmecken|быть по вкусу|Dat.
 kaufen|покупать
-wünschen|желать
-zeigen|показывать
+wünschen|желать|Dat.+Akk.
+zeigen|показывать|Dat.+Akk.
 arbeiten|работать
 anprobieren|примерять
-passen|подходить
+passen|подходить|Dat.
 packen|укладывать, паковать
 abholen|забирать, получать
-schicken|посылать
+schicken|посылать|Dat.+Akk.
 öffnen|открывать
 anschnallen|пристёгивать(ся)
 dauern|длиться
 einstellen|настраивать, регулировать
 tanken|заправляться
 reparieren|чинить, ремонтировать
-glauben|думать, полагать
+glauben|думать, полагать|Dat.+Akk.
 stellen|ставить
 überprüfen|проверять
 abschleppen|отбуксировать
 stimmen|быть верным, соответствовать
 rauchen|курить
 landen|приземляться
-verkaufen|продавать
+verkaufen|продавать|Dat.+Akk.
 bremsen|тормозить
 legen|класть
 passieren|случаться
 verletzen|повреждать, ранить
 wiederholen|повторять
 möchten|хотеть бы
-antworten|отвечать
+antworten|отвечать|Dat.
 reservieren|бронировать
 telefonieren|говорить по телефону
 ausrichten|передавать (сообщение)
@@ -1197,8 +1197,8 @@ wecken|будить
 sagen|сказать, говорить
 fühlen|чувствовать
 besetzen|занимать
-fehlen|не хватать
-empfehlen|рекомендовать
+fehlen|не хватать|Dat.
+empfehlen|рекомендовать|Dat.+Akk.
 mögen|желать, любить
 wollen|желать, хотеть
 müssen|быть должным
@@ -1206,18 +1206,18 @@ sollen|быть обязанным
 dürfen|мочь, разрешать
 können|мочь
 kennen|знать
-nennen|называть
+nennen|называть|Dat.+Akk.
 brennen|гореть
 rennen|бежать, мчаться
 wenden|поворачивать, обращать
-senden|посылать
+senden|посылать|Dat.+Akk.
 denken|думать
 sein|быть
 haben|иметь
 werden|стать, становиться
 wissen|знать
 tun|делать
-bringen|приносить
+bringen|приносить|Dat.+Akk.
 sich bewerben|подавать заявление о приёме на работу
 kündigen|увольнять(ся), расторгать договор
 beantragen|подавать заявление (на что-то)
@@ -1351,6 +1351,266 @@ na|ну
 früh|рано
 spät|поздно`;
 
+  // Additional verbs with Dativ / Dativ+Akkusativ (appended separately so existing word ids stay stable)
+  const RAW_VERB2 = `
+abraten|отговаривать|Dat.
+ähneln|быть похожим на|Dat.
+auffallen|бросаться в глаза|Dat.
+ausweichen|уклоняться, избегать|Dat.
+begegnen|встречать (случайно)|Dat.
+beistehen|поддерживать, помогать|Dat.
+beitreten|вступать (в организацию)|Dat.
+danken|благодарить|Dat.
+dienen|служить|Dat.
+drohen|угрожать|Dat.
+einfallen|приходить в голову|Dat.
+entfallen|выпадать из памяти|Dat.
+folgen|следовать|Dat.
+gehören|принадлежать|Dat.
+gelingen|удаваться|Dat.
+genügen|быть достаточным|Dat.
+gratulieren|поздравлять|Dat.
+leichtfallen|даваться легко|Dat.
+leidtun|сожалеть, быть жаль|Dat.
+missfallen|не нравиться|Dat.
+misslingen|не удаваться|Dat.
+nützen|быть полезным|Dat.
+schaden|вредить|Dat.
+schwerfallen|даваться с трудом|Dat.
+vertrauen|доверять|Dat.
+widersprechen|возражать, противоречить|Dat.
+zuhören|слушать (кого-то)|Dat.
+zustimmen|соглашаться|Dat.
+abgewöhnen|отучать (себя) от|Dat.+Akk.
+angewöhnen|приучать (себя) к|Dat.+Akk.
+beschreiben|описывать|Dat.+Akk.
+bestätigen|подтверждать|Dat.+Akk.
+borgen|одалживать|Dat.+Akk.
+entziehen|лишать, отнимать|Dat.+Akk.
+erklären|объяснять|Dat.+Akk.
+erlauben|разрешать|Dat.+Akk.
+erleichtern|облегчать|Dat.+Akk.
+ermöglichen|делать возможным|Dat.+Akk.
+erzählen|рассказывать|Dat.+Akk.
+gestatten|позволять|Dat.+Akk.
+leihen|одалживать, давать взаймы|Dat.+Akk.
+liefern|доставлять|Dat.+Akk.
+mitteilen|сообщать|Dat.+Akk.
+präsentieren|представлять, презентовать|Dat.+Akk.
+schenken|дарить|Dat.+Akk.
+schulden|быть должным|Dat.+Akk.
+servieren|подавать (еду)|Dat.+Akk.
+spenden|жертвовать|Dat.+Akk.
+verbieten|запрещать|Dat.+Akk.
+verdanken|быть обязанным (кому-то чем-то)|Dat.+Akk.
+verheimlichen|скрывать, утаивать|Dat.+Akk.
+vermitteln|передавать, устраивать|Dat.+Akk.
+verraten|выдавать, раскрывать (тайну)|Dat.+Akk.
+verschweigen|умалчивать|Dat.+Akk.
+versprechen|обещать|Dat.+Akk.
+verzeihen|прощать|Dat.+Akk.
+vorlesen|читать вслух|Dat.+Akk.
+vorschlagen|предлагать|Dat.+Akk.
+wegnehmen|отнимать|Dat.+Akk.
+wiedergeben|возвращать, воспроизводить|Dat.+Akk.
+zuordnen|соотносить, относить к|Dat.+Akk.
+zurückbringen|приносить обратно|Dat.+Akk.`;
+
+  // Adjectives
+  const RAW_ADJ = `
+alt|старый
+jung|молодой
+groß|большой, высокий
+klein|маленький
+gut|хороший
+schlecht|плохой
+schön|красивый
+hässlich|уродливый
+neu|новый
+teuer|дорогой
+billig|дешевый
+schnell|быстрый
+langsam|медленный
+heiß|горячий
+kalt|холодный
+warm|теплый
+leicht|легкий (по весу / простой)
+schwer|тяжелый / сложный
+voll|полный
+leer|пустой
+falsch|неправильный, ложный
+freundlich|дружелюбный
+nett|милый, приятный
+gesund|здоровый
+krank|больной
+müde|уставший
+hungrig|голодный
+durstig|испытывающий жажду
+glücklich|счастливый
+traurig|грустный
+wichtig|важный
+interessant|интересный
+langweilig|скучный
+laut|громкий
+leise|тихий
+arm|бедный
+reich|богатый
+bekannt|известный, знакомый
+unbekannt|неизвестный
+beliebt|любимый, популярный
+fleißig|прилежный, трудолюбивый
+faul|ленивый
+ruhig|спокойный
+nervös|нервный
+lustig|веселый, забавный
+ernst|серьезный
+dumm|глупый
+klug|умный
+intelligent|умный, интеллигентный
+modern|современный
+altmodisch|старомодный
+sauber|чистый
+schmutzig|грязный
+trocken|сухой
+nass|мокрый
+hell|светлый
+dunkel|темный
+breit|широкий
+schmal|узкий
+eng|тесный, узкий
+tief|глубокий
+flach|плоский, мелкий
+stark|сильный
+schwach|слабый
+gefährlich|опасный
+sicher|безопасный, уверенный
+unmöglich|невозможный
+pünktlich|пунктуальный
+bequem|удобный, комфортный
+anstrengend|утомительный, напряженный
+abhängig|зависимый
+unabhängig|независимый
+aktiv|активный
+passiv|пассивный
+ähnlich|похожий, сходный
+verschieden|разный, различный
+unterschiedlich|разный, отличающийся
+aufregend|волнующий, захватывающий
+begeistert|восторженный
+enttäuscht|разочарованный
+besonders|особенный
+einfach|простой
+kompliziert|сложный, запутанный
+kostenlos|бесплатный
+umsonst|бесплатный / напрасный
+kreativ|творческий
+kritisch|критический
+ehrlich|честный
+höflich|вежливый
+unhöflich|грубый, невежливый
+selbstverständlich|само собой разумеющийся
+erfolgreich|успешный
+erfolglos|безуспешный
+fest|крепкий, фиксированный
+flexibel|гибкий
+geduldig|терпеливый
+ungeduldig|нетерпеливый
+gerecht|справедливый
+ungerecht|несправедливый
+gespannt|напряженный (в ожидании)
+gewohnt|привычный
+ungewohnt|непривычный
+neugierig|любопытный
+offen|открытый
+schüchtern|застенчивый
+pessimistisch|пессимистичный
+optimistisch|оптимистичный
+privat|личный, частный
+öffentlich|общественный, публичный
+selbstständig|самостоятельный
+sinnvoll|осмысленный, целесообразный
+sinnlos|бессмысленный
+sympathisch|симпатичный, приятный
+unsympathisch|неприятный (по характеру)
+verantwortlich|ответственный
+verrückt|сумасшедший, безумный
+zufrieden|довольный
+unzufrieden|недовольный
+zwingend|обязательный, принудительный
+abscheulich|отвратительный, мерзкий
+ambitioniert|амбициозный
+angeboren|врожденный
+angebracht|уместный, подобающий
+anspruchsvoll|требовательный, сложный (высокого уровня)
+aufwendig|затратный (по времени/средствам), трудоемкий
+ausgezeichnet|отличный, превосходный
+bedeutend|значительный, выдающийся
+beachtlich|внушительный, заметный
+bedrückt|угнетенный, подавленный
+beiläufig|мимолетный, попутный
+beklemmend|гнетущий, тревожный
+berechtigt|правомочный, обоснованный
+beruhigend|успокаивающий
+bevorzugt|предпочтительный
+bizarr|причудливый, странный
+chronisch|хронический
+dringend|срочный, неотложный
+effektiv|эффективный (результативный)
+effizient|эффективный (экономичный)
+eindringlich|достойный внимания, настойчивый
+einfühlsam|чуткий, эмпатичный
+entscheidend|решающий, определяющий
+entsprechend|соответствующий
+erheblich|значительный, существенный
+erschöpfend|исчерпывающий, изнурительный
+exzessiv|чрезмерный, эксцессивный
+faszinierend|завораживающий, увлекательный
+fristlos|безотлагательный (о сроках/увольнении)
+geboten|необходимый, должный
+gediegen|солидный, добротный
+gelassen|невозмутимый, спокойный
+gelegentlich|случайный, периодический
+gemeingefährlich|общественно опасный
+gescheit|толковый, смышленый
+gleichgültig|безразличный, равнодушный
+gründlich|основательный, тщательный
+haftbar|несущий ответственность
+hervorragend|выдающийся, превосходный
+hilfsbereit|готовый прийти на помощь, отзывчивый
+intakt|неповрежденный, исправный
+konsequent|последовательный
+kontinuierlich|непрерывный, постоянный
+konventionell|консервативный, традиционный
+lebendig|живой, оживленный
+massiv|массивный, массовый
+mühelos|без усилий, легкий
+nachhaltig|устойчивый, экологичный / долговременный
+nahelegend|очевидный
+nützlich|полезный
+objektiv|объективный
+subjektiv|субъективный
+penibel|педантичный, дотошный
+profitabel|рентабельный, прибыльный
+qualifiziert|квалифицированный
+radikal|радикальный
+relevant|релевантный, актуальный
+solide|надежный, прочный, солидный
+spontan|спонтанный
+strikt|строгий
+substanziell|существенный, вещественный
+überflüssig|излишний, лишний
+überzeugend|убедительный
+umfassend|всеобъемлющий, исчерпывающий
+unverzichtbar|незаменимый, крайне необходимый
+verbindlich|обязательный, обязывающий
+vielseitig|разносторонний
+vorsätzlich|умышленный, преднамеренный
+widersprüchlich|противоречивый
+zielbewusst|целеустремленный
+zuverlässig|надежный
+zweifelhaft|сомнительный`;
+
+
   // Sentence word-order tasks.
   // Format per line: tokens (space-separated, punctuation as its own token) | decoy tokens (comma-separated, "-" if none) | Russian translation | tense | type
   const RAW_ORDER = `
@@ -1400,7 +1660,144 @@ nachdenken|über|Akk.|размышлять о
 sich beschäftigen|mit|Dat.|заниматься (чем-то)
 rechnen|mit|Dat.|рассчитывать на
 sich verabreden|mit|Dat.|договариваться о встрече с
-leiden|an|Dat.|страдать (болезнью)`;
+leiden|an|Dat.|страдать (болезнью)
+ankommen|auf|Akk.|зависеть от
+anpassen|an|Akk.|приспосабливать к
+antworten|auf|Akk.|отвечать на
+sich ärgern|über|Akk.|злиться на
+aufpassen|auf|Akk.|присматривать за
+ausgeben|für|Akk.|тратить на
+sich begeistern|für|Akk.|восхищаться, увлекаться
+sich beklagen|über|Akk.|жаловаться на
+berichten|über|Akk.|сообщать о
+sich beschweren|über|Akk.|жаловаться на
+sich bewerben|auf|Akk.|откликаться на (вакансию)
+sich beziehen|auf|Akk.|ссылаться на
+danken|für|Akk.|благодарить за
+eingehen|auf|Akk.|соглашаться на, вникать в
+sich einigen|auf|Akk.|договориться о
+sich einsetzen|für|Akk.|выступать за
+sich engagieren|für|Akk.|выступать за
+sich engagieren|gegen|Akk.|выступать против
+sich entscheiden|für|Akk.|решиться на, выбрать
+sich entscheiden|gegen|Akk.|решить против, отказаться от
+erzählen|über|Akk.|рассказывать о
+sich gewöhnen|an|Akk.|привыкать к
+glauben|an|Akk.|верить в
+halten|für|Akk.|считать (кем-то/чем-то)
+sich halten|an|Akk.|придерживаться
+sich handeln|um|Akk.|речь идёт о
+hinweisen|auf|Akk.|указывать на
+hoffen|auf|Akk.|надеяться на
+sich informieren|über|Akk.|информироваться о
+investieren|in|Akk.|инвестировать в
+kämpfen|für|Akk.|бороться за
+kämpfen|gegen|Akk.|бороться против
+sich konzentrieren|auf|Akk.|концентрироваться на
+lachen|über|Akk.|смеяться над
+reagieren|auf|Akk.|реагировать на
+reden|über|Akk.|говорить о
+schimpfen|über|Akk.|ругаться на
+sorgen|für|Akk.|заботиться о
+sich sorgen|um|Akk.|беспокоиться о
+sich spezialisieren|auf|Akk.|специализироваться на
+sprechen|über|Akk.|говорить о
+sich streiten|über|Akk.|спорить о
+sich streiten|um|Akk.|ссориться из-за
+sich unterhalten|über|Akk.|беседовать о
+sich verlieben|in|Akk.|влюбляться в
+verzichten|auf|Akk.|отказываться от
+sich vorbereiten|auf|Akk.|готовиться к
+sich wenden|an|Akk.|обращаться к
+werben|für|Akk.|рекламировать
+sich wundern|über|Akk.|удивляться
+abhalten|von|Dat.|удерживать от
+abmelden|von|Dat.|отписывать, снимать с учёта
+abraten|von|Dat.|отговаривать от
+ändern|an|Dat.|изменять (что-то в)
+anfangen|mit|Dat.|начинать с
+anrufen|bei|Dat.|звонить (в учреждение)
+arbeiten|an|Dat.|работать над
+arbeiten|bei|Dat.|работать в (фирме)
+arbeiten|in|Dat.|работать в (месте)
+aufhören|mit|Dat.|прекращать
+ausgehen|von|Dat.|исходить из
+sich auskennen|mit|Dat.|разбираться в
+sich austauschen|mit|Dat.|обмениваться (мнениями) с
+sich bedanken|bei|Dat.|благодарить (кого-то)
+sich befassen|mit|Dat.|заниматься (вопросом)
+sich befinden|in|Dat.|находиться в
+beginnen|mit|Dat.|начинать с
+beitragen|zu|Dat.|способствовать
+sich beklagen|bei|Dat.|жаловаться (кому-то)
+berichten|von|Dat.|сообщать о
+sich beschweren|bei|Dat.|жаловаться (кому-то)
+bestellen|bei|Dat.|заказывать у
+sich beteiligen|an|Dat.|участвовать в
+sich bewerben|bei|Dat.|подавать заявку в (фирму)
+bringen|zu|Dat.|приводить к
+diskutieren|mit|Dat.|дискутировать с
+sich entschließen|zu|Dat.|решиться на
+sich entschuldigen|bei|Dat.|извиняться перед
+erhalten|von|Dat.|получать от
+sich erholen|von|Dat.|отдыхать, восстанавливаться от
+erkennen|an|Dat.|узнавать по
+sich erkundigen|bei|Dat.|справляться у
+sich erkundigen|nach|Dat.|справляться о
+erwarten|von|Dat.|ожидать от
+erziehen|zu|Dat.|воспитывать (кем-то)
+experimentieren|mit|Dat.|экспериментировать с
+fragen|nach|Dat.|спрашивать о
+führen|zu|Dat.|приводить к
+handeln|mit|Dat.|торговать (чем-то)
+handeln|von|Dat.|рассказывать о (о книге, фильме)
+halten|von|Dat.|быть мнения о
+hören|von|Dat.|слышать о
+klarkommen|mit|Dat.|справляться с
+klingen|nach|Dat.|звучать как
+leiden|unter|Dat.|страдать от
+liegen|an|Dat.|зависеть от, быть из-за
+sich melden|bei|Dat.|связываться с
+motivieren|zu|Dat.|мотивировать к
+nachfragen|bei|Dat.|переспрашивать у
+sich orientieren|an|Dat.|ориентироваться на
+passen|zu|Dat.|подходить к
+raten|zu|Dat.|советовать
+retten|vor|Dat.|спасать от
+sich richten|nach|Dat.|ориентироваться на, руководствоваться
+schimpfen|mit|Dat.|ругать (кого-то)
+schmecken|nach|Dat.|иметь вкус (чего-то)
+speichern|in|Dat.|сохранять в
+speichern|auf|Dat.|сохранять на
+sprechen|mit|Dat.|говорить с
+sprechen|von|Dat.|говорить о
+sterben|an|Dat.|умирать от
+sich streiten|mit|Dat.|ссориться с
+telefonieren|mit|Dat.|разговаривать по телефону с
+sich treffen|mit|Dat.|встречаться с
+sich trennen|von|Dat.|расставаться с
+überreden|zu|Dat.|уговаривать на
+überzeugen|von|Dat.|убеждать в
+umgehen|mit|Dat.|обращаться с
+unterbrechen|bei|Dat.|прерывать (при чём-то)
+sich unterhalten|mit|Dat.|беседовать с
+sich unterscheiden|von|Dat.|отличаться от
+unterstützen|bei|Dat.|поддерживать в
+sich verabschieden|von|Dat.|прощаться с
+verbinden|mit|Dat.|соединять с
+vergleichen|mit|Dat.|сравнивать с
+verlangen|von|Dat.|требовать от
+sich verstecken|vor|Dat.|прятаться от
+sich verstehen|mit|Dat.|ладить с
+vorbeikommen|bei|Dat.|заходить к
+vorkommen|bei|Dat.|встречаться, происходить у
+vortragen|vor|Dat.|выступать перед
+weglaufen|vor|Dat.|убегать от
+sich wünschen|von|Dat.|желать (получить) от
+zurückkommen|von|Dat.|возвращаться из
+zählen|zu|Dat.|относиться к, входить в число
+zweifeln|an|Dat.|сомневаться в
+zwingen|zu|Dat.|принуждать к`;
 
 
   // ---------------- parsing helpers ----------------
@@ -1421,6 +1818,8 @@ leiden|an|Dat.|страдать (болезнью)`;
     ...parseBlock(RAW_FRAGE,"","frage"),
     ...parseBlock(RAW_PREP,"","prep"),
     ...parseBlock(RAW_OTHER,"","other"),
+    ...parseBlock(RAW_VERB2,"","verb"),
+    ...parseBlock(RAW_ADJ,"","adj"),
   ].map((w,i)=>({...w, id:"w"+i}));
 
   const GENDER_MAP = { der:'m', das:'n', die:'f' };
@@ -1465,6 +1864,7 @@ leiden|an|Dat.|страдать (болезнью)`;
     {key:"noun", tKey:"typeNoun"},
     {key:"case", tKey:"typeCase"},
     {key:"verb", tKey:"typeVerb"},
+    {key:"adj", tKey:"typeAdj"},
     {key:"verbprep", tKey:"typeVerbprep"},
     {key:"frage", tKey:"typeFrage"},
     {key:"prep", tKey:"typePrep"},
@@ -1473,7 +1873,7 @@ leiden|an|Dat.|страдать (болезнью)`;
   ];
   // Categories that represent standalone "words" a person can browse/manage
   // (case/order are derived quiz modes, not separate editable vocabulary items).
-  const LISTABLE_BASIC_CATS = ["noun","verb","verbprep","frage","prep","other"];
+  const LISTABLE_BASIC_CATS = ["noun","verb","adj","verbprep","frage","prep","other"];
 
   // Custom decks: types kept simple on purpose (no sentences/cases/prepositions —
   // those need curated grammar data that doesn't make sense for free-form entries).
