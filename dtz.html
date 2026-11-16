@@ -1654,6 +1654,344 @@ per|по, через, посредством|Akk.
 pro|за, на (каждого)|Akk.
 à|по (цене)|Akk.`;
 
+  // B2 Beruf vocabulary (appended separately so existing word ids stay stable)
+  const RAW_DER_B2 = `
+Arbeitgeber|Работодатель
+Arbeitnehmer|Работник, наёмный сотрудник
+Arbeitsplatz|Рабочее место
+Arbeitsablauf|Рабочий процесс
+Auftrag|Заказ, поручение
+Auftraggeber|Заказчик
+Ansprechpartner|Контактное лицо
+Abteilungsleiter|Руководитель отдела
+Vorgesetzte|Начальник (der Vorgesetzte)
+Geschäftsführer|Генеральный директор
+Mitarbeiter|Сотрудник
+Betrieb|Предприятие
+Betriebsrat|Производственный совет
+Kunde|Клиент
+Lieferant|Поставщик
+Dienstleister|Поставщик услуг
+Termin|Встреча, срок
+Zeitplan|График, расписание
+Liefertermin|Срок поставки
+Feierabend|Конец рабочего дня
+Schichtdienst|Сменная работа
+Überstundenausgleich|Компенсация сверхурочных
+Bewerber|Кандидат, соискатель
+Werdegang|Карьерный путь
+Berufseinstieg|Начало карьеры
+Aufstieg|Карьерный рост
+Tarifvertrag|Тарифный договор
+Mindestlohn|Минимальная зарплата
+Arbeitsschutz|Охрана труда
+Datenschutz|Защита данных
+Kostenvoranschlag|Предварительная смета
+Umsatz|Оборот, выручка
+Gewinn|Прибыль
+Verlust|Убыток
+Wettbewerb|Конкуренция
+Konkurrent|Конкурент
+Standort|Местоположение (фирмы)
+Bericht|Отчёт
+Entwurf|Черновик, проект
+Anhang|Вложение (в письме)
+Verteiler|Список рассылки
+Beschluss|Решение (собрания)
+Vorschlag|Предложение
+Kompromiss|Компромисс
+Einwand|Возражение
+Konflikt|Конфликт
+Rückruf|Обратный звонок
+Rabatt|Скидка
+Versand|Отправка
+Lieferschein|Накладная
+Mangel|Недостаток, дефект
+Schaden|Ущерб, повреждение
+Ablauf|Ход, процесс
+Fortschritt|Прогресс
+Erfolg|Успех
+Zuständigkeitsbereich|Зона ответственности
+Ruhestand|Пенсия (выход на пенсию)
+Minijob|Мини-работа (до 538 €)
+Praktikant|Практикант
+Auszubildende|Ученик (по профобучению; der Auszubildende)`;
+
+  const RAW_DAS_B2 = `
+Unternehmen|Предприятие, компания
+Team|Команда
+Projekt|Проект
+Meeting|Совещание
+Protokoll|Протокол
+Gehaltsgespräch|Разговор о зарплате
+Vorstellungsgespräch|Собеседование
+Arbeitszeugnis|Характеристика с места работы
+Zeugnis|Аттестат, свидетельство
+Anschreiben|Сопроводительное письмо
+Praktikum|Практика, стажировка
+Bruttogehalt|Зарплата брутто
+Nettogehalt|Зарплата нетто
+Budget|Бюджет
+Ziel|Цель
+Ergebnis|Результат
+Problem|Проблема
+Missverständnis|Недоразумение
+Feedback|Обратная связь
+Personal|Персонал
+Lager|Склад
+Produkt|Продукт
+Muster|Образец
+Werkzeug|Инструмент
+Fachwissen|Профессиональные знания
+Know-how|Ноу-хау
+Homeoffice|Удалённая работа из дома
+Arbeitsverhältnis|Трудовые отношения
+Arbeitsklima|Атмосфера на работе
+Betriebsklima|Климат на предприятии
+Mitarbeitergespräch|Беседа с сотрудником
+Kündigungsschreiben|Письмо об увольнении
+Mobbing|Травля на работе
+Netzwerk|Сеть (контактов)
+Anliegen|Просьба, дело, вопрос
+Verfahren|Процедура, метод
+Risiko|Риск
+Fazit|Вывод, итог`;
+
+  const RAW_DIE_B2 = `
+Firma|Фирма
+Branche|Отрасль
+Geschäftsleitung|Руководство фирмы
+Führungskraft|Руководитель
+Belegschaft|Персонал, коллектив
+Stellenanzeige|Объявление о вакансии
+Stellenausschreibung|Объявление о конкурсе на должность
+Qualifikation|Квалификация
+Berufserfahrung|Опыт работы
+Fähigkeit|Способность, умение
+Kenntnis|Знание
+Weiterbildung|Повышение квалификации
+Fortbildung|Курсы повышения квалификации
+Umschulung|Переобучение
+Probezeit|Испытательный срок
+Arbeitszeit|Рабочее время
+Gleitzeit|Скользящий график
+Teilzeit|Неполный рабочий день
+Vollzeit|Полный рабочий день
+Überstunde|Сверхурочный час
+Schicht|Смена
+Krankmeldung|Больничный (уведомление)
+Arbeitsunfähigkeitsbescheinigung|Больничный лист
+Elternzeit|Отпуск по уходу за ребёнком
+Befristung|Ограничение срока (договора)
+Beförderung|Повышение (в должности)
+Gehaltserhöhung|Повышение зарплаты
+Aufgabe|Задача
+Verantwortung|Ответственность
+Zuständigkeit|Компетенция, ответственность
+Besprechung|Совещание
+Sitzung|Заседание
+Tagesordnung|Повестка дня
+Präsentation|Презентация
+Frist|Срок
+Deadline|Дедлайн
+Rücksprache|Консультация, согласование
+Absprache|Договорённость
+Vereinbarung|Соглашение
+Entscheidung|Решение
+Lösung|Решение (проблемы)
+Herausforderung|Вызов, сложная задача
+Beschwerde|Жалоба
+Reklamation|Рекламация, претензия
+Lieferung|Поставка
+Bestellung|Заказ
+Auftragsbestätigung|Подтверждение заказа
+Zahlung|Оплата
+Mahnung|Напоминание об оплате
+Kundschaft|Клиентура
+Dienstleistung|Услуга
+Qualität|Качество
+Leistung|Производительность, достижение
+Arbeitslosigkeit|Безработица
+Gewerkschaft|Профсоюз
+Sozialversicherung|Социальное страхование
+Rente|Пенсия
+Dienstreise|Командировка
+Kooperation|Сотрудничество
+Zusammenarbeit|Сотрудничество, совместная работа
+Kommunikation|Коммуникация
+Teamfähigkeit|Умение работать в команде
+Belastbarkeit|Стрессоустойчивость
+Eigeninitiative|Собственная инициатива
+Digitalisierung|Цифровизация
+Arbeitsbelastung|Рабочая нагрузка
+Kritik|Критика
+Rückmeldung|Обратная связь, ответ
+Kündigungsschutzklage|Иск о защите от увольнения`;
+
+  const RAW_VERB_B2 = `
+leiten|руководить
+verwalten|управлять, администрировать
+organisieren|организовывать
+planen|планировать
+koordinieren|координировать
+delegieren|делегировать
+beauftragen|поручать
+bearbeiten|обрабатывать
+abschließen|завершать, заключать (договор)
+einhalten|соблюдать (срок)
+verschieben|переносить
+absagen|отменять
+zusagen|соглашаться, подтверждать
+einarbeiten|вводить в работу
+entlassen|увольнять
+befördern|повышать в должности
+verhandeln|вести переговоры
+überzeugen|убеждать
+zusammenfassen|резюмировать
+protokollieren|протоколировать
+weiterleiten|пересылать
+zurückrufen|перезванивать
+nachfragen|переспрашивать
+klären|выяснять
+abstimmen|согласовывать
+sich abstimmen|согласовывать (друг с другом)
+beanstanden|предъявлять претензию
+reklamieren|подавать рекламацию
+berechnen|рассчитывать, выставлять счёт
+mahnen|напоминать (об оплате)
+erstatten|возмещать
+genehmigen|одобрять, разрешать
+unterstützen|поддерживать
+sich durchsetzen|настоять на своём
+kritisieren|критиковать
+loben|хвалить
+sich weiterbilden|повышать квалификацию
+qualifizieren|квалифицировать
+umsetzen|реализовывать
+optimieren|оптимизировать
+überwachen|контролировать, наблюдать
+gewährleisten|гарантировать, обеспечивать
+sicherstellen|обеспечивать
+vermeiden|избегать
+berücksichtigen|учитывать
+priorisieren|расставлять приоритеты
+in Anspruch nehmen|воспользоваться (услугой)
+zur Verfügung stellen|предоставлять
+zur Verfügung stehen|быть в распоряжении
+in Frage kommen|подходить, рассматриваться
+in Kraft treten|вступать в силу
+zum Ausdruck bringen|выражать
+eine Entscheidung treffen|принимать решение
+Bescheid geben|сообщать, давать знать
+Bescheid sagen|сообщать
+Rücksicht nehmen|считаться (с кем-то)
+Stellung nehmen|высказывать позицию
+Verantwortung übernehmen|брать ответственность
+einen Antrag stellen|подавать заявление
+eine Frage stellen|задавать вопрос
+Kritik üben|критиковать
+in Verbindung stehen|быть на связи
+zur Sprache bringen|поднимать (тему)
+ums Leben kommen|погибать
+Einfluss nehmen|влиять
+einen Termin vereinbaren|договориться о встрече
+Überstunden machen|работать сверхурочно
+krankgeschrieben sein|быть на больничном`;
+
+  const RAW_ADJ_B2 = `
+befristet|срочный (о договоре)
+unbefristet|бессрочный
+berufstätig|работающий
+arbeitslos|безработный
+zuständig|ответственный, компетентный
+belastbar|стрессоустойчивый
+teamfähig|умеющий работать в команде
+kompetent|компетентный
+engagiert|увлечённый, активный
+motiviert|мотивированный
+lösungsorientiert|ориентированный на решение
+kundenorientiert|ориентированный на клиента
+sorgfältig|тщательный, аккуратный
+gewissenhaft|добросовестный
+termingerecht|в срок
+fristgerecht|в установленный срок
+vertraulich|конфиденциальный
+dienstlich|служебный
+beruflich|профессиональный
+kaufmännisch|коммерческий
+fachlich|профессиональный, специальный
+tariflich|тарифный
+brutto|брутто
+netto|нетто
+wirtschaftlich|экономический, рентабельный
+überfordert|перегруженный
+unterfordert|недогруженный
+ausgebucht|полностью занятый
+vorläufig|предварительный
+ausführlich|подробный
+schriftlich|письменный
+mündlich|устный
+zeitnah|своевременный, в ближайшее время
+reibungslos|беспроблемный, гладкий
+zielorientiert|целенаправленный
+international|международный
+mehrsprachig|многоязычный`;
+
+  const RAW_OTHER_B2 = `
+allerdings|однако, впрочем
+dennoch|тем не менее
+trotzdem|несмотря на это
+außerdem|кроме того
+darüber hinaus|помимо этого
+zudem|к тому же
+folglich|следовательно
+somit|таким образом
+deshalb|поэтому
+deswegen|поэтому
+daher|поэтому, отсюда
+nämlich|а именно, ведь
+sowohl ... als auch|как ... так и
+weder ... noch|ни ... ни
+entweder ... oder|либо ... либо
+zwar ... aber|хотя ... но
+je ... desto|чем ... тем
+nicht nur ... sondern auch|не только ... но и
+obwohl|хотя
+falls|в случае если
+sofern|поскольку, если
+indem|тем, что; путём
+sodass|так что
+anstatt dass|вместо того чтобы
+ohne dass|без того чтобы
+nachdem|после того как
+sobald|как только
+solange|пока, до тех пор пока
+seitdem|с тех пор как
+inzwischen|тем временем, уже
+mittlerweile|тем временем, к этому времени
+bisher|до сих пор
+demnächst|в ближайшее время
+umgehend|незамедлительно
+voraussichtlich|предположительно
+gegebenenfalls (ggf.)|при необходимости
+beziehungsweise (bzw.)|или, соответственно
+im Voraus|заранее
+im Anhang|во вложении
+in Bezug auf|относительно
+im Hinblick auf|с учётом, в отношении
+im Auftrag (i. A.)|по поручению
+Mit freundlichen Grüßen|С уважением
+Sehr geehrte Damen und Herren|Уважаемые дамы и господа
+Vielen Dank im Voraus|Заранее спасибо
+Ich beziehe mich auf|Я ссылаюсь на
+Ich würde vorschlagen, dass|Я бы предложил(а), чтобы
+Meiner Meinung nach|По моему мнению
+Ich bin der Ansicht, dass|Я придерживаюсь мнения, что
+Da stimme ich Ihnen zu|Тут я с вами согласен(-на)
+Da bin ich anderer Meinung|Тут я другого мнения
+Könnten Sie mir bitte mitteilen|Не могли бы вы сообщить мне
+Ich möchte mich beschweren über|Я хотел(а) бы пожаловаться на`;
+
 
   // Sentence word-order tasks.
   // Format per line: tokens (space-separated, punctuation as its own token) | decoy tokens (comma-separated, "-" if none) | Russian translation | tense | type
@@ -1671,7 +2009,15 @@ Meine Eltern haben das neue Auto schon verkauft .|den,neuen|Мои родите�
 Letzte Woche habe ich meinen Chef getroffen .|mein,meinem|На прошлой неделе я встретил(а) своего начальника.|Perfekt|Aussage
 Hast du den Termin beim Arzt schon vereinbart ?|der,dem|Ты уже договорился(-лась) о приёме у врача?|Perfekt|Frage
 Wann bist du nach Deutschland gekommen ?|hast,hattest|Когда ты приехал(а) в Германию?|Perfekt|Frage
-Weil ich die Prüfung bestanden habe , bin ich sehr glücklich .|hat,hatte|Так как я сдал(а) экзамен, я очень счастлив(а).|Perfekt|Aussage`;
+Weil ich die Prüfung bestanden habe , bin ich sehr glücklich .|hat,hatte|Так как я сдал(а) экзамен, я очень счастлив(а).|Perfekt|Aussage
+Könnten Sie mir bitte die Unterlagen bis Freitag schicken ?|Ihnen,schickt|Не могли бы вы прислать мне документы до пятницы?|Präsens|Frage
+Wir müssen den Termin leider auf nächste Woche verschieben .|dem,nächsten|К сожалению, нам нужно перенести встречу на следующую неделю.|Präsens|Aussage
+Ich bin für die Planung des Projekts zuständig .|der,dem|Я отвечаю за планирование проекта.|Präsens|Aussage
+Obwohl ich viel Erfahrung habe , muss ich mich noch einarbeiten .|hat,habt|Хотя у меня много опыта, мне ещё нужно освоиться.|Präsens|Aussage
+Der Kunde hat sich über die verspätete Lieferung beschwert .|verspätet,den|Клиент пожаловался на задержку поставки.|Perfekt|Aussage
+Wir haben uns mit der Geschäftsleitung auf einen Kompromiss geeinigt .|den,einem|Мы договорились с руководством о компромиссе.|Perfekt|Aussage
+Haben Sie den Bericht schon an alle Kollegen weitergeleitet ?|dem,Kollegin|Вы уже переслали отчёт всем коллегам?|Perfekt|Frage
+Falls Sie Fragen haben , stehe ich Ihnen gern zur Verfügung .|Sie,stehen|Если у вас есть вопросы, я охотно к вашим услугам.|Präsens|Aussage`;
 
   // Verbs with fixed prepositions (Rektion der Verben): verb | preposition | case | Russian meaning
   const RAW_VERBPREP = `
@@ -1875,7 +2221,32 @@ enttäuscht sein|von|Dat.|быть разочарованным в
 überzeugt sein|von|Dat.|быть убеждённым в
 bereit sein|zu|Dat.|быть готовым к
 Lust haben|auf|Akk.|хотеть (чего-то)
-Zeit haben|für|Akk.|иметь время для`;
+Zeit haben|für|Akk.|иметь время для
+sich bewerben|als|Nom.|подавать заявку на должность
+sich einarbeiten|in|Akk.|вникать в, осваивать
+Rücksicht nehmen|auf|Akk.|считаться с
+Bezug nehmen|auf|Akk.|ссылаться на
+Einfluss haben|auf|Akk.|влиять на
+Wert legen|auf|Akk.|придавать значение
+Anspruch haben|auf|Akk.|иметь право на
+verfügen|über|Akk.|располагать
+haften|für|Akk.|нести ответственность за
+sich durchsetzen|gegen|Akk.|одержать верх над
+Kontakt aufnehmen|mit|Dat.|связаться с
+in Kontakt stehen|mit|Dat.|быть на связи с
+zusammenarbeiten|mit|Dat.|сотрудничать с
+sich abstimmen|mit|Dat.|согласовывать с
+Rücksprache halten|mit|Dat.|консультироваться с
+beauftragen|mit|Dat.|поручать
+sich zurechtfinden|in|Dat.|ориентироваться в
+Erfahrung haben|in|Dat.|иметь опыт в
+mitwirken|an|Dat.|участвовать в, содействовать
+fehlen|an|Dat.|не хватать (чего-то)
+profitieren|von|Dat.|извлекать выгоду из
+zurücktreten|von|Dat.|отказываться от, уходить с (поста)
+abweichen|von|Dat.|отклоняться от
+neigen|zu|Dat.|быть склонным к
+befähigen|zu|Dat.|давать возможность, квалифицировать`;
 
 
   // ---------------- parsing helpers ----------------
@@ -1899,6 +2270,12 @@ Zeit haben|für|Akk.|иметь время для`;
     ...parseBlock(RAW_VERB2,"","verb"),
     ...parseBlock(RAW_ADJ,"","adj"),
     ...parseBlock(RAW_PREP2,"","prep"),
+    ...parseBlock(RAW_DER_B2,"der","noun"),
+    ...parseBlock(RAW_DAS_B2,"das","noun"),
+    ...parseBlock(RAW_DIE_B2,"die","noun"),
+    ...parseBlock(RAW_VERB_B2,"","verb"),
+    ...parseBlock(RAW_ADJ_B2,"","adj"),
+    ...parseBlock(RAW_OTHER_B2,"","other"),
   ].map((w,i)=>({...w, id:"w"+i}));
 
   const GENDER_MAP = { der:'m', das:'n', die:'f' };
