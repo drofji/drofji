@@ -1610,6 +1610,50 @@ zielbewusst|целеустремленный
 zuverlässig|надежный
 zweifelhaft|сомнительный`;
 
+  // Additional prepositions (Genitiv and more; appended separately so existing word ids stay stable)
+  const RAW_PREP2 = `
+wegen|из-за, по причине|Gen.
+trotz|несмотря на|Gen.
+während|во время, в течение|Gen.
+statt|вместо|Gen.
+anstatt|вместо|Gen.
+innerhalb|внутри, в течение (срока)|Gen.
+außerhalb|вне, за пределами|Gen.
+oberhalb|выше, над|Gen.
+unterhalb|ниже, под|Gen.
+diesseits|по эту сторону|Gen.
+jenseits|по ту сторону|Gen.
+aufgrund|на основании, из-за|Gen.
+infolge|вследствие|Gen.
+angesichts|ввиду, учитывая|Gen.
+anlässlich|по случаю|Gen.
+bezüglich|относительно, касательно|Gen.
+hinsichtlich|в отношении, касательно|Gen.
+mithilfe|с помощью|Gen.
+mittels|посредством|Gen.
+zugunsten|в пользу|Gen.
+mangels|за неимением, из-за отсутствия|Gen.
+einschließlich|включая|Gen.
+ausschließlich|исключая, исключительно|Gen.
+zuzüglich|плюс, с добавлением|Gen.
+abzüglich|за вычетом|Gen.
+inmitten|посреди|Gen.
+seitens|со стороны|Gen.
+unweit|недалеко от|Gen.
+um ... willen|ради|Gen.
+laut|согласно, по словам|Gen./Dat.
+dank|благодаря|Gen./Dat.
+binnen|в течение, в пределах (срока)|Gen./Dat.
+entlang|вдоль|Akk./Gen.
+entgegen|вопреки, навстречу|Dat.
+gemäß|согласно, в соответствии с|Dat.
+zufolge|согласно (стоит после сущ.)|Dat.
+samt|вместе с|Dat.
+zuliebe|ради (кого-то)|Dat.
+per|по, через, посредством|Akk.
+pro|за, на (каждого)|Akk.
+à|по (цене)|Akk.`;
+
 
   // Sentence word-order tasks.
   // Format per line: tokens (space-separated, punctuation as its own token) | decoy tokens (comma-separated, "-" if none) | Russian translation | tense | type
@@ -1797,7 +1841,41 @@ sich wünschen|von|Dat.|желать (получить) от
 zurückkommen|von|Dat.|возвращаться из
 zählen|zu|Dat.|относиться к, входить в число
 zweifeln|an|Dat.|сомневаться в
-zwingen|zu|Dat.|принуждать к`;
+zwingen|zu|Dat.|принуждать к
+sich bemühen|um|Akk.|стараться добиться
+gehen|um|Akk.|речь идёт о (es geht um)
+sich anmelden|für|Akk.|записываться на
+sich anmelden|zu|Dat.|записываться на (курс)
+sich schämen|für|Akk.|стыдиться за
+schützen|vor|Dat.|защищать от
+warnen|vor|Dat.|предупреждать о
+Angst haben|vor|Dat.|бояться
+suchen|nach|Dat.|искать
+riechen|nach|Dat.|пахнуть (чем-то)
+sich sehnen|nach|Dat.|тосковать по
+streben|nach|Dat.|стремиться к
+stolz sein|auf|Akk.|гордиться
+gespannt sein|auf|Akk.|с нетерпением ждать
+neidisch sein|auf|Akk.|завидовать
+böse sein|auf|Akk.|сердиться на
+wütend sein|auf|Akk.|злиться на
+froh sein|über|Akk.|радоваться
+traurig sein|über|Akk.|грустить из-за
+verantwortlich sein|für|Akk.|отвечать за
+bekannt sein|für|Akk.|быть известным чем-то
+zuständig sein|für|Akk.|отвечать за, быть ответственным за
+zufrieden sein|mit|Dat.|быть довольным
+einverstanden sein|mit|Dat.|быть согласным с
+verheiratet sein|mit|Dat.|быть женатым / замужем за
+fertig sein|mit|Dat.|закончить (что-то)
+interessiert sein|an|Dat.|быть заинтересованным в
+abhängig sein|von|Dat.|зависеть от
+begeistert sein|von|Dat.|быть в восторге от
+enttäuscht sein|von|Dat.|быть разочарованным в
+überzeugt sein|von|Dat.|быть убеждённым в
+bereit sein|zu|Dat.|быть готовым к
+Lust haben|auf|Akk.|хотеть (чего-то)
+Zeit haben|für|Akk.|иметь время для`;
 
 
   // ---------------- parsing helpers ----------------
@@ -1820,6 +1898,7 @@ zwingen|zu|Dat.|принуждать к`;
     ...parseBlock(RAW_OTHER,"","other"),
     ...parseBlock(RAW_VERB2,"","verb"),
     ...parseBlock(RAW_ADJ,"","adj"),
+    ...parseBlock(RAW_PREP2,"","prep"),
   ].map((w,i)=>({...w, id:"w"+i}));
 
   const GENDER_MAP = { der:'m', das:'n', die:'f' };
