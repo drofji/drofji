@@ -603,10 +603,10 @@
         <span class="lb-ic">🎨</span>
         <span><span id="btnSettingsLabel">Язык и тема</span><span class="lb-sub" id="settingsHint">интерфейс и оформление</span></span>
       </button>
-      <button class="list-btn" id="speechBtn" role="switch" aria-checked="true">
+      <button class="list-btn" id="speechBtn" role="switch" aria-checked="false">
         <span class="lb-ic">🔊</span>
         <span class="lb-text"><span id="btnSpeechLabel">Озвучка</span><span class="lb-sub" id="speechHint">произносить немецкие слова и подтверждать выбор</span></span>
-        <span class="switch on" id="speechSwitch"></span>
+        <span class="switch" id="speechSwitch"></span>
       </button>
       <button class="list-btn" id="supportBtn">
         <span class="lb-ic">💛</span>
@@ -2420,7 +2420,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
   let currentOptions = [];
   let locked = false;
   let theme = "dark";
-  let speechOn = true;
+  let speechOn = false;
   let onboarded = false;
 
   function todayKey(){
