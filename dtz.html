@@ -439,6 +439,9 @@
     border:1px solid var(--rule); background:var(--flap-bg); border-radius:12px; padding:13px 10px;
     text-align:center; cursor:pointer; color:var(--ink); font-size:13px;
   }
+  .dir-grid{ display:grid; grid-template-columns:1fr; gap:10px; }
+  .dir-grid .pick-card{ text-align:left; }
+  .dir-grid .pick-card .dsub{ display:block; font-size:11.5px; font-weight:400; color:var(--ink-dim); margin-top:3px; }
   .pick-card.sel{ border-color:var(--accent); background:var(--accent-soft); }
   .pick-card .flag{ font-size:21px; display:block; margin-bottom:4px; }
   .theme-swatch{ width:100%; height:32px; border-radius:9px; margin-bottom:6px; border:1px solid var(--rule); }
@@ -465,6 +468,18 @@
     <div class="theme-grid" id="themeGrid"></div>
     <div class="modal-actions">
       <button class="btn-primary" id="langNextBtn">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ONBOARDING: quiz direction (shown once; editable later in More → Settings) -->
+<div class="modal-overlay" id="onboardDirModal">
+  <div class="modal-card">
+    <div class="modal-title" id="obDirTitle">Как хочешь учить слова?</div>
+    <div class="modal-desc" id="obDirDesc">Это можно изменить в любой момент: «Ещё» → «Настройки».</div>
+    <div class="dir-grid" id="dirGrid"></div>
+    <div class="modal-actions">
+      <button class="btn-primary" id="dirDoneBtn">Готово</button>
     </div>
   </div>
 </div>
@@ -602,6 +617,10 @@
       <button class="list-btn" id="settingsBtn">
         <span class="lb-ic">🎨</span>
         <span><span id="btnSettingsLabel">Язык и тема</span><span class="lb-sub" id="settingsHint">интерфейс и оформление</span></span>
+      </button>
+      <button class="list-btn" id="dirBtn">
+        <span class="lb-ic">🔁</span>
+        <span class="lb-text"><span id="btnDirLabel">Направление</span><span class="lb-sub" id="dirHint"></span></span>
       </button>
       <button class="list-btn" id="speechBtn" role="switch" aria-checked="false">
         <span class="lb-ic">🔊</span>
@@ -748,7 +767,7 @@
       manageBtn:"Слова", addWordBtn:"Слово", exportBtn:"Экспорт", importBtn:"Импорт",
       today:"Сегодня", allTime:"Всего", learnedSuffix:"выучено", learnedInSel:"ВЫУЧЕНО В ПОДБОРКЕ",
       newBadge:"Новая", seenBadge:"Повтор", deckLabel:"В КОЛОДЕ",
-      hintChoice:"нужно 2 верных ответа подряд", speechLabel:"Озвучка", speechHint:"произносить немецкие слова и подтверждать выбор", confirmChoice:"Подтвердить", hintOrder:"нажимай слова по порядку, чтобы собрать предложение",
+      hintChoice:"нужно 2 верных ответа подряд", speechLabel:"Озвучка", speechHint:"произносить немецкие слова и подтверждать выбор", confirmChoice:"Подтвердить", dirLabel:"Направление", dirTargetShort:"RU", dirTitle:"Как хочешь учить слова?", dirDesc:"Это можно изменить в любой момент: «Ещё» → «Настройки».", dirDone:"Готово", dirRuDe:"С русского на немецкий", dirRuDeSub:"видишь перевод — выбираешь немецкое слово", dirDeRu:"С немецкого на русский", dirDeRuSub:"видишь немецкое слово — выбираешь перевод", dirRandom:"Рандом", dirRandomSub:"направление меняется случайно", hintOrder:"нажимай слова по порядку, чтобы собрать предложение",
       doneTitle:"ALLE AN BORD 🚆", doneText:"Вы выучили все слова в этой подборке.", restart:"Начать заново",
       resetProgress:"Сбросить прогресс", tip:"der/das/die — учи артикль вместе со словом",
       manageTitle:"Слова", search:"Поиск слова или перевода…",
@@ -783,7 +802,7 @@
       manageBtn:"Слова", addWordBtn:"Слово", exportBtn:"Експорт", importBtn:"Імпорт",
       today:"Сьогодні", allTime:"Всього", learnedSuffix:"вивчено", learnedInSel:"ВИВЧЕНО В ПІДБІРЦІ",
       newBadge:"Нова", seenBadge:"Повтор", deckLabel:"У КОЛОДІ",
-      hintChoice:"потрібні 2 правильні відповіді підряд", speechLabel:"Озвучення", speechHint:"вимовляти німецькі слова та підтверджувати вибір", confirmChoice:"Підтвердити", hintOrder:"тисни слова по порядку, щоб скласти речення",
+      hintChoice:"потрібні 2 правильні відповіді підряд", speechLabel:"Озвучення", speechHint:"вимовляти німецькі слова та підтверджувати вибір", confirmChoice:"Підтвердити", dirLabel:"Напрямок", dirTargetShort:"RU", dirTitle:"Як хочеш вчити слова?", dirDesc:"Це можна змінити будь-коли: «Ще» → «Налаштування».", dirDone:"Готово", dirRuDe:"З перекладу на німецьку", dirRuDeSub:"бачиш переклад — обираєш німецьке слово", dirDeRu:"З німецької на переклад", dirDeRuSub:"бачиш німецьке слово — обираєш переклад", dirRandom:"Рандом", dirRandomSub:"напрямок змінюється випадково", hintOrder:"тисни слова по порядку, щоб скласти речення",
       doneTitle:"ALLE AN BORD 🚆", doneText:"Ви вивчили всі слова в цій підбірці.", restart:"Почати заново",
       resetProgress:"Скинути прогрес", tip:"der/das/die — вчи артикль разом зі словом",
       manageTitle:"Слова", search:"Пошук слова або перекладу…",
@@ -818,7 +837,7 @@
       manageBtn:"Words", addWordBtn:"Word", exportBtn:"Export", importBtn:"Import",
       today:"Today", allTime:"All-time", learnedSuffix:"learned", learnedInSel:"LEARNED IN SELECTION",
       newBadge:"New", seenBadge:"Repeat", deckLabel:"IN DECK",
-      hintChoice:"need 2 correct answers in a row", speechLabel:"Speech", speechHint:"pronounce German words and confirm your choice", confirmChoice:"Confirm", hintOrder:"tap the words in order to build the sentence",
+      hintChoice:"need 2 correct answers in a row", speechLabel:"Speech", speechHint:"pronounce German words and confirm your choice", confirmChoice:"Confirm", dirLabel:"Direction", dirTargetShort:"RU", dirTitle:"How do you want to learn?", dirDesc:"You can change this anytime: More → Settings.", dirDone:"Done", dirRuDe:"Translation → German", dirRuDeSub:"see the translation, pick the German word", dirDeRu:"German → translation", dirDeRuSub:"see the German word, pick the translation", dirRandom:"Random", dirRandomSub:"direction changes randomly", hintOrder:"tap the words in order to build the sentence",
       doneTitle:"ALLE AN BORD 🚆", doneText:"You've learned every word in this selection.", restart:"Start over",
       resetProgress:"Reset progress", tip:"der/das/die — learn the article together with the word",
       manageTitle:"Words", search:"Search word or translation…",
@@ -2397,7 +2416,12 @@ befähigen|zu|Dat.|давать возможность, квалифициров
     renderQuestion();
   }
 
+  const DIRECTIONAL_EXCLUDE = ["case","order","verbprep"];
   function makeQuestion(word){
+    if(!DIRECTIONAL_EXCLUDE.includes(word.cat)){
+      const dir = quizDir === "random" ? (Math.random() < 0.5 ? "ru-de" : "de-ru") : quizDir;
+      return { ...word, dir };
+    }
     if(word.cat !== "case") return word;
     const caseName = CASES[Math.floor(Math.random()*CASES.length)];
     const correctArticle = ARTICLE_TABLE[word.gender][caseName];
@@ -2421,6 +2445,8 @@ befähigen|zu|Dat.|давать возможность, квалифициров
   let locked = false;
   let theme = "dark";
   let speechOn = false;
+  let quizDir = "ru-de";   // "ru-de" | "de-ru" | "random"
+  let dirAsked = false;     // one-time direction prompt already shown
   let onboarded = false;
 
   function todayKey(){
@@ -2469,7 +2495,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
   function buildPayload(){
     return JSON.stringify({
       version:5, streaks, learned, shownIds, pendingReview, renderCount, allTimeShown, today,
-      selectedCats:[...selectedCats], currentDeckId, customDecks, customWords, uiLang, theme, onboarded, speechOn,
+      selectedCats:[...selectedCats], currentDeckId, customDecks, customWords, uiLang, theme, onboarded, speechOn, quizDir, dirAsked,
     });
   }
   async function saveProgress(){
@@ -2505,6 +2531,8 @@ befähigen|zu|Dat.|давать возможность, квалифициров
       if(data.uiLang) uiLang = data.uiLang;
       if(data.theme) theme = data.theme;
       if(typeof data.speechOn === 'boolean') speechOn = data.speechOn;
+      if(["ru-de","de-ru","random"].includes(data.quizDir)) quizDir = data.quizDir;
+      dirAsked = !!data.dirAsked;
       onboarded = !!data.onboarded;
     }
   }
@@ -2693,6 +2721,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
         isCorrect: f === question.correctArticle,
       })));
     }
+    if(question.dir === "de-ru") return buildTranslationOptions(question);
     let sameCat = ALL.filter(w=>w.cat===question.cat && w.id!==question.id);
     const candidates = sameCat.length >= 4 ? sameCat : ALL.filter(w=>!["case","order","verbprep"].includes(w.cat) && w.id!==question.id);
     shuffle(candidates);
@@ -2727,6 +2756,27 @@ befähigen|zu|Dat.|давать возможность, квалифициров
       }
       return { id: w.id, label, plain: plainLabelOf(w), isCorrect: w.id === question.id };
     }));
+  }
+
+  function escHtml(str){
+    return String(str==null?"":str).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  }
+  // German word shown, pick the translation.
+  function buildTranslationOptions(question){
+    let sameCat = ALL.filter(w=>w.cat===question.cat && w.id!==question.id && w.ru);
+    const candidates = sameCat.length >= 4 ? sameCat : ALL.filter(w=>!DIRECTIONAL_EXCLUDE.includes(w.cat) && w.id!==question.id && w.ru);
+    shuffle(candidates);
+    const used = new Set([(question.ru||"").trim().toLowerCase()]);
+    const distractors = [];
+    for(const w of candidates){
+      if(distractors.length >= 4) break;
+      const k = w.ru.trim().toLowerCase();
+      if(used.has(k)) continue;
+      used.add(k); distractors.push(w);
+    }
+    return shuffle([question, ...distractors].map(w=>({
+      id: w.id, label: escHtml(w.ru), plain: w.ru, isCorrect: w.id === question.id,
+    })));
   }
 
   function renderDots(){
@@ -2846,6 +2896,46 @@ befähigen|zu|Dat.|давать возможность, квалифициров
     await saveProgress();
   });
 
+  // ---- Quiz direction (RU→DE, DE→RU, random) ----
+  const DIR_OPTIONS = [
+    {key:"ru-de", icon:"🇷🇺 → 🇩🇪", tKey:"dirRuDe", subKey:"dirRuDeSub"},
+    {key:"de-ru", icon:"🇩🇪 → 🇷🇺", tKey:"dirDeRu", subKey:"dirDeRuSub"},
+    {key:"random", icon:"🎲", tKey:"dirRandom", subKey:"dirRandomSub"},
+  ];
+  let obDir = quizDir;
+  function renderDirHint(){
+    const h = document.getElementById('dirHint');
+    const o = DIR_OPTIONS.find(x=>x.key===quizDir);
+    if(h && o) h.textContent = t(o.tKey);
+  }
+  function renderDirGrid(){
+    const g = document.getElementById('dirGrid');
+    g.innerHTML = "";
+    DIR_OPTIONS.forEach(o=>{
+      const c = document.createElement('div');
+      c.className = 'pick-card' + (obDir===o.key ? ' sel' : '');
+      c.innerHTML = `<span class="flag">${o.icon}</span>${escHtml(t(o.tKey))}<span class="dsub">${escHtml(t(o.subKey))}</span>`;
+      c.addEventListener('click', ()=>{ obDir = o.key; renderDirGrid(); });
+      g.appendChild(c);
+    });
+  }
+  async function openDirModal(){
+    obDir = quizDir;
+    renderDirGrid();
+    openModal('onboardDirModal');
+    if(!dirAsked){ dirAsked = true; await saveProgress(); }
+  }
+  document.getElementById('dirBtn').addEventListener('click', openDirModal);
+  document.getElementById('dirDoneBtn').addEventListener('click', async ()=>{
+    const changed = obDir !== quizDir;
+    quizDir = obDir;
+    dirAsked = true;
+    renderDirHint();
+    closeModal('onboardDirModal');
+    await saveProgress();
+    if(changed && currentQuestion && currentQuestion.cat !== "order" && !locked) renderQuestion();
+  });
+
   function renderChoiceQuestion(question){
     currentOptions = buildOptions(question);
 
@@ -2857,11 +2947,19 @@ befähigen|zu|Dat.|давать возможность, квалифициров
       els.genderLabel.textContent = t("typeVerbprep").toUpperCase();
       els.ruWord.textContent = question.verb + " ... ?";
       els.flapSub.textContent = t("translationPrefix") + question.ru;
+    } else if(question.dir === "de-ru"){
+      els.genderLabel.textContent = "DE → " + t("dirTargetShort");
+      els.ruWord.textContent = plainLabelOf(question);
+      els.flapSub.textContent = "";
+      speakDe(plainLabelOf(question));
     } else {
-      els.genderLabel.textContent = "DE ⇄ " + uiLang.toUpperCase();
+      els.genderLabel.textContent = t("dirTargetShort") + " → DE";
       els.ruWord.textContent = question.ru;
       els.flapSub.textContent = "";
     }
+    // Options are German unless we're asking for the translation.
+    const germanOptions = question.dir !== "de-ru";
+    const confirmMode = speechActive() && germanOptions;
 
     els.options.innerHTML = "";
     currentOptions.forEach((opt, idx)=>{
@@ -2871,7 +2969,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
       btn.innerHTML = `<span class="idx">${String(idx+1).padStart(2,'0')}</span>${opt.label}`;
       btn.addEventListener('click', ()=>{
         if(locked) return;
-        if(!speechActive()){ handleAnswer(opt, question, btn); return; }
+        if(!confirmMode){ handleAnswer(opt, question, btn); return; }
         speakDe(spokenTextOf(opt, question));
         selectedOpt = { opt, btn };
         Array.from(els.options.querySelectorAll('.opt')).forEach(b=>b.classList.toggle('selected', b===btn));
@@ -2890,7 +2988,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
       selectedOpt.btn.classList.remove('selected');
       handleAnswer(selectedOpt.opt, question, selectedOpt.btn);
     });
-    if(speechActive()) els.options.appendChild(confirmBtn);
+    if(confirmMode) els.options.appendChild(confirmBtn);
   }
 
   function recordAnswer(question, isCorrect){
@@ -2944,7 +3042,8 @@ befähigen|zu|Dat.|давать возможность, квалифициров
         els.feedback.textContent = t("wrongPrefix") + (correctOpt ? correctOpt.plain : "");
       }
       els.feedback.className = "feedback bad";
-      if(correctOpt) speakDe(spokenTextOf(correctOpt, question));
+      if(question.dir === "de-ru") speakDe(plainLabelOf(question));
+      else if(correctOpt) speakDe(spokenTextOf(correctOpt, question));
     }
 
     allBtns.forEach(b=>{ if(!b.classList.contains('correct') && !b.classList.contains('wrong')) b.classList.add('dim'); });
@@ -3093,6 +3192,11 @@ befähigen|zu|Dat.|давать возможность, квалифициров
     setText('btnImportLabel','importBtn');
     setText('btnSettingsLabel','settingsBtnLabel');
     setText('btnSpeechLabel','speechLabel');
+    setText('btnDirLabel','dirLabel');
+    setText('obDirTitle','dirTitle');
+    setText('obDirDesc','dirDesc');
+    setText('dirDoneBtn','dirDone');
+    if(typeof renderDirHint === 'function') renderDirHint();
     setText('speechHint','speechHint');
     setText('btnResetLabel','resetProgress');
     setText('btnSupportLabel','obSupportTitle');
@@ -3665,6 +3769,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
     onboarded = true;
     await saveProgress();
     closeModal('onboardSupportModal');
+    if(!dirAsked) openDirModal();
   });
 
   // ---------------- page navigation ----------------
@@ -3727,6 +3832,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
     applyTheme(theme);
     renderSpeechToggle();
     applyI18nToStaticEls();
+    renderDirHint();
     renderDeckRow();
     renderChips();
     renderQuestion();
@@ -3735,6 +3841,8 @@ befähigen|zu|Dat.|давать возможность, квалифициров
       obLang = uiLang; obTheme = theme;
       renderLangGrid(); renderThemeGrid();
       openModal('onboardLangModal');
+    } else if(!dirAsked){
+      openDirModal();
     }
   })();
 
