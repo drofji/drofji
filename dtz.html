@@ -2031,6 +2031,42 @@ Könnten Sie mir bitte mitteilen|Не могли бы вы сообщить мн
 Ich möchte mich beschweren über|Я хотел(а) бы пожаловаться на`;
 
 
+  // Nouns whose meaning depends on the article (der See / die See …)
+  const RAW_DER_HOM = `
+See|Озеро
+Leiter|Руководитель, заведующий
+Teil|Часть (целого)
+Band|Том (книги)
+Schild|Щит
+Gehalt|Содержание (доля вещества)
+Kiefer|Челюсть
+Tor|Глупец (книжн.)
+Erbe|Наследник
+Moment|Момент, миг
+Verdienst|Заработок
+Junge|Мальчик
+Pony|Чёлка
+Flur|Коридор, прихожая`;
+  const RAW_DAS_HOM = `
+Steuer|Руль
+Teil|Деталь, запчасть
+Band|Лента, тесьма
+Schild|Табличка, вывеска
+Tor|Ворота
+Erbe|Наследство
+Moment|Фактор, момент (книжн.)
+Verdienst|Заслуга
+Junge|Детёныш
+Pony|Пони
+Mark|Костный мозг`;
+  const RAW_DIE_HOM = `
+See|Море
+Leiter|Лестница (приставная)
+Band|Музыкальная группа
+Kiefer|Сосна
+Mark|Марка (бывшая валюта)
+Flur|Поле, нива (книжн.)`;
+
   // Collocations / useful phrases (both directions)
   const RAW_PHRASE = `
 einen Termin vereinbaren|договориться о встрече / записаться на приём
@@ -2407,6 +2443,9 @@ befähigen|zu|Dat.|давать возможность, квалифициров
     ...parseBlock(RAW_ADJ_B2,"","adj"),
     ...parseBlock(RAW_OTHER_B2,"","other"),
     ...parseBlock(RAW_PHRASE,"","phrase"),
+    ...parseBlock(RAW_DER_HOM,"der","noun"),
+    ...parseBlock(RAW_DAS_HOM,"das","noun"),
+    ...parseBlock(RAW_DIE_HOM,"die","noun"),
   ].map((w,i)=>({...w, id:"w"+i}));
 
   const GENDER_MAP = { der:'m', das:'n', die:'f' };
@@ -2887,6 +2926,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
   function distractorPool(question){
     const ok = w => w.id !== question.id && w.cat !== "case" && w.cat !== "order" && normRu(w.ru) !== normRu(question.ru) && (w.cat !== "verbprep" || question.cat === "verbprep");
     const tiers = [
+      ALL.filter(w=>ok(w) && question.cat==="noun" && w.cat==="noun" && w.word===question.word),
       ALL.filter(w=>ok(w) && w.cat===question.cat),
       ALL.filter(w=>ok(w) && w.cat!==question.cat),
       basicAllWords.filter(w=>ok(w) && w.cat===question.cat),
