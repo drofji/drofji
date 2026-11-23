@@ -395,6 +395,8 @@
   }
   .modal-title{ font-family:'Space Mono',monospace; font-weight:700; font-size:16px; color:var(--accent); margin:0 0 4px; }
   .modal-desc{ font-size:12.5px; color:var(--ink-dim); margin:0 0 14px; }
+  .form-error{ color:var(--red); font-size:12px; margin-top:10px; min-height:0; }
+  .form-error:empty{ display:none; }
   .field-label{
     font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.08em; text-transform:uppercase;
     color:var(--ink-dim); margin:14px 0 6px;
@@ -681,6 +683,7 @@
     <input class="text-input" id="newWordInput" placeholder="Beispiel">
     <div class="field-label" id="fieldTrLabel">Перевод</div>
     <input class="text-input" id="newTrInput" placeholder="пример">
+    <div class="form-error" id="addWordError"></div>
     <div class="modal-actions">
       <button class="btn-secondary" data-close="addWordModal" id="cancelAddWord">Отмена</button>
       <button class="btn-primary" id="saveWordBtn">Сохранить</button>
@@ -772,7 +775,7 @@
       resetProgress:"Сбросить прогресс", tip:"der/das/die — учи артикль вместе со словом",
       manageTitle:"Слова", search:"Поиск слова или перевода…",
       filterAll:"Все", filterLearned:"Выучено", filterHalf:"Наполовину", filterNew:"Не пройдено",
-      typeNoun:"Существительные", typeVerb:"Глаголы", typeAdj:"Прилагательные", typeOther:"Другое", typeCase:"Артикль: падежи",
+      typeNoun:"Существительные", typeVerb:"Глаголы", typeAdj:"Прилагательные", typePhrase:"Словосочетания", errWordCyr:"Немецкое слово нужно писать латиницей (например: Beispiel). Перевод — во втором поле.", errSame:"Слово и перевод не должны совпадать.", errTrLatin:"Похоже, поля перепутаны: перевод написан латиницей.", typeOther:"Другое", typeCase:"Артикль: падежи",
       typeVerbprep:"Глагол+предлог", typeFrage:"Вопрос. слова", typePrep:"Предлоги", typeOrder:"Порядок слов",
       colEdit:"✎", colDelete:"🗑", confirmDeleteTitle:"Удалить слово?", confirmDeleteText:"Это действие нельзя отменить.",
       cancel:"Отмена", delete:"Удалить", save:"Сохранить", create:"Создать",
@@ -807,7 +810,7 @@
       resetProgress:"Скинути прогрес", tip:"der/das/die — вчи артикль разом зі словом",
       manageTitle:"Слова", search:"Пошук слова або перекладу…",
       filterAll:"Всі", filterLearned:"Вивчено", filterHalf:"Наполовину", filterNew:"Не пройдено",
-      typeNoun:"Іменники", typeVerb:"Дієслова", typeAdj:"Прикметники", typeOther:"Інше", typeCase:"Артикль: відмінки",
+      typeNoun:"Іменники", typeVerb:"Дієслова", typeAdj:"Прикметники", typePhrase:"Словосполучення", errWordCyr:"Німецьке слово треба писати латиницею (наприклад: Beispiel). Переклад — у другому полі.", errSame:"Слово і переклад не повинні збігатися.", errTrLatin:"Схоже, поля переплутані: переклад написаний латиницею.", typeOther:"Інше", typeCase:"Артикль: відмінки",
       typeVerbprep:"Дієслово+прийменник", typeFrage:"Питальні слова", typePrep:"Прийменники", typeOrder:"Порядок слів",
       colEdit:"✎", colDelete:"🗑", confirmDeleteTitle:"Видалити слово?", confirmDeleteText:"Цю дію не можна скасувати.",
       cancel:"Скасувати", delete:"Видалити", save:"Зберегти", create:"Створити",
@@ -842,7 +845,7 @@
       resetProgress:"Reset progress", tip:"der/das/die — learn the article together with the word",
       manageTitle:"Words", search:"Search word or translation…",
       filterAll:"All", filterLearned:"Learned", filterHalf:"Halfway", filterNew:"Not started",
-      typeNoun:"Nouns", typeVerb:"Verbs", typeAdj:"Adjectives", typeOther:"Other", typeCase:"Article: cases",
+      typeNoun:"Nouns", typeVerb:"Verbs", typeAdj:"Adjectives", typePhrase:"Phrases", errWordCyr:"Write the German word in Latin letters (e.g. Beispiel). The translation goes in the second field.", errSame:"Word and translation must be different.", errTrLatin:"The fields look swapped: the translation is in Latin letters.", typeOther:"Other", typeCase:"Article: cases",
       typeVerbprep:"Verb+preposition", typeFrage:"Question words", typePrep:"Prepositions", typeOrder:"Word order",
       colEdit:"✎", colDelete:"🗑", confirmDeleteTitle:"Delete word?", confirmDeleteText:"This can't be undone.",
       cancel:"Cancel", delete:"Delete", save:"Save", create:"Create",
@@ -885,8 +888,8 @@ Deutschland|Германия
 Russland|Россия
 Zoll|Таможня
 Anfang|Начало
-Bank|Банк
-Schein|Купюра, банкнот
+Geldautomat|Банкомат
+Schein|Купюра, банкнота; справка
 Umtauschkurs|Курс обмена
 Scheck|Чек
 Platz|Место
@@ -900,15 +903,15 @@ Schlüssel|Ключ
 Anzug|Костюм
 Tisch|Стол
 Stuhl|Стул
-Ober|Официант
+Ober|Официант (старин.)
 Teller|Тарелка
 Rest|Остаток
-Stock|Этаж, палка
+Stock|Этаж; палка
 Augenblick|Мгновение
 Preis|Цена
 Brief|Письмо
-Schalter|Окошко
-Ausweis|Удостоверение
+Schalter|Окошко (кассы); выключатель
+Ausweis|Удостоверение личности
 Apparat|Аппарат
 Bahnhof|Вокзал
 Zug|Поезд
@@ -916,7 +919,7 @@ Anschluss|Пересадка
 Bahnsteig|Перрон
 Zuschlag|Доплата
 Gepäckschein|Багажная квитанция
-Wagen|Транспортное средство
+Wagen|Вагон; машина
 Fahrplan|Расписание
 Flug|Полёт, рейс
 Flugplatz|Аэродром
@@ -927,7 +930,7 @@ Arzt|Врач
 Schmerz|Боль
 Kopf|Голова
 Magen|Желудок
-Unfall|Случай
+Unfall|Несчастный случай, авария
 Antrag|Заявление
 Aufenthaltstitel|Вид на жительство
 Mietvertrag|Договор аренды
@@ -938,7 +941,7 @@ Vertrag|Договор
 Nachweis|Подтверждение, справка
 Lebenslauf|Резюме, автобиография
 Arbeitsvertrag|Трудовой договор
-Lohn|Заработная плата
+Lohn|Заработная плата (почасовая, рабочих)
 Urlaub|Отпуск
 Feiertag|Праздничный день
 Kontostand|Остаток на счёте
@@ -965,7 +968,7 @@ Stadion|Стадион
 Haus|Дом
 Krankenhaus|Больница
 Rathaus|Ратуша
-Arbeitsamt|Биржа труда
+Arbeitsamt|Биржа труда (старое название)
 Ende|Конец
 Taxi|Такси
 Hotel|Отель
@@ -973,20 +976,20 @@ Zimmer|Комната
 Einzelzimmer|Одноместный номер
 Doppelzimmer|Двухместный номер
 Bad|Ванная
-WC|Туалет
+WC|Туалет (табличка на двери)
 Frühstück|Завтрак
 Hemd|Рубашка
 Restaurant|Ресторан
-Menü|Меню, комплексный обед
-Gericht|Блюдо, суд
+Menü|Комплексный обед; меню (в программе)
+Gericht|Блюдо; суд
 Messer|Нож
 Löffel|Ложка
-Glas|Стекло, стакан
+Glas|Стакан; стекло
 Angebot|Предложение
-Geschäft|Магазин, дело
+Geschäft|Магазин; сделка, бизнес
 Gerät|Прибор
 Gespräch|Разговор
-Gleis|Путь (жд)
+Gleis|Путь (железнодорожный)
 Fenster|Окно
 Bett|Кровать
 Flugzeug|Самолёт
@@ -997,7 +1000,7 @@ Büro|Бюро, офис
 Auto|Автомобиль
 Fahrzeug|Транспортное средство
 Licht|Свет
-Fieber|Температура
+Fieber|Высокая температура, жар
 Ausland|Заграница
 Fundbüro|Бюро находок
 Amt|Ведомство, учреждение
@@ -1005,7 +1008,7 @@ Formular|Бланк, форма
 Konto|Счёт (банковский)
 Kindergeld|Пособие на детей
 Jobcenter|Джобцентр
-Gehalt|Зарплата
+Gehalt|Оклад, зарплата (служащих)
 Rezept|Рецепт
 Kind|Ребёнок
 Internet|Интернет`;
@@ -1013,7 +1016,7 @@ Internet|Интернет`;
   const RAW_DIE = `
 Nacht|Ночь
 Entschuldigung|Извинение
-Frau|Госпожа, жена, женщина
+Frau|Женщина; жена; госпожа
 Kollegin|Коллега (женщина)
 Freundin|Подруга
 Reise|Путешествие
@@ -1022,16 +1025,16 @@ Zollerklärung|Таможенная декларация
 Sache|Вещь, дело
 Tasche|Сумка, карман
 Zigarette|Сигарета
-Bank|Скамейка
+Bank|Банк; скамейка
 Währung|Валюта
 Karte|Карта, открытка
-Uhr|Час(ы), часы
+Uhr|Часы; час (при указании времени)
 Zeit|Время
 Arbeit|Работа
-Strasse|Улица
+Straße|Улица
 U-Bahn|Метро
 S-Bahn|Городская электричка
-Strassenbahn|Трамвай
+Straßenbahn|Трамвай
 Station|Станция
 Mitte|Центр, середина
 Apotheke|Аптека
@@ -1041,9 +1044,9 @@ Ecke|Угол
 Fahrt|Поездка
 Dusche|Душ
 Toilette|Туалет
-Rechnung|Счёт
-Gaststätte|Ресторан
-Speisekarte|Меню
+Rechnung|Счёт (к оплате)
+Gaststätte|Ресторан, трактир
+Speisekarte|Меню (в ресторане)
 Gabel|Вилка
 Ware|Товар
 Abteilung|Отдел
@@ -1059,30 +1062,30 @@ Marke|Марка
 Stunde|Час, урок
 Vorwahl|Код города
 Eisenbahn|Железная дорога
-Auskunft|Справочное бюро
+Auskunft|Справка, информация; справочное бюро
 Fahrkarte|Проездной билет
 Gepäckaufbewahrung|Камера хранения
 Tür|Дверь
 Verspätung|Задержка, опоздание
 Gesellschaft|Общество, компания
-Maschine|Машина, механизм
+Maschine|Машина, механизм; самолёт (разг.)
 Abfertigung|Оформление
 Bordkarte|Посадочный талон
 Reihe|Ряд
 Linie|Линия, маршрут
 Tüte|Кулёк, пакет
-Arznei|Лекарство
+Arznei|Лекарство (книжн.)
 Autobahn|Автострада
 Polizei|Полиция
-Leitung|Руководство
+Leitung|Руководство; линия, провод
 Schuld|Вина, долг
 Brücke|Мост
 Ordnung|Порядок
-Papiere|Бумаги, документы
+Unterkunft|Жильё, ночлег
 Panne|Поломка
-Stelle|Место
+Stelle|Место; должность, вакансия
 Hilfe|Помощь
-Batterie|Аккумулятор
+Batterie|Батарейка, аккумулятор
 Sprechstunde|Приёмные часы (у врача)
 Bremse|Тормоз
 Spritze|Шприц, укол
@@ -1093,7 +1096,7 @@ Anmeldung|Регистрация, запись
 Abmeldung|Снятие с учёта
 Miete|Арендная плата
 Kündigung|Расторжение договора, увольнение
-Nebenkosten|Коммунальные расходы
+Nebenkostenabrechnung|Расчёт коммунальных платежей
 Wohnung|Квартира
 Heizung|Отопление
 Unterschrift|Подпись
@@ -1101,7 +1104,7 @@ Bescheinigung|Справка
 Versicherung|Страховка
 Krankenkasse|Медицинская страховая касса
 Arbeitsagentur|Агентство занятости
-Bewerbung|Заявка на работу, резюме
+Bewerbung|Заявление о приёме на работу
 Kündigungsfrist|Срок расторжения договора
 Steuer|Налог
 Überweisung|Денежный перевод
@@ -1119,22 +1122,22 @@ Behörde|Ведомство, инстанция`;
 
   // Verbs: infinitive | meaning (strong, weak and irregular verbs merged into one category)
   const RAW_VERB = `
-sprechen|разговаривать
+sprechen|говорить, разговаривать
 stehen|стоять
 verstehen|понимать
 gehen|идти
-kommen|прийти
+kommen|приходить, приезжать
 bekommen|получать
 ankommen|прибывать
 nehmen|брать
 annehmen|принимать
 mitnehmen|брать с собой
 geben|давать|Dat.+Akk.
-aufgeben|оставлять, сдавать
+aufgeben|сдавать (багаж, посылку); бросать
 fahren|ехать
-abfahren|отъезжать
+abfahren|отправляться (о транспорте)
 schreiben|писать|Dat.+Akk.
-steigen|взбираться
+steigen|подниматься; садиться (в транспорт)
 umsteigen|пересаживаться
 aussteigen|выходить
 lassen|позволять, оставлять
@@ -1142,13 +1145,13 @@ halten|держать
 bleiben|оставаться
 trinken|пить
 sehen|видеть
-nachsehen|проверять, наблюдать
-bieten|предлагать|Dat.+Akk.
-anbieten|предлагать (нереальное)|Dat.+Akk.
+nachsehen|посмотреть, проверить
+bieten|предоставлять, предлагать (возможность)|Dat.+Akk.
+anbieten|предлагать (товар, услугу, помощь)|Dat.+Akk.
 liegen|лежать
-rufen|звать
-aufrufen|вызывать
-anrufen|звонить
+rufen|звать, вызывать
+aufrufen|вызывать (по имени, номеру)
+anrufen|звонить (по телефону)
 ausrufen|восклицать
 schließen|закрывать
 schlafen|спать
@@ -1163,34 +1166,34 @@ ziehen|тянуть
 anziehen|надевать
 ausziehen|снимать
 stehlen|украсть, воровать
-finden|находить, искать
+finden|находить; считать (о мнении)
 entscheiden|решать
 verlieren|терять
-essen|кушать
+essen|есть, кушать
 waschen|стирать, мыть
 gefallen|нравиться|Dat.
-entschuldigen|извиняться
-vorstellen|представлять
+entschuldigen|извинять; (возвр.) извиняться
+vorstellen|представлять (кого-то); (возвр.) представляться
 heißen|называться
-aufmachen|открывать
+aufmachen|открывать (разг.)
 zahlen|платить
-wechseln|менять
+wechseln|менять, разменивать (деньги)
 einlösen|обналичивать
 kosten|стоить
 reisen|путешествовать
-umtauschen|обменивать
+umtauschen|обменивать (товар, валюту)
 warten|ждать
 entwerten|компостировать
 fragen|спрашивать
 bestellen|заказывать
 ausfüllen|заполнять
-reinigen|чистить
-wohnen|проживать
-abreisen|уезжать, отъезжать
+reinigen|чистить (химчистка)
+wohnen|жить, проживать
+abreisen|уезжать (из отеля, города)
 machen|делать
 bedienen|обслуживать
-wählen|выбирать, набирать
-schmecken|быть по вкусу|Dat.
+wählen|выбирать; набирать (номер)
+schmecken|нравиться на вкус|Dat.
 kaufen|покупать
 wünschen|желать|Dat.+Akk.
 zeigen|показывать|Dat.+Akk.
@@ -1198,7 +1201,7 @@ arbeiten|работать
 anprobieren|примерять
 passen|подходить|Dat.
 packen|укладывать, паковать
-abholen|забирать, получать
+abholen|забирать (кого-то/что-то)
 schicken|посылать|Dat.+Akk.
 öffnen|открывать
 anschnallen|пристёгивать(ся)
@@ -1206,9 +1209,9 @@ dauern|длиться
 einstellen|настраивать, регулировать
 tanken|заправляться
 reparieren|чинить, ремонтировать
-glauben|думать, полагать|Dat.+Akk.
+glauben|верить; полагать|Dat.+Akk.
 stellen|ставить
-überprüfen|проверять
+überprüfen|перепроверять, контролировать
 abschleppen|отбуксировать
 stimmen|быть верным, соответствовать
 rauchen|курить
@@ -1217,45 +1220,45 @@ verkaufen|продавать|Dat.+Akk.
 bremsen|тормозить
 legen|класть
 passieren|случаться
-verletzen|повреждать, ранить
+verletzen|ранить, травмировать
 wiederholen|повторять
-möchten|хотеть бы
+möchten|хотел(а) бы
 antworten|отвечать|Dat.
-reservieren|бронировать
+reservieren|резервировать (столик, номер)
 telefonieren|говорить по телефону
 ausrichten|передавать (сообщение)
 hören|слышать
-buchen|бронировать
-führen|вести
+buchen|бронировать (поездку, билет)
+führen|вести; руководить
 parken|парковаться
 wecken|будить
 sagen|сказать, говорить
 fühlen|чувствовать
-besetzen|занимать
+besetzen|занимать (место)
 fehlen|не хватать|Dat.
 empfehlen|рекомендовать|Dat.+Akk.
-mögen|желать, любить
-wollen|желать, хотеть
-müssen|быть должным
-sollen|быть обязанным
-dürfen|мочь, разрешать
-können|мочь
-kennen|знать
+mögen|любить, нравиться
+wollen|хотеть (намерение)
+müssen|быть должным (необходимость)
+sollen|следовать, быть должным (по указанию)
+dürfen|иметь право, можно
+können|мочь, уметь
+kennen|знать (быть знакомым)
 nennen|называть|Dat.+Akk.
 brennen|гореть
 rennen|бежать, мчаться
-wenden|поворачивать, обращать
-senden|посылать|Dat.+Akk.
+wenden|разворачивать; (возвр.) обращаться к
+senden|отправлять (письмо, файл)|Dat.+Akk.
 denken|думать
 sein|быть
 haben|иметь
 werden|стать, становиться
-wissen|знать
-tun|делать
+wissen|знать (факт, информацию)
+tun|делать (общ.)
 bringen|приносить|Dat.+Akk.
-sich bewerben|подавать заявление о приёме на работу
+sich bewerben|подавать заявление (на работу, место)
 kündigen|увольнять(ся), расторгать договор
-beantragen|подавать заявление (на что-то)
+beantragen|ходатайствовать, оформлять (документ, пособие)
 sich anmelden|регистрироваться
 sich abmelden|сниматься с учёта
 unterschreiben|подписывать
@@ -1282,9 +1285,9 @@ versichern|страховать
 impfen|делать прививку
 untersuchen|обследовать, осматривать
 behandeln|лечить, обращаться
-erhalten|получать
+erhalten|получать (офиц.)
 ausstellen|выдавать (документ)
-prüfen|проверять
+prüfen|проверять, экзаменовать
 gelten|действовать, быть действительным
 verlängern|продлевать
 ablaufen|истекать (о сроке)
@@ -1298,15 +1301,15 @@ wohin|куда
 wo|где
 wie|как
 wer|кто
-wofür|зачем
-wieviel|сколько
+wofür|за что, для чего
+wie viel|сколько
 was|что
 wann|когда
 womit|чем, с помощью чего
 warum|почему
 wen|кого
-welche|какая, который
-wozu|для чего`;
+welche|какой, какая, какие
+wozu|зачем, с какой целью`;
 
   const RAW_PREP = `
 bis|до|Akk.
@@ -1325,11 +1328,11 @@ unter|под, среди|Akk./Dat.
 vor|перед|Akk./Dat.
 zwischen|между|Akk./Dat.
 von|от|Dat.
-zu|к|Dat.
+zu|к (кому-то, куда-то)|Dat.
 seit|с (какого-то момента)|Dat.
 aus|из|Dat.
 mit|с|Dat.
-nach|после, в направлении|Dat.
+nach|после; в (город, страну); по (мнению)|Dat.
 bei|у, при|Dat.
 ab|начиная с|Dat.
 gegenüber|напротив, по сравнению с|Dat.
@@ -1339,19 +1342,19 @@ außer|кроме|Dat.`;
 jetzt|сейчас, в данный момент
 nun|теперь, итак
 also|значит, итак
-gleich|сразу, в тот же миг
+gleich|сейчас, сразу; одинаковый
 sofort|немедленно
 bald|скоро, вскоре
 während|в течение, пока
 wahr|правда, истинный
-wahrlich|истинно
-recht|верно, правда же
+wahrlich|воистину (книжн.)
+recht|довольно, весьма; верно
 genau|точно, верно
 richtig|правильно, верно
 wirklich|действительно
 möglich|возможно
 vielleicht|может быть
-darum|поэтому, потому
+darum|поэтому
 aber|но, же
 nur|только
 jedoch|однако
@@ -1359,25 +1362,25 @@ sondern|а (после отрицания)
 sehr|очень
 so|так
 sowie|так же, как и
-dass|что, чтобы
+dass|что (союз)
 weil|потому что, так как
 hier|здесь
-dort|там, туда
+dort|там
 da|вот, тут, там
 zuerst|во-первых, сначала
 je|когда-либо
 solch|такой
 nebenan|рядом, по соседству
-damit|тем, чтобы
+damit|чтобы; этим, с этим
 davor|перед этим
 davon|об этом, о том
 darauf|на это, затем
 dabei|при этом
 danach|после этого, затем
 dafür|для этого
-dann|тогда
+dann|потом, тогда
 daneben|рядом, кроме того
-damals|тогда, в то время
+damals|тогда, в то время (в прошлом)
 oft|часто
 manchmal|иногда
 immer|всегда
@@ -1392,8 +1395,8 @@ abraten|отговаривать|Dat.
 ähneln|быть похожим на|Dat.
 auffallen|бросаться в глаза|Dat.
 ausweichen|уклоняться, избегать|Dat.
-begegnen|встречать (случайно)|Dat.
-beistehen|поддерживать, помогать|Dat.
+begegnen|встретить (случайно)|Dat.
+beistehen|поддерживать (в трудной ситуации)|Dat.
 beitreten|вступать (в организацию)|Dat.
 danken|благодарить|Dat.
 dienen|служить|Dat.
@@ -1414,39 +1417,39 @@ schaden|вредить|Dat.
 schwerfallen|даваться с трудом|Dat.
 vertrauen|доверять|Dat.
 widersprechen|возражать, противоречить|Dat.
-zuhören|слушать (кого-то)|Dat.
+zuhören|внимательно слушать (кого-то)|Dat.
 zustimmen|соглашаться|Dat.
 abgewöhnen|отучать (себя) от|Dat.+Akk.
 angewöhnen|приучать (себя) к|Dat.+Akk.
 beschreiben|описывать|Dat.+Akk.
 bestätigen|подтверждать|Dat.+Akk.
-borgen|одалживать|Dat.+Akk.
-entziehen|лишать, отнимать|Dat.+Akk.
+borgen|одалживать (разг.)|Dat.+Akk.
+entziehen|лишать (прав, разрешения)|Dat.+Akk.
 erklären|объяснять|Dat.+Akk.
 erlauben|разрешать|Dat.+Akk.
 erleichtern|облегчать|Dat.+Akk.
 ermöglichen|делать возможным|Dat.+Akk.
 erzählen|рассказывать|Dat.+Akk.
-gestatten|позволять|Dat.+Akk.
-leihen|одалживать, давать взаймы|Dat.+Akk.
-liefern|доставлять|Dat.+Akk.
-mitteilen|сообщать|Dat.+Akk.
-präsentieren|представлять, презентовать|Dat.+Akk.
+gestatten|позволять (вежл.)|Dat.+Akk.
+leihen|давать/брать взаймы|Dat.+Akk.
+liefern|доставлять, поставлять|Dat.+Akk.
+mitteilen|сообщать (офиц.)|Dat.+Akk.
+präsentieren|презентовать|Dat.+Akk.
 schenken|дарить|Dat.+Akk.
 schulden|быть должным|Dat.+Akk.
 servieren|подавать (еду)|Dat.+Akk.
-spenden|жертвовать|Dat.+Akk.
+spenden|жертвовать (деньги)|Dat.+Akk.
 verbieten|запрещать|Dat.+Akk.
 verdanken|быть обязанным (кому-то чем-то)|Dat.+Akk.
 verheimlichen|скрывать, утаивать|Dat.+Akk.
-vermitteln|передавать, устраивать|Dat.+Akk.
+vermitteln|быть посредником; передавать (знания)|Dat.+Akk.
 verraten|выдавать, раскрывать (тайну)|Dat.+Akk.
 verschweigen|умалчивать|Dat.+Akk.
 versprechen|обещать|Dat.+Akk.
 verzeihen|прощать|Dat.+Akk.
 vorlesen|читать вслух|Dat.+Akk.
-vorschlagen|предлагать|Dat.+Akk.
-wegnehmen|отнимать|Dat.+Akk.
+vorschlagen|предлагать (идею)|Dat.+Akk.
+wegnehmen|отбирать, забирать|Dat.+Akk.
 wiedergeben|возвращать, воспроизводить|Dat.+Akk.
 zuordnen|соотносить, относить к|Dat.+Akk.
 zurückbringen|приносить обратно|Dat.+Akk.`;
@@ -1501,7 +1504,7 @@ lustig|веселый, забавный
 ernst|серьезный
 dumm|глупый
 klug|умный
-intelligent|умный, интеллигентный
+intelligent|интеллектуальный, умный
 modern|современный
 altmodisch|старомодный
 sauber|чистый
@@ -1512,13 +1515,13 @@ hell|светлый
 dunkel|темный
 breit|широкий
 schmal|узкий
-eng|тесный, узкий
+eng|тесный
 tief|глубокий
 flach|плоский, мелкий
 stark|сильный
 schwach|слабый
 gefährlich|опасный
-sicher|безопасный, уверенный
+sicher|безопасный; уверенный
 unmöglich|невозможный
 pünktlich|пунктуальный
 bequem|удобный, комфортный
@@ -1528,8 +1531,8 @@ unabhängig|независимый
 aktiv|активный
 passiv|пассивный
 ähnlich|похожий, сходный
-verschieden|разный, различный
-unterschiedlich|разный, отличающийся
+verschieden|различный, разнообразный
+unterschiedlich|отличающийся, неодинаковый
 aufregend|волнующий, захватывающий
 begeistert|восторженный
 enttäuscht|разочарованный
@@ -1537,7 +1540,7 @@ besonders|особенный
 einfach|простой
 kompliziert|сложный, запутанный
 kostenlos|бесплатный
-umsonst|бесплатный / напрасный
+umsonst|бесплатно; напрасно
 kreativ|творческий
 kritisch|критический
 ehrlich|честный
@@ -1552,7 +1555,7 @@ geduldig|терпеливый
 ungeduldig|нетерпеливый
 gerecht|справедливый
 ungerecht|несправедливый
-gespannt|напряженный (в ожидании)
+gespannt|с нетерпением ожидающий
 gewohnt|привычный
 ungewohnt|непривычный
 neugierig|любопытный
@@ -1563,7 +1566,7 @@ optimistisch|оптимистичный
 privat|личный, частный
 öffentlich|общественный, публичный
 selbstständig|самостоятельный
-sinnvoll|осмысленный, целесообразный
+sinnvoll|целесообразный, разумный
 sinnlos|бессмысленный
 sympathisch|симпатичный, приятный
 unsympathisch|неприятный (по характеру)
@@ -1571,15 +1574,15 @@ verantwortlich|ответственный
 verrückt|сумасшедший, безумный
 zufrieden|довольный
 unzufrieden|недовольный
-zwingend|обязательный, принудительный
+zwingend|обязательный, непременный
 abscheulich|отвратительный, мерзкий
 ambitioniert|амбициозный
 angeboren|врожденный
 angebracht|уместный, подобающий
 anspruchsvoll|требовательный, сложный (высокого уровня)
 aufwendig|затратный (по времени/средствам), трудоемкий
-ausgezeichnet|отличный, превосходный
-bedeutend|значительный, выдающийся
+ausgezeichnet|отличный
+bedeutend|важный, выдающийся
 beachtlich|внушительный, заметный
 bedrückt|угнетенный, подавленный
 beiläufig|мимолетный, попутный
@@ -1590,17 +1593,17 @@ bevorzugt|предпочтительный
 bizarr|причудливый, странный
 chronisch|хронический
 dringend|срочный, неотложный
-effektiv|эффективный (результативный)
-effizient|эффективный (экономичный)
-eindringlich|достойный внимания, настойчивый
+effektiv|действенный, результативный
+effizient|эффективный (без лишних затрат)
+eindringlich|настойчивый, убедительный
 einfühlsam|чуткий, эмпатичный
 entscheidend|решающий, определяющий
 entsprechend|соответствующий
-erheblich|значительный, существенный
-erschöpfend|исчерпывающий, изнурительный
+erheblich|значительный (о размере)
+erschöpfend|изнурительный; исчерпывающий
 exzessiv|чрезмерный, эксцессивный
 faszinierend|завораживающий, увлекательный
-fristlos|безотлагательный (о сроках/увольнении)
+fristlos|без предупреждения (об увольнении)
 geboten|необходимый, должный
 gediegen|солидный, добротный
 gelassen|невозмутимый, спокойный
@@ -1610,17 +1613,17 @@ gescheit|толковый, смышленый
 gleichgültig|безразличный, равнодушный
 gründlich|основательный, тщательный
 haftbar|несущий ответственность
-hervorragend|выдающийся, превосходный
+hervorragend|превосходный, выдающийся
 hilfsbereit|готовый прийти на помощь, отзывчивый
 intakt|неповрежденный, исправный
 konsequent|последовательный
 kontinuierlich|непрерывный, постоянный
-konventionell|консервативный, традиционный
+konventionell|традиционный, общепринятый
 lebendig|живой, оживленный
 massiv|массивный, массовый
-mühelos|без усилий, легкий
+mühelos|без усилий
 nachhaltig|устойчивый, экологичный / долговременный
-nahelegend|очевидный
+naheliegend|напрашивающийся, очевидный
 nützlich|полезный
 objektiv|объективный
 subjektiv|субъективный
@@ -1629,20 +1632,20 @@ profitabel|рентабельный, прибыльный
 qualifiziert|квалифицированный
 radikal|радикальный
 relevant|релевантный, актуальный
-solide|надежный, прочный, солидный
+solide|прочный, солидный
 spontan|спонтанный
 strikt|строгий
-substanziell|существенный, вещественный
+substanziell|существенный, по существу
 überflüssig|излишний, лишний
 überzeugend|убедительный
-umfassend|всеобъемлющий, исчерпывающий
+umfassend|всеобъемлющий
 unverzichtbar|незаменимый, крайне необходимый
-verbindlich|обязательный, обязывающий
+verbindlich|обязывающий, имеющий силу
 vielseitig|разносторонний
 vorsätzlich|умышленный, преднамеренный
 widersprüchlich|противоречивый
 zielbewusst|целеустремленный
-zuverlässig|надежный
+zuverlässig|надёжный (о человеке, источнике)
 zweifelhaft|сомнительный`;
 
   // Additional prepositions (Genitiv and more; appended separately so existing word ids stay stable)
@@ -1694,12 +1697,12 @@ pro|за, на (каждого)|Akk.
 Arbeitgeber|Работодатель
 Arbeitnehmer|Работник, наёмный сотрудник
 Arbeitsplatz|Рабочее место
-Arbeitsablauf|Рабочий процесс
+Arbeitsablauf|Последовательность рабочих операций
 Auftrag|Заказ, поручение
 Auftraggeber|Заказчик
 Ansprechpartner|Контактное лицо
 Abteilungsleiter|Руководитель отдела
-Vorgesetzte|Начальник (der Vorgesetzte)
+Vorgesetzte|Начальник, непосредственный руководитель
 Geschäftsführer|Генеральный директор
 Mitarbeiter|Сотрудник
 Betrieb|Предприятие
@@ -1707,7 +1710,7 @@ Betriebsrat|Производственный совет
 Kunde|Клиент
 Lieferant|Поставщик
 Dienstleister|Поставщик услуг
-Termin|Встреча, срок
+Termin|Назначенная встреча, приём
 Zeitplan|График, расписание
 Liefertermin|Срок поставки
 Feierabend|Конец рабочего дня
@@ -1728,7 +1731,7 @@ Verlust|Убыток
 Wettbewerb|Конкуренция
 Konkurrent|Конкурент
 Standort|Местоположение (фирмы)
-Bericht|Отчёт
+Bericht|Отчёт, доклад
 Entwurf|Черновик, проект
 Anhang|Вложение (в письме)
 Verteiler|Список рассылки
@@ -1743,20 +1746,20 @@ Versand|Отправка
 Lieferschein|Накладная
 Mangel|Недостаток, дефект
 Schaden|Ущерб, повреждение
-Ablauf|Ход, процесс
+Ablauf|Ход (событий), порядок действий
 Fortschritt|Прогресс
 Erfolg|Успех
 Zuständigkeitsbereich|Зона ответственности
 Ruhestand|Пенсия (выход на пенсию)
-Minijob|Мини-работа (до 538 €)
+Minijob|Мини-джоб (подработка с низким доходом)
 Praktikant|Практикант
-Auszubildende|Ученик (по профобучению; der Auszubildende)`;
+Auszubildende|Ученик на профобучении`;
 
   const RAW_DAS_B2 = `
-Unternehmen|Предприятие, компания
+Unternehmen|Компания, предприятие (крупное)
 Team|Команда
 Projekt|Проект
-Meeting|Совещание
+Meeting|Встреча, митинг (в офисе)
 Protokoll|Протокол
 Gehaltsgespräch|Разговор о зарплате
 Vorstellungsgespräch|Собеседование
@@ -1771,7 +1774,7 @@ Ziel|Цель
 Ergebnis|Результат
 Problem|Проблема
 Missverständnis|Недоразумение
-Feedback|Обратная связь
+Feedback|Фидбэк, отзыв
 Personal|Персонал
 Lager|Склад
 Produkt|Продукт
@@ -1804,8 +1807,8 @@ Qualifikation|Квалификация
 Berufserfahrung|Опыт работы
 Fähigkeit|Способность, умение
 Kenntnis|Знание
-Weiterbildung|Повышение квалификации
-Fortbildung|Курсы повышения квалификации
+Weiterbildung|Дальнейшее обучение, повышение квалификации
+Fortbildung|Курсы повышения квалификации (по профессии)
 Umschulung|Переобучение
 Probezeit|Испытательный срок
 Arbeitszeit|Рабочее время
@@ -1822,8 +1825,8 @@ Beförderung|Повышение (в должности)
 Gehaltserhöhung|Повышение зарплаты
 Aufgabe|Задача
 Verantwortung|Ответственность
-Zuständigkeit|Компетенция, ответственность
-Besprechung|Совещание
+Zuständigkeit|Компетенция (кто за что отвечает)
+Besprechung|Совещание, обсуждение
 Sitzung|Заседание
 Tagesordnung|Повестка дня
 Präsentation|Презентация
@@ -1833,7 +1836,7 @@ Rücksprache|Консультация, согласование
 Absprache|Договорённость
 Vereinbarung|Соглашение
 Entscheidung|Решение
-Lösung|Решение (проблемы)
+Lösung|Решение (задачи, проблемы)
 Herausforderung|Вызов, сложная задача
 Beschwerde|Жалоба
 Reklamation|Рекламация, претензия
@@ -1851,8 +1854,8 @@ Gewerkschaft|Профсоюз
 Sozialversicherung|Социальное страхование
 Rente|Пенсия
 Dienstreise|Командировка
-Kooperation|Сотрудничество
-Zusammenarbeit|Сотрудничество, совместная работа
+Kooperation|Кооперация (между фирмами)
+Zusammenarbeit|Совместная работа
 Kommunikation|Коммуникация
 Teamfähigkeit|Умение работать в команде
 Belastbarkeit|Стрессоустойчивость
@@ -1860,12 +1863,12 @@ Eigeninitiative|Собственная инициатива
 Digitalisierung|Цифровизация
 Arbeitsbelastung|Рабочая нагрузка
 Kritik|Критика
-Rückmeldung|Обратная связь, ответ
+Rückmeldung|Ответ, обратное сообщение
 Kündigungsschutzklage|Иск о защите от увольнения`;
 
   const RAW_VERB_B2 = `
-leiten|руководить
-verwalten|управлять, администрировать
+leiten|руководить, возглавлять
+verwalten|администрировать, вести (дела)
 organisieren|организовывать
 planen|планировать
 koordinieren|координировать
@@ -1874,9 +1877,9 @@ beauftragen|поручать
 bearbeiten|обрабатывать
 abschließen|завершать, заключать (договор)
 einhalten|соблюдать (срок)
-verschieben|переносить
-absagen|отменять
-zusagen|соглашаться, подтверждать
+verschieben|переносить (на другое время)
+absagen|отменять, отказываться (от встречи)
+zusagen|подтвердить участие, дать согласие
 einarbeiten|вводить в работу
 entlassen|увольнять
 befördern|повышать в должности
@@ -1887,47 +1890,47 @@ protokollieren|протоколировать
 weiterleiten|пересылать
 zurückrufen|перезванивать
 nachfragen|переспрашивать
-klären|выяснять
-abstimmen|согласовывать
-sich abstimmen|согласовывать (друг с другом)
+klären|выяснять, прояснять
+abstimmen|голосовать; согласовывать
+sich abstimmen|договариваться (друг с другом)
 beanstanden|предъявлять претензию
 reklamieren|подавать рекламацию
 berechnen|рассчитывать, выставлять счёт
 mahnen|напоминать (об оплате)
 erstatten|возмещать
 genehmigen|одобрять, разрешать
-unterstützen|поддерживать
+unterstützen|поддерживать, помогать
 sich durchsetzen|настоять на своём
 kritisieren|критиковать
 loben|хвалить
 sich weiterbilden|повышать квалификацию
 qualifizieren|квалифицировать
-umsetzen|реализовывать
+umsetzen|воплощать, реализовывать
 optimieren|оптимизировать
-überwachen|контролировать, наблюдать
-gewährleisten|гарантировать, обеспечивать
-sicherstellen|обеспечивать
+überwachen|следить, вести надзор
+gewährleisten|гарантировать
+sicherstellen|удостовериться, обеспечить
 vermeiden|избегать
 berücksichtigen|учитывать
 priorisieren|расставлять приоритеты
 in Anspruch nehmen|воспользоваться (услугой)
 zur Verfügung stellen|предоставлять
-zur Verfügung stehen|быть в распоряжении
+zur Verfügung stehen|быть в распоряжении, быть доступным
 in Frage kommen|подходить, рассматриваться
 in Kraft treten|вступать в силу
 zum Ausdruck bringen|выражать
 eine Entscheidung treffen|принимать решение
-Bescheid geben|сообщать, давать знать
-Bescheid sagen|сообщать
+Bescheid geben|дать знать, уведомить
+Bescheid sagen|сказать, предупредить
 Rücksicht nehmen|считаться (с кем-то)
 Stellung nehmen|высказывать позицию
 Verantwortung übernehmen|брать ответственность
 einen Antrag stellen|подавать заявление
 eine Frage stellen|задавать вопрос
-Kritik üben|критиковать
+Kritik üben|высказывать критику
 in Verbindung stehen|быть на связи
 zur Sprache bringen|поднимать (тему)
-ums Leben kommen|погибать
+in Rente gehen|выходить на пенсию
 Einfluss nehmen|влиять
 einen Termin vereinbaren|договориться о встрече
 Überstunden machen|работать сверхурочно
@@ -2028,6 +2031,98 @@ Könnten Sie mir bitte mitteilen|Не могли бы вы сообщить мн
 Ich möchte mich beschweren über|Я хотел(а) бы пожаловаться на`;
 
 
+  // Collocations / useful phrases (both directions)
+  const RAW_PHRASE = `
+einen Termin vereinbaren|договориться о встрече / записаться на приём
+einen Termin absagen|отменить встречу
+einen Termin verschieben|перенести встречу
+einen Antrag stellen|подать заявление
+ein Formular ausfüllen|заполнить бланк
+eine Frage stellen|задать вопрос
+eine Entscheidung treffen|принять решение
+Bescheid wissen|быть в курсе
+eine Rolle spielen|играть роль
+Platz nehmen|присаживаться
+Spaß machen|доставлять удовольствие
+Sport treiben|заниматься спортом
+Hausaufgaben machen|делать домашнее задание
+eine Prüfung ablegen|сдавать экзамен
+eine Prüfung bestehen|сдать экзамен (успешно)
+durch die Prüfung fallen|провалить экзамен
+den Bus verpassen|опоздать на автобус
+eine Fahrkarte lösen|купить билет (в автомате)
+Geld abheben|снять деньги
+Geld überweisen|перевести деньги
+ein Konto eröffnen|открыть счёт
+ein Konto kündigen|закрыть счёт
+die Miete zahlen|платить за квартиру
+eine Wohnung besichtigen|осматривать квартиру
+einen Vertrag unterschreiben|подписать договор
+einen Vertrag kündigen|расторгнуть договор
+den Müll trennen|сортировать мусор
+den Müll rausbringen|выносить мусор
+sich krankmelden|сообщить о болезни, взять больничный
+zum Arzt gehen|пойти к врачу
+ein Rezept bekommen|получить рецепт
+Medikamente einnehmen|принимать лекарства
+eine Überweisung zum Facharzt|направление к специалисту
+im Wartezimmer warten|ждать в приёмной
+gute Besserung|выздоравливай(те)
+in Ordnung|в порядке, хорошо
+auf jeden Fall|в любом случае, обязательно
+auf keinen Fall|ни в коем случае
+zum Beispiel (z. B.)|например
+das heißt (d. h.)|то есть
+nach Hause|домой
+zu Hause|дома
+ab und zu|время от времени
+vor Kurzem|недавно
+in letzter Zeit|в последнее время
+so schnell wie möglich|как можно быстрее
+im Moment|в данный момент
+in der Regel|как правило
+von Zeit zu Zeit|время от времени
+Es kommt darauf an.|Это зависит (от обстоятельств).
+Das macht nichts.|Ничего страшного.
+Es tut mir leid.|Мне жаль. / Извините.
+Keine Ahnung.|Понятия не имею.
+Wie bitte?|Простите? (переспросить)
+Könnten Sie das bitte wiederholen?|Не могли бы вы повторить?
+Ich hätte gern …|Я бы хотел(а) …
+Was kostet das?|Сколько это стоит?
+Darf ich Sie etwas fragen?|Можно вас кое-что спросить?
+Ich bin damit einverstanden.|Я с этим согласен(-на).
+Das finde ich gut.|Мне это нравится.
+Ich bin dagegen.|Я против.
+Was halten Sie davon?|Что вы об этом думаете?
+Ich schlage vor, dass …|Я предлагаю, чтобы …
+Wie wäre es mit …?|Как насчёт …?
+Hätten Sie Zeit am Montag?|У вас будет время в понедельник?
+Leider kann ich nicht.|К сожалению, я не могу.
+Ich melde mich später.|Я свяжусь позже.
+Vielen Dank für Ihre Hilfe.|Большое спасибо за помощь.
+Ich freue mich auf Ihre Antwort.|Жду вашего ответа.
+Mit freundlichen Grüßen|С уважением (в письме)
+Liebe Grüße|С наилучшими пожеланиями (неофиц.)
+im Anhang finden Sie|во вложении вы найдёте
+in Vollzeit arbeiten|работать полный день
+in Teilzeit arbeiten|работать неполный день
+Überstunden machen|работать сверхурочно
+Urlaub nehmen|взять отпуск
+eine Stelle suchen|искать работу
+sich um eine Stelle bewerben|подать заявку на вакансию
+ein Vorstellungsgespräch haben|проходить собеседование
+eine Gehaltserhöhung bekommen|получить прибавку к зарплате
+Erfahrung sammeln|набираться опыта
+Kontakt aufnehmen|выйти на связь
+eine Lösung finden|найти решение
+ein Problem lösen|решить проблему
+Verantwortung tragen|нести ответственность
+die Frist einhalten|соблюдать срок
+eine Beschwerde einreichen|подать жалобу
+das Geld zurückbekommen|получить деньги обратно
+den Kundenservice anrufen|позвонить в службу поддержки`;
+
   // Sentence word-order tasks.
   // Format per line: tokens (space-separated, punctuation as its own token) | decoy tokens (comma-separated, "-" if none) | Russian translation | tense | type
   const RAW_ORDER = `
@@ -2086,7 +2181,7 @@ sich beschäftigen|mit|Dat.|заниматься (чем-то)
 rechnen|mit|Dat.|рассчитывать на
 sich verabreden|mit|Dat.|договариваться о встрече с
 leiden|an|Dat.|страдать (болезнью)
-ankommen|auf|Akk.|зависеть от
+ankommen|auf|Akk.|зависеть от (безлично)
 anpassen|an|Akk.|приспосабливать к
 antworten|auf|Akk.|отвечать на
 sich ärgern|über|Akk.|злиться на
@@ -2204,7 +2299,7 @@ sich trennen|von|Dat.|расставаться с
 überreden|zu|Dat.|уговаривать на
 überzeugen|von|Dat.|убеждать в
 umgehen|mit|Dat.|обращаться с
-unterbrechen|bei|Dat.|прерывать (при чём-то)
+unterbrechen|bei|Dat.|прерывать (кого-то за делом)
 sich unterhalten|mit|Dat.|беседовать с
 sich unterscheiden|von|Dat.|отличаться от
 unterstützen|bei|Dat.|поддерживать в
@@ -2224,7 +2319,7 @@ zählen|zu|Dat.|относиться к, входить в число
 zweifeln|an|Dat.|сомневаться в
 zwingen|zu|Dat.|принуждать к
 sich bemühen|um|Akk.|стараться добиться
-gehen|um|Akk.|речь идёт о (es geht um)
+gehen|um|Akk.|речь идёт о (безлично)
 sich anmelden|für|Akk.|записываться на
 sich anmelden|zu|Dat.|записываться на (курс)
 sich schämen|für|Akk.|стыдиться за
@@ -2311,6 +2406,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
     ...parseBlock(RAW_VERB_B2,"","verb"),
     ...parseBlock(RAW_ADJ_B2,"","adj"),
     ...parseBlock(RAW_OTHER_B2,"","other"),
+    ...parseBlock(RAW_PHRASE,"","phrase"),
   ].map((w,i)=>({...w, id:"w"+i}));
 
   const GENDER_MAP = { der:'m', das:'n', die:'f' };
@@ -2360,11 +2456,12 @@ befähigen|zu|Dat.|давать возможность, квалифициров
     {key:"frage", tKey:"typeFrage"},
     {key:"prep", tKey:"typePrep"},
     {key:"other", tKey:"typeOther"},
+    {key:"phrase", tKey:"typePhrase"},
     {key:"order", tKey:"typeOrder"},
   ];
   // Categories that represent standalone "words" a person can browse/manage
   // (case/order are derived quiz modes, not separate editable vocabulary items).
-  const LISTABLE_BASIC_CATS = ["noun","verb","adj","verbprep","frage","prep","other"];
+  const LISTABLE_BASIC_CATS = ["noun","verb","adj","verbprep","frage","prep","other","phrase"];
 
   // Custom decks: types kept simple on purpose (no sentences/cases/prepositions —
   // those need curated grammar data that doesn't make sense for free-form entries).
@@ -2433,10 +2530,12 @@ befähigen|zu|Dat.|давать возможность, квалифициров
     renderQuestion();
   }
 
-  const DIRECTIONAL_EXCLUDE = ["case","order","verbprep"];
+  const DIRECTIONAL_EXCLUDE = ["case","order"];
   function makeQuestion(word){
     if(!DIRECTIONAL_EXCLUDE.includes(word.cat)){
       const dir = quizDir === "random" ? (Math.random() < 0.5 ? "ru-de" : "de-ru") : quizDir;
+      // Verb+preposition in RU→DE keeps its "pick the preposition" drill.
+      if(word.cat === "verbprep" && dir !== "de-ru") return word;
       return { ...word, dir };
     }
     if(word.cat !== "case") return word;
@@ -2545,6 +2644,14 @@ befähigen|zu|Dat.|давать возможность, квалифициров
       if(data.currentDeckId) currentDeckId = data.currentDeckId;
       customDecks = data.customDecks || {};
       customWords = data.customWords || {};
+      Object.values(customWords).forEach(arr=>{
+        (arr||[]).forEach(w=>{
+          const cyr = /[\u0400-\u04FF]/, lat = /[A-Za-zÄÖÜäöüß]/;
+          if(w && w.word && w.ru && cyr.test(w.word) && lat.test(w.ru) && !cyr.test(w.ru)){
+            const tmp = w.word; w.word = w.ru; w.ru = tmp;
+          }
+        });
+      });
       if(data.uiLang) uiLang = data.uiLang;
       if(data.theme) theme = data.theme;
       if(typeof data.speechOn === 'boolean') speechOn = data.speechOn;
@@ -2739,9 +2846,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
       })));
     }
     if(question.dir === "de-ru") return buildTranslationOptions(question);
-    let sameCat = ALL.filter(w=>w.cat===question.cat && w.id!==question.id);
-    const candidates = sameCat.length >= 4 ? sameCat : ALL.filter(w=>!["case","order","verbprep"].includes(w.cat) && w.id!==question.id);
-    shuffle(candidates);
+    const candidates = distractorPool(question);
 
     const questionPlain = plainLabelOf(question);
     const usedPlains = new Set([questionPlain]);
@@ -2775,14 +2880,37 @@ befähigen|zu|Dat.|давать возможность, квалифициров
     }));
   }
 
+  const normRu = x => String(x||"").trim().toLowerCase();
+  // Candidate wrong answers: same category first, then the whole deck, then the basic
+  // vocabulary (so tiny custom decks still get 5 options). Words with the same
+  // translation as the question are never offered — they would be indistinguishable.
+  function distractorPool(question){
+    const ok = w => w.id !== question.id && w.cat !== "case" && w.cat !== "order" && normRu(w.ru) !== normRu(question.ru) && (w.cat !== "verbprep" || question.cat === "verbprep");
+    const tiers = [
+      ALL.filter(w=>ok(w) && w.cat===question.cat),
+      ALL.filter(w=>ok(w) && w.cat!==question.cat),
+      basicAllWords.filter(w=>ok(w) && w.cat===question.cat),
+      basicAllWords.filter(w=>ok(w) && w.cat!==question.cat),
+    ];
+    const out = []; const seen = new Set();
+    for(const tier of tiers){
+      shuffle(tier);
+      for(const w of tier){ if(!seen.has(w.id)){ seen.add(w.id); out.push(w); } }
+      if(out.length >= 12) break;
+    }
+    return out;
+  }
+  function germanLabelOf(w){
+    if(w.cat === "verbprep") return (w.verb||"") + " " + (w.prep||w.word||"") + (w.caseTag ? ` (+${w.caseTag})` : "");
+    return plainLabelOf(w);
+  }
+
   function escHtml(str){
     return String(str==null?"":str).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   }
   // German word shown, pick the translation.
   function buildTranslationOptions(question){
-    let sameCat = ALL.filter(w=>w.cat===question.cat && w.id!==question.id && w.ru);
-    const candidates = sameCat.length >= 4 ? sameCat : ALL.filter(w=>!DIRECTIONAL_EXCLUDE.includes(w.cat) && w.id!==question.id && w.ru);
-    shuffle(candidates);
+    const candidates = distractorPool(question).filter(w=>w.ru);
     const used = new Set([(question.ru||"").trim().toLowerCase()]);
     const distractors = [];
     for(const w of candidates){
@@ -2960,15 +3088,15 @@ befähigen|zu|Dat.|давать возможность, квалифициров
       els.genderLabel.textContent = question.caseName.toUpperCase();
       els.ruWord.textContent = question.word;
       els.flapSub.textContent = t("translationPrefix") + question.ru;
+    } else if(question.dir === "de-ru"){
+      els.genderLabel.textContent = "DE → " + t("dirTargetShort");
+      els.ruWord.textContent = germanLabelOf(question);
+      els.flapSub.textContent = "";
+      speakDe(germanLabelOf(question));
     } else if(question.cat === "verbprep"){
       els.genderLabel.textContent = t("typeVerbprep").toUpperCase();
       els.ruWord.textContent = question.verb + " ... ?";
       els.flapSub.textContent = t("translationPrefix") + question.ru;
-    } else if(question.dir === "de-ru"){
-      els.genderLabel.textContent = "DE → " + t("dirTargetShort");
-      els.ruWord.textContent = plainLabelOf(question);
-      els.flapSub.textContent = "";
-      speakDe(plainLabelOf(question));
     } else {
       els.genderLabel.textContent = t("dirTargetShort") + " → DE";
       els.ruWord.textContent = question.ru;
@@ -3059,7 +3187,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
         els.feedback.textContent = t("wrongPrefix") + (correctOpt ? correctOpt.plain : "");
       }
       els.feedback.className = "feedback bad";
-      if(question.dir === "de-ru") speakDe(plainLabelOf(question));
+      if(question.dir === "de-ru") speakDe(germanLabelOf(question));
       else if(correctOpt) speakDe(spokenTextOf(correctOpt, question));
     }
 
@@ -3517,6 +3645,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
     editingWordId = null;
     newWordType = 'noun'; newWordGender = 'der';
     els.newWordInput.value = ''; els.newTrInput.value = '';
+    document.getElementById('addWordError').textContent = "";
     renderTypeBtns(newWordType);
     els.fieldGenderLabel.style.display = 'block';
     els.genderBtns.style.display = 'flex';
@@ -3528,6 +3657,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
     newWordType = w.cat; newWordGender = w.article || 'der';
     els.newWordInput.value = w.word || w.verb || '';
     els.newTrInput.value = w.ru || '';
+    document.getElementById('addWordError').textContent = "";
     renderTypeBtns(newWordType);
     const showGender = newWordType === 'noun';
     els.fieldGenderLabel.style.display = showGender ? 'block' : 'none';
@@ -3540,10 +3670,19 @@ befähigen|zu|Dat.|давать возможность, квалифициров
     openAddWord();
   });
 
+  const CYR_RE = /[\u0400-\u04FF]/;
+  const LAT_RE = /[A-Za-zÄÖÜäöüß]/;
   els.saveWordBtn.addEventListener('click', async ()=>{
     const word = els.newWordInput.value.trim();
     const tr = els.newTrInput.value.trim();
+    const errEl = document.getElementById('addWordError');
+    errEl.textContent = "";
     if(!word || !tr) return;
+    if(CYR_RE.test(word)){
+      errEl.textContent = t(CYR_RE.test(tr) ? "errWordCyr" : "errTrLatin");
+      return;
+    }
+    if(normRu(word) === normRu(tr)){ errEl.textContent = t("errSame"); return; }
     const arr = customWords[currentDeckId] || (customWords[currentDeckId] = []);
     if(editingWordId){
       const idx = arr.findIndex(w=>w.id===editingWordId);
