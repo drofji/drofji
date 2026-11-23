@@ -2383,8 +2383,25 @@ befähigen|zu|Dat.|давать возможность, квалифициров
   function allDeckIds(){ return [BASIC_DECK_ID, ...Object.keys(customDecks)]; }
   function deckName(id){ return id === BASIC_DECK_ID ? t("basicName") : (customDecks[id] ? customDecks[id].name : id); }
 
+  // Types a user can add to the basic deck themselves.
+  const BASIC_OWN_TYPES = [
+    {key:"noun", tKey:"typeNoun"},
+    {key:"verb", tKey:"typeVerb"},
+    {key:"adj", tKey:"typeAdj"},
+    {key:"prep", tKey:"typePrep"},
+    {key:"other", tKey:"typeOther"},
+  ];
+  function ownBasicWords(){
+    const own = (customWords[BASIC_DECK_ID] || []).map(w=>({...w, deckId:BASIC_DECK_ID, own:true}));
+    // Own nouns also take part in the article/case drill.
+    const ownCase = own.filter(w=>w.cat==="noun" && GENDER_MAP[w.article]).map(w=>({
+      id: "case-" + w.id, word: w.word, ru: w.ru, article: "", cat: "case",
+      gender: GENDER_MAP[w.article], deckId: BASIC_DECK_ID,
+    }));
+    return [...own, ...ownCase];
+  }
   function wordsForDeck(id){
-    if(id === BASIC_DECK_ID) return basicAllWords;
+    if(id === BASIC_DECK_ID) return [...basicAllWords, ...ownBasicWords()];
     return (customWords[id] || []).map(w=>({...w, deckId:id}));
   }
 
@@ -3419,7 +3436,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
       main.appendChild(de); main.appendChild(ru); main.appendChild(tag);
       row.appendChild(main);
 
-      if(isCustom){
+      if(isCustom || w.own){
         const actions = document.createElement('div');
         actions.className = 'word-actions';
         const editBtn = document.createElement('button');
@@ -3446,6 +3463,8 @@ befähigen|zu|Dat.|давать возможность, квалифициров
       const id = pendingDeleteWordId;
       customWords[currentDeckId] = (customWords[currentDeckId]||[]).filter(w=>w.id!==id);
       delete streaks[id]; delete learned[id]; delete shownIds[id]; delete pendingReview[id];
+      const cid = "case-" + id;
+      delete streaks[cid]; delete learned[cid]; delete shownIds[cid]; delete pendingReview[cid];
       pendingDeleteWordId = null;
       ALL = wordsForDeck(currentDeckId);
       await saveProgress();
@@ -3472,7 +3491,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
 
   function renderTypeBtns(selected){
     els.typeBtns.innerHTML = "";
-    CUSTOM_TYPES.forEach(c=>{
+    (currentDeckId === BASIC_DECK_ID ? BASIC_OWN_TYPES : CUSTOM_TYPES).forEach(c=>{
       const b = document.createElement('button');
       b.className = 'type-btn' + (c.key===selected ? ' active' : '');
       b.textContent = t(c.tKey);
@@ -3518,8 +3537,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
   }
 
   els.addWordBtn.addEventListener('click', ()=>{
-    if(currentDeckId === BASIC_DECK_ID){ openModal('createDeckModal'); }
-    else{ openAddWord(); }
+    openAddWord();
   });
 
   els.saveWordBtn.addEventListener('click', async ()=>{
@@ -3614,8 +3632,15 @@ befähigen|zu|Dat.|давать возможность, квалифициров
     const rows = [["id","deck","deckName","type","gender","word","translation","verb","prep","caseTag","streak","learned"]];
     deckIds.forEach(id=>{
       if(id === BASIC_DECK_ID){
-        wordsForDeck(id).forEach(w=>{
+        basicAllWords.forEach(w=>{
           rows.push([w.id, id, deckName(id), "", "", "", "", "", "", "", streaks[w.id]||0, learned[w.id]?1:0]);
+        });
+        (customWords[BASIC_DECK_ID] || []).forEach(w=>{
+          rows.push([
+            w.id, id, deckName(id), w.cat, w.article||"", w.word||"", w.ru||"", "", "", w.caseTag||"",
+            includeProgressForCustom ? (streaks[w.id]||0) : "",
+            includeProgressForCustom ? (learned[w.id]?1:0) : "",
+          ]);
         });
       } else {
         wordsForDeck(id).forEach(w=>{
@@ -3674,10 +3699,11 @@ befähigen|zu|Dat.|давать возможность, квалифициров
           if(streakVal!=="") streaks[id] = parseInt(streakVal,10)||0;
           if(learnedVal!=="") learned[id] = (learnedVal==="1"||learnedVal==="true");
           updatedProgress++;
+          continue;
         }
-        continue;
-      }
-      if(!customDecks[deck]){
+        if(!get(row,'word')) continue;   // own word in the basic deck: handled below
+        if(!customWords[deck]) customWords[deck] = [];
+      } else if(!customDecks[deck]){
         customDecks[deck] = { id:deck, name: dName || deck };
         customWords[deck] = [];
         newDecks++;
