@@ -1054,7 +1054,7 @@ Kabine|Кабина
 Kasse|Касса
 Quittung|Квитанция
 Farbe|Краска, цвет
-Bekleidung|Одежда
+Bekleidung|Одежда (офиц., в магазине)
 Wäsche|Бельё
 Post|Почта
 Luft|Воздух
@@ -2060,12 +2060,222 @@ Junge|Детёныш
 Pony|Пони
 Mark|Костный мозг`;
   const RAW_DIE_HOM = `
-See|Море
+See|Море (у побережья, книжн.)
 Leiter|Лестница (приставная)
 Band|Музыкальная группа
 Kiefer|Сосна
 Mark|Марка (бывшая валюта)
 Flur|Поле, нива (книжн.)`;
+
+  // Nouns A1–B2 (added list; appended so existing ids stay stable)
+  const RAW_DER_LIST = `
+Mann|Мужчина; муж
+Kaffee|Кофе
+Tee|Чай
+Apfel|Яблоко
+Beruf|Профессия
+Wald|Лес
+Fluss|Река
+Berg|Гора
+Schuh|Ботинок, туфля
+Einfluss|Влияние
+Vorteil|Преимущество
+Nachteil|Недостаток, минус
+Klimawandel|Изменение климата
+Verbrauch|Потребление, расход
+Misserfolg|Неудача, провал
+Verbraucher|Потребитель
+Zusammenhang|Взаимосвязь, контекст
+Ressourcenverbrauch|Потребление ресурсов
+Fachkräftemangel|Дефицит квалифицированных кадров
+Alltag|Повседневность, будни
+Angestellte|Служащий (по найму)
+Anreiz|Стимул
+Anspruch|Право (на что-то), притязание
+Anstieg|Рост, подъём
+Anteil|Доля
+Arbeitsmarkt|Рынок труда
+Aspekt|Аспект
+Aufbau|Структура; построение
+Aufenthalt|Пребывание
+Aufwand|Затраты (сил, времени)
+Ausgangspunkt|Исходная точка
+Austausch|Обмен
+Bedarf|Потребность
+Begriff|Понятие, термин
+Beitrag|Вклад; взнос; статья
+Beleg|Квитанция, чек; доказательство
+Bereich|Область, сфера
+Bescheid|Уведомление, официальное решение
+Besitz|Владение, имущество
+Bestandteil|Составная часть
+Betrag|Сумма
+Betrug|Мошенничество
+Beweis|Доказательство
+Bewohner|Житель
+Bezug|Связь, отношение
+Blickwinkel|Ракурс, угол зрения
+Bruch|Разрыв; перелом
+Bürger|Гражданин
+Charakter|Характер
+Dialekt|Диалект
+Dialog|Диалог
+Druck|Давление; печать
+Durchschnitt|Среднее значение`;
+  const RAW_DAS_LIST = `
+Land|Страна; сельская местность
+Fahrrad|Велосипед
+Essen|Еда
+Brot|Хлеб
+Fleisch|Мясо
+Buch|Книга
+Wetter|Погода
+Meer|Море
+Geschenk|Подарок
+Argument|Аргумент, довод
+Bewusstsein|Сознание, осознание
+Defizit|Дефицит
+Detail|Деталь, подробность`;
+  const RAW_DIE_LIST = `
+Stadt|Город
+Woche|Неделя
+Schule|Школа
+Sprache|Язык (речь)
+Gesundheit|Здоровье
+Krankheit|Болезнь
+Umgebung|Окрестности, окружение
+Natur|Природа
+Umwelt|Окружающая среда
+Kleidung|Одежда
+Erfahrung|Опыт
+Idee|Идея
+Einladung|Приглашение
+Prüfung|Экзамен; проверка
+Zukunft|Будущее
+Vergangenheit|Прошлое
+Nachricht|Новость; сообщение
+Meinung|Мнение
+Diskussion|Дискуссия, обсуждение
+Möglichkeit|Возможность
+Bedingung|Условие
+Voraussetzung|Предпосылка, обязательное условие
+Entwicklung|Развитие
+Beziehung|Отношение, связь
+Wirtschaft|Экономика, хозяйство
+Politik|Политика
+Regierung|Правительство
+Sicherheit|Безопасность
+Gewohnheit|Привычка
+Hoffnung|Надежда
+Angst|Страх
+Forschung|Исследование (научное)
+Wissenschaft|Наука
+Teilnahme|Участие
+Auswirkung|Последствие, воздействие
+Ursache|Причина
+Maßnahme|Мера (действие)
+Umsetzung|Реализация, воплощение
+Benachteiligung|Ущемление прав
+Gleichberechtigung|Равноправие
+Nachhaltigkeit|Устойчивость, экологичность
+Wettbewerbsfähigkeit|Конкурентоспособность
+Stellungnahme|Позиция, официальное заявление
+Auseinandersetzung|Спор, полемика; осмысление
+Bereitschaft|Готовность
+Zuverlässigkeit|Надёжность
+Glaubwürdigkeit|Достоверность, доверие
+Öffentlichkeit|Общественность
+Gesetzgebung|Законодательство
+Verordnung|Постановление, предписание
+Genehmigung|Разрешение (официальное)
+Bewältigung|Преодоление
+Beeinträchtigung|Нарушение, ограничение
+Verpflichtung|Обязательство
+Zustimmung|Согласие, одобрение
+Ablehnung|Отказ, отклонение
+Annahme|Принятие; предположение
+Einschätzung|Оценка, суждение
+Vorahnung|Предчувствие
+Selbstständigkeit|Самостоятельность
+Abgabe|Сдача, подача; сбор (налог)
+Abhängigkeit|Зависимость
+Ablenkung|Отвлечение внимания
+Absicht|Намерение
+Abstimmung|Голосование; согласование
+Abwechslung|Разнообразие
+Abweichung|Отклонение, расхождение
+Achtung|Уважение; внимание
+Aktualität|Актуальность
+Akzeptanz|Принятие (обществом)
+Alternative|Альтернатива
+Anerkennung|Признание
+Anforderung|Требование
+Angelegenheit|Дело, вопрос
+Angleichung|Выравнивание, уравнивание
+Anregung|Побуждение, идея (подсказка)
+Anschaffung|Приобретение, покупка
+Anwendung|Применение
+Anzahl|Количество
+Arbeitsweise|Способ работы
+Armut|Бедность
+Atmosphäre|Атмосфера, обстановка
+Auffassung|Взгляд, точка зрения
+Aufforderung|Призыв, требование
+Ausgabe|Расход; выпуск, издание
+Ausgrenzung|Исключение (из общества)
+Ausnahme|Исключение (из правила)
+Aussage|Высказывание; показание
+Ausstattung|Оснащение, оборудование
+Auswahl|Выбор, ассортимент
+Auswertung|Анализ, обработка (данных)
+Auszeichnung|Награда
+Beachtung|Соблюдение; внимание
+Bedeutung|Значение
+Bedienung|Обслуживание; управление (устройством)
+Befragung|Опрос
+Befürchtung|Опасение
+Begegnung|Встреча (случайная)
+Begeisterung|Восторг, воодушевление
+Begründung|Обоснование
+Behandlung|Лечение; обращение
+Behauptung|Утверждение
+Bekämpfung|Борьба (с чем-либо)
+Belastung|Нагрузка, бремя
+Beliebtheit|Популярность
+Bemerkung|Замечание
+Bemühung|Усилие, старание
+Beobachtung|Наблюдение
+Beratung|Консультация
+Bereicherung|Обогащение
+Berücksichtigung|Учёт, принятие во внимание
+Beschäftigung|Занятость; занятие
+Beseitigung|Устранение
+Besonderheit|Особенность
+Besserung|Улучшение, выздоровление
+Bestätigung|Подтверждение
+Bestimmung|Предписание; назначение
+Beteiligung|Участие (в деле, доле)
+Betreuung|Уход, присмотр
+Bevölkerung|Население
+Bevorzugung|Предпочтение, привилегия
+Bewegung|Движение
+Bewertung|Оценка (отзыв, балл)
+Bildung|Образование
+Bindung|Привязанность, связь
+Bundesregierung|Федеральное правительство
+Chance|Шанс
+Darstellung|Изложение, представление
+Datei|Файл
+Dauer|Продолжительность
+Debatte|Дебаты
+Definition|Определение (понятия)
+Demonstration|Демонстрация
+Diagnose|Диагноз
+Differenz|Разница
+Dimension|Измерение, масштаб
+Distanz|Дистанция
+Disziplin|Дисциплина
+Dokumentation|Документация`;
 
   // Collocations / useful phrases (both directions)
   const RAW_PHRASE = `
@@ -2446,6 +2656,9 @@ befähigen|zu|Dat.|давать возможность, квалифициров
     ...parseBlock(RAW_DER_HOM,"der","noun"),
     ...parseBlock(RAW_DAS_HOM,"das","noun"),
     ...parseBlock(RAW_DIE_HOM,"die","noun"),
+    ...parseBlock(RAW_DER_LIST,"der","noun"),
+    ...parseBlock(RAW_DAS_LIST,"das","noun"),
+    ...parseBlock(RAW_DIE_LIST,"die","noun"),
   ].map((w,i)=>({...w, id:"w"+i}));
 
   const GENDER_MAP = { der:'m', das:'n', die:'f' };
