@@ -94,6 +94,112 @@
     --shadow: rgba(30,38,52,.16);
   }
 
+  [data-theme="navy"]{
+    --bg: #0b1328;
+    --bg-glow: #13204a;
+    --panel: #121c3a;
+    --panel-2: #1a2750;
+    --flap-bg: #070d1f;
+    --accent: #7cc4ff;
+    --accent-soft: rgba(124,196,255,.15);
+    --accent-dim: #3d6a91;
+    --green: #4fc38a;
+    --red: #ff6b81;
+    --ink: #eaf1ff;
+    --ink-dim: #8fa0c4;
+    --rule: #253462;
+    --male: #8ab8ff;
+    --neut: #6fe0a0;
+    --fem: #ff9ec0;
+    --overlay: rgba(3,7,18,.8);
+    --on-accent: #06213a;
+    --shadow: rgba(0,0,0,.55);
+  }
+  [data-theme="oled"]{
+    --bg: #000000;
+    --bg-glow: #0a0a0a;
+    --panel: #0d0d0d;
+    --panel-2: #161616;
+    --flap-bg: #000000;
+    --accent: #ffffff;
+    --accent-soft: rgba(255,255,255,.12);
+    --accent-dim: #666666;
+    --green: #3ddc84;
+    --red: #ff5c6c;
+    --ink: #f5f5f5;
+    --ink-dim: #8a8a8a;
+    --rule: #232323;
+    --male: #6ea8ff;
+    --neut: #6fd68a;
+    --fem: #ff8fa8;
+    --overlay: rgba(0,0,0,.85);
+    --on-accent: #000000;
+    --shadow: rgba(0,0,0,.7);
+  }
+  [data-theme="forest"]{
+    --bg: #0d1712;
+    --bg-glow: #14241b;
+    --panel: #132019;
+    --panel-2: #1b2c22;
+    --flap-bg: #08110c;
+    --accent: #8fd16a;
+    --accent-soft: rgba(143,209,106,.14);
+    --accent-dim: #4f7a3a;
+    --green: #6fd68a;
+    --red: #ef6f6c;
+    --ink: #eef5e9;
+    --ink-dim: #8fa596;
+    --rule: #23382b;
+    --male: #7fb2ff;
+    --neut: #9be37a;
+    --fem: #ff9aae;
+    --overlay: rgba(4,10,6,.8);
+    --on-accent: #0d1a06;
+    --shadow: rgba(0,0,0,.55);
+  }
+  [data-theme="sakura"]{
+    --bg: #fbeef2;
+    --bg-glow: #fff7f9;
+    --panel: #ffffff;
+    --panel-2: #fcf0f4;
+    --flap-bg: #fff5f8;
+    --accent: #c2416b;
+    --accent-soft: rgba(194,65,107,.12);
+    --accent-dim: #e08aa6;
+    --green: #2f8a5b;
+    --red: #c23a3a;
+    --ink: #2c1b22;
+    --ink-dim: #8a6b77;
+    --rule: #f1d6e0;
+    --male: #2f63c2;
+    --neut: #2f8a5b;
+    --fem: #b0306a;
+    --overlay: rgba(44,27,34,.4);
+    --on-accent: #ffffff;
+    --shadow: rgba(120,40,70,.14);
+  }
+  [data-theme="lavender"]{
+    --bg: #efedfb;
+    --bg-glow: #faf9ff;
+    --panel: #ffffff;
+    --panel-2: #f3f1fd;
+    --flap-bg: #f8f7ff;
+    --accent: #6a4fd1;
+    --accent-soft: rgba(106,79,209,.12);
+    --accent-dim: #a897ec;
+    --green: #2f8a5b;
+    --red: #c33b4d;
+    --ink: #1f1b33;
+    --ink-dim: #6c6788;
+    --rule: #dedaf3;
+    --male: #2f63c2;
+    --neut: #1c8f52;
+    --fem: #c23a6b;
+    --overlay: rgba(31,27,51,.42);
+    --on-accent: #ffffff;
+    --shadow: rgba(40,30,90,.14);
+  }
+
   *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
   html, body{ margin:0; padding:0; height:100%; overflow:hidden; }
   body{
@@ -332,6 +438,14 @@
   .deck-item .dk-name{ font-family:'Space Mono',monospace; font-weight:700; font-size:14px; }
   .deck-item .dk-meta{ font-size:11px; color:var(--ink-dim); margin-top:2px; }
   .deck-item .dk-check{ color:var(--accent); font-size:16px; }
+  .deck-item .dk-del{ background:none; border:1px solid var(--rule); border-radius:9px; color:var(--red); font-size:14px; padding:6px 9px; cursor:pointer; }
+  .ob-steps{ display:flex; align-items:center; gap:10px; margin:-2px 0 14px; }
+  .ob-steps .ob-count{ font-family:'Space Mono',monospace; font-size:10.5px; letter-spacing:.06em; color:var(--ink-dim); text-transform:uppercase; white-space:nowrap; }
+  .ob-steps .ob-dots{ display:flex; gap:5px; flex:1; }
+  .ob-steps .ob-dot{ height:4px; flex:1; max-width:34px; border-radius:2px; background:var(--rule); }
+  .ob-steps .ob-dot.done{ background:var(--accent-dim); }
+  .ob-steps .ob-dot.cur{ background:var(--accent); }
+  .ob-steps .ob-skip{ background:none; border:none; color:var(--ink-dim); font-size:12px; text-decoration:underline; cursor:pointer; padding:4px 0; white-space:nowrap; }
   .deck-add{
     width:100%; padding:14px; border-radius:13px; border:1px dashed var(--accent-dim);
     background:none; color:var(--accent); font-family:'Space Mono',monospace; font-weight:700;
@@ -470,6 +584,18 @@
     <div class="theme-grid" id="themeGrid"></div>
     <div class="modal-actions">
       <button class="btn-primary" id="langNextBtn">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ONBOARDING: theme (shown once to existing users) -->
+<div class="modal-overlay" id="onboardThemeModal">
+  <div class="modal-card">
+    <div class="modal-title" id="obThemeTitle">Новые темы оформления</div>
+    <div class="modal-desc" id="obThemeDesc">Выбери, как будет выглядеть приложение.</div>
+    <div class="theme-grid" id="themeGrid2"></div>
+    <div class="modal-actions">
+      <button class="btn-primary" id="themeDoneBtn">Готово</button>
     </div>
   </div>
 </div>
@@ -793,7 +919,7 @@
       wrongPrefix:"Неверно. Правильно: ",
       genderQCorrect:"Правильно: ",
       obLangTitle:"Выбери язык", obLangDesc:"Язык интерфейса и переводов с немецкого",
-      obThemeLabel:"Тема оформления", next:"Далее →",
+      obThemeLabel:"Тема оформления", obThemeTitle:"Новые темы оформления", obThemeDesc:"Выбери, как будет выглядеть приложение. Изменить можно в «Ещё» → «Настройки» → «Язык и тема».", stepOf:"Шаг {n} из {m}", skipAll:"Пропустить всё", deleteDeckTitle:"Удалить раздел?", deleteDeckText:"Раздел «{name}» и все его слова будут удалены. Это нельзя отменить.", next:"Далее →",
       obSupportTitle:"Поддержать разработчика",
       obSupportDesc:"Приложение бесплатное. Если понравилось — буду рад коннекту и подписке.",
       linkedinLabel:"Добавиться в LinkedIn", githubLabel:"Подписаться на GitHub",
@@ -828,7 +954,7 @@
       wrongPrefix:"Неправильно. Правильна відповідь: ",
       genderQCorrect:"Правильно: ",
       obLangTitle:"Обери мову", obLangDesc:"Мова інтерфейсу та перекладів з німецької",
-      obThemeLabel:"Тема оформлення", next:"Далі →",
+      obThemeLabel:"Тема оформлення", obThemeTitle:"Нові теми оформлення", obThemeDesc:"Обери, як виглядатиме застосунок. Змінити можна в «Ще» → «Налаштування» → «Мова і тема».", stepOf:"Крок {n} з {m}", skipAll:"Пропустити все", deleteDeckTitle:"Видалити розділ?", deleteDeckText:"Розділ «{name}» і всі його слова буде видалено. Це не можна скасувати.", next:"Далі →",
       obSupportTitle:"Підтримати розробника",
       obSupportDesc:"Застосунок безкоштовний. Якщо сподобався — буду радий конекту й підписці.",
       linkedinLabel:"Додати в LinkedIn", githubLabel:"Підписатись на GitHub",
@@ -863,7 +989,7 @@
       wrongPrefix:"Incorrect. Correct answer: ",
       genderQCorrect:"Correct: ",
       obLangTitle:"Choose your language", obLangDesc:"Interface language and translations from German",
-      obThemeLabel:"Theme", next:"Next →",
+      obThemeLabel:"Theme", obThemeTitle:"New themes", obThemeDesc:"Choose how the app looks. You can change it in More → Settings → Language & theme.", stepOf:"Step {n} of {m}", skipAll:"Skip all", deleteDeckTitle:"Delete section?", deleteDeckText:"The section “{name}” and all its words will be deleted. This cannot be undone.", next:"Next →",
       obSupportTitle:"Support the developer",
       obSupportDesc:"This app is free. If you like it, a follow means a lot.",
       linkedinLabel:"Connect on LinkedIn", githubLabel:"Follow on GitHub",
@@ -2815,6 +2941,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
   let speechOn = false;
   let quizDir = "ru-de";   // "ru-de" | "de-ru" | "random"
   let dirAsked = false;     // one-time direction prompt already shown
+  let themeAsked = false;   // one-time theme prompt already shown
   let onboarded = false;
 
   function todayKey(){
@@ -2863,7 +2990,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
   function buildPayload(){
     return JSON.stringify({
       version:5, streaks, learned, shownIds, pendingReview, renderCount, allTimeShown, today,
-      selectedCats:[...selectedCats], currentDeckId, customDecks, customWords, uiLang, theme, onboarded, speechOn, quizDir, dirAsked,
+      selectedCats:[...selectedCats], currentDeckId, customDecks, customWords, uiLang, theme, onboarded, speechOn, quizDir, dirAsked, themeAsked,
     });
   }
   async function saveProgress(){
@@ -2909,6 +3036,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
       if(typeof data.speechOn === 'boolean') speechOn = data.speechOn;
       if(["ru-de","de-ru","random"].includes(data.quizDir)) quizDir = data.quizDir;
       dirAsked = !!data.dirAsked;
+      themeAsked = !!data.themeAsked;
       onboarded = !!data.onboarded;
     }
   }
@@ -3329,7 +3457,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
     quizDir = obDir;
     dirAsked = true;
     renderDirHint();
-    closeModal('onboardDirModal');
+    if(obActive) advanceOnboarding(); else closeModal('onboardDirModal');
     await saveProgress();
     if(changed && currentQuestion && currentQuestion.cat !== "order" && !locked) renderQuestion();
   });
@@ -3578,6 +3706,11 @@ befähigen|zu|Dat.|давать возможность, квалифициров
   function applyTheme(name){
     theme = name;
     document.documentElement.setAttribute('data-theme', name);
+    try{
+      const bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if(meta && bg) meta.setAttribute('content', bg);
+    }catch(e){ /* ignore */ }
   }
 
   // ---------------- static UI text (i18n) ----------------
@@ -3646,6 +3779,9 @@ befähigen|zu|Dat.|давать возможность, квалифициров
     setText('obLangTitle','obLangTitle');
     setText('obLangDesc','obLangDesc');
     setText('obThemeLabel','obThemeLabel');
+    setText('obThemeTitle','obThemeTitle');
+    setText('obThemeDesc','obThemeDesc');
+    setText('themeDoneBtn','dirDone');
     setText('langNextBtn','next');
     setText('obSupportTitle','obSupportTitle');
     setText('obSupportDesc','obSupportDesc');
@@ -3675,6 +3811,21 @@ befähigen|zu|Dat.|давать возможность, квалифициров
       main.appendChild(nm); main.appendChild(meta);
       item.appendChild(main);
 
+      if(id !== BASIC_DECK_ID){
+        const del = document.createElement('button');
+        del.className = 'dk-del';
+        del.textContent = '🗑';
+        del.setAttribute('aria-label', t('deleteDeckTitle'));
+        del.addEventListener('click', (e)=>{
+          e.stopPropagation();
+          pendingDeleteWordId = null;
+          pendingDeleteDeckId = id;
+          document.getElementById('confirmTitle').textContent = t('deleteDeckTitle');
+          document.getElementById('confirmDesc').textContent = t('deleteDeckText').replace('{name}', deckName(id));
+          openModal('confirmModal');
+        });
+        item.appendChild(del);
+      }
       if(id === currentDeckId){
         const chk = document.createElement('div');
         chk.className = 'dk-check';
@@ -3727,6 +3878,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
   let manageState = { search:"", typeFilter:"all", statusFilter:"all" };
   let editingWordId = null;
   let pendingDeleteWordId = null;
+  let pendingDeleteDeckId = null;
 
   function wordStatus(id){
     if(learned[id]) return "learned";
@@ -3830,6 +3982,9 @@ befähigen|zu|Dat.|давать возможность, квалифициров
         delBtn.textContent = t('colDelete');
         delBtn.addEventListener('click', ()=>{
           pendingDeleteWordId = w.id;
+          pendingDeleteDeckId = null;
+          document.getElementById('confirmTitle').textContent = t('confirmDeleteTitle');
+          document.getElementById('confirmDesc').textContent = t('confirmDeleteText');
           openModal('confirmModal');
         });
         actions.appendChild(editBtn); actions.appendChild(delBtn);
@@ -3841,6 +3996,20 @@ befähigen|zu|Dat.|давать возможность, квалифициров
   }
 
   els.confirmDeleteBtn.addEventListener('click', async ()=>{
+    if(pendingDeleteDeckId){
+      const id = pendingDeleteDeckId;
+      pendingDeleteDeckId = null;
+      (customWords[id] || []).forEach(w=>{
+        [w.id, "case-" + w.id].forEach(k=>{ delete streaks[k]; delete learned[k]; delete shownIds[k]; delete pendingReview[k]; });
+      });
+      delete customWords[id];
+      delete customDecks[id];
+      closeModal('confirmModal');
+      if(currentDeckId === id) switchDeck(BASIC_DECK_ID); else renderDeckRow();
+      renderStats();
+      await saveProgress();
+      return;
+    }
     if(pendingDeleteWordId){
       const id = pendingDeleteWordId;
       customWords[currentDeckId] = (customWords[currentDeckId]||[]).filter(w=>w.id!==id);
@@ -4137,11 +4306,17 @@ befähigen|zu|Dat.|давать возможность, квалифициров
     {key:'ru', flag:'🇷🇺', name:'Русский'},
     {key:'en', flag:'🇬🇧', name:'English'},
   ];
+  const sw2 = (a,b)=>`linear-gradient(135deg, ${a} 0 62%, ${b} 62% 100%)`;
   const THEME_OPTIONS = [
-    {key:'dark', name:{ru:'Тёмная',uk:'Темна',en:'Dark'}, sw:'#12161d'},
-    {key:'light', name:{ru:'Светлая',uk:'Світла',en:'Light'}, sw:'#f4f5f7'},
-    {key:'beige', name:{ru:'Бежевая',uk:'Бежева',en:'Beige'}, sw:'#f1e7d3'},
-    {key:'gray', name:{ru:'Серая',uk:'Сіра',en:'Gray'}, sw:'#e6e8eb'},
+    {key:'dark', name:{ru:'Обычная',uk:'Звичайна',en:'Classic'}, sw:sw2('#0b0e14','#f2b846')},
+    {key:'navy', name:{ru:'Ночная',uk:'Нічна',en:'Midnight'}, sw:sw2('#0b1328','#7cc4ff')},
+    {key:'oled', name:{ru:'Чёрная (OLED)',uk:'Чорна (OLED)',en:'Black (OLED)'}, sw:sw2('#000000','#ffffff')},
+    {key:'forest', name:{ru:'Лесная',uk:'Лісова',en:'Forest'}, sw:sw2('#0d1712','#8fd16a')},
+    {key:'light', name:{ru:'Светлая',uk:'Світла',en:'Light'}, sw:sw2('#eef1f6','#b8721a')},
+    {key:'sakura', name:{ru:'Сакура',uk:'Сакура',en:'Sakura'}, sw:sw2('#fbeef2','#c2416b')},
+    {key:'lavender', name:{ru:'Лаванда',uk:'Лаванда',en:'Lavender'}, sw:sw2('#efedfb','#6a4fd1')},
+    {key:'beige', name:{ru:'Бежевая',uk:'Бежева',en:'Beige'}, sw:sw2('#ece0c9','#9d5a16')},
+    {key:'gray', name:{ru:'Серая',uk:'Сіра',en:'Gray'}, sw:sw2('#dfe2e7','#4a5568')},
   ];
   let obLang = 'ru', obTheme = 'dark', cameFromSettings = false;
 
@@ -4155,16 +4330,93 @@ befähigen|zu|Dat.|давать возможность, квалифициров
       els.langGrid.appendChild(c);
     });
   }
-  function renderThemeGrid(){
-    els.themeGrid.innerHTML = "";
+  function renderThemeGrid(container, preview){
+    const grid = container || els.themeGrid;
+    grid.innerHTML = "";
     THEME_OPTIONS.forEach(o=>{
       const c = document.createElement('div');
       c.className = 'pick-card' + (obTheme===o.key ? ' sel' : '');
       c.innerHTML = `<div class="theme-swatch" style="background:${o.sw}"></div>${o.name[obLang]||o.name.ru}`;
-      c.addEventListener('click', ()=>{ obTheme=o.key; renderThemeGrid(); });
-      els.themeGrid.appendChild(c);
+      c.addEventListener('click', ()=>{
+        obTheme = o.key;
+        if(preview) document.documentElement.setAttribute('data-theme', o.key);
+        renderThemeGrid(container, preview);
+      });
+      grid.appendChild(c);
     });
   }
+
+  // ---------------- first-run / "what's new" flow with step indicator ----------------
+  const OB_MODALS = { lang:'onboardLangModal', theme:'onboardThemeModal', dir:'onboardDirModal', support:'onboardSupportModal' };
+  let obQueue = [], obPos = 0, obActive = false;
+  function clearSteppers(){ document.querySelectorAll('.ob-steps').forEach(el=>el.remove()); }
+  function renderStepper(modalId){
+    clearSteppers();
+    if(obQueue.length < 2) return;   // a single dialog needs no step indicator
+    const card = document.querySelector('#'+modalId+' .modal-card');
+    const bar = document.createElement('div');
+    bar.className = 'ob-steps';
+    const count = document.createElement('span');
+    count.className = 'ob-count';
+    count.textContent = t('stepOf').replace('{n}', obPos+1).replace('{m}', obQueue.length);
+    const dots = document.createElement('span');
+    dots.className = 'ob-dots';
+    obQueue.forEach((_,i)=>{
+      const d = document.createElement('span');
+      d.className = 'ob-dot' + (i < obPos ? ' done' : i === obPos ? ' cur' : '');
+      dots.appendChild(d);
+    });
+    const skip = document.createElement('button');
+    skip.className = 'ob-skip';
+    skip.textContent = t('skipAll');
+    skip.addEventListener('click', skipOnboarding);
+    bar.appendChild(count); bar.appendChild(dots); bar.appendChild(skip);
+    card.insertBefore(bar, card.firstChild);
+  }
+  function showObStep(){
+    const step = obQueue[obPos];
+    if(step === 'lang'){ obLang = uiLang; obTheme = theme; renderLangGrid(); renderThemeGrid(); }
+    if(step === 'theme'){ obLang = uiLang; obTheme = theme; renderThemeGrid(document.getElementById('themeGrid2'), true); }
+    if(step === 'dir'){ obDir = quizDir; renderDirGrid(); }
+    renderStepper(OB_MODALS[step]);
+    openModal(OB_MODALS[step]);
+  }
+  function startOnboarding(){
+    obQueue = [];
+    if(!onboarded){
+      obQueue.push('lang');
+      if(!dirAsked) obQueue.push('dir');
+      obQueue.push('support');
+    } else {
+      if(!themeAsked) obQueue.push('theme');
+      if(!dirAsked) obQueue.push('dir');
+    }
+    obPos = 0;
+    if(obQueue.length){ obActive = true; showObStep(); }
+  }
+  async function finishOnboarding(){
+    obActive = false;
+    clearSteppers();
+    onboarded = true; themeAsked = true; dirAsked = true;
+    await saveProgress();
+  }
+  async function advanceOnboarding(){
+    closeModal(OB_MODALS[obQueue[obPos]]);
+    obPos++;
+    if(obPos < obQueue.length) showObStep();
+    else await finishOnboarding();
+  }
+  async function skipOnboarding(){
+    closeModal(OB_MODALS[obQueue[obPos]]);
+    applyTheme(theme);   // drop an unconfirmed theme preview
+    await finishOnboarding();
+  }
+  document.getElementById('themeDoneBtn').addEventListener('click', async ()=>{
+    applyTheme(obTheme);
+    themeAsked = true;
+    await saveProgress();
+    if(obActive) advanceOnboarding(); else closeModal('onboardThemeModal');
+  });
 
   els.settingsBtn.addEventListener('click', ()=>{
     cameFromSettings = true;
@@ -4178,17 +4430,17 @@ befähigen|zu|Dat.|давать возможность, квалифициров
     applyTheme(obTheme);
     applyI18nToStaticEls();
     renderDeckRow(); renderChips();
+    themeAsked = true;
     await saveProgress();
-    closeModal('onboardLangModal');
-    if(cameFromSettings){ cameFromSettings = false; }
-    else { openModal('onboardSupportModal'); }
+    if(cameFromSettings || !obActive){ cameFromSettings = false; closeModal('onboardLangModal'); }
+    else { advanceOnboarding(); }
   });
 
   els.supportDoneBtn.addEventListener('click', async ()=>{
+    if(obActive){ advanceOnboarding(); return; }
     onboarded = true;
     await saveProgress();
     closeModal('onboardSupportModal');
-    if(!dirAsked) openDirModal();
   });
 
   // ---------------- page navigation ----------------
@@ -4256,13 +4508,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
     renderChips();
     renderQuestion();
     renderManageFilters();
-    if(!onboarded){
-      obLang = uiLang; obTheme = theme;
-      renderLangGrid(); renderThemeGrid();
-      openModal('onboardLangModal');
-    } else if(!dirAsked){
-      openDirModal();
-    }
+    startOnboarding();
   })();
 
 })();
