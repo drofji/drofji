@@ -442,9 +442,12 @@
   .lang-confirm-alt{ font-size:11.5px; opacity:.85; margin-top:-6px; }
   /* Right-to-left interface (Farsi, Arabic); German text keeps its own direction */
   .opt, .flap-word, .flap-sub, .ru-hint, .feedback, .word-de, .word-ru, .modal-desc, .modal-title{ unicode-bidi: plaintext; }
+  /* Arabic script must not be letter-spaced (it breaks the joined letters) and needs a font with Arabic glyphs */
+  [dir="rtl"] *{ letter-spacing:0 !important; }
+  [dir="rtl"] *:not(.flap-word):not(.token-chip):not(.build-strip){ font-family: system-ui, -apple-system, "Segoe UI", Tahoma, "Noto Sans Arabic", sans-serif; }
   [dir="rtl"] .opt{ text-align:right; padding:13px 38px 13px 14px; }
   [dir="rtl"] .opt .idx{ left:auto; right:12px; }
-  [dir="rtl"] .build-strip, [dir="rtl"] .token-pool{ direction:ltr; }
+  [dir="rtl"] .build-strip, [dir="rtl"] .token-pool, [dir="rtl"] .case-helper{ direction:ltr; }
   [dir="rtl"] .dir-grid .pick-card{ text-align:right; }
   [dir="rtl"] .list-btn{ text-align:right; }
   .ob-steps{ display:flex; align-items:center; gap:10px; margin:-2px 0 14px; }
