@@ -4384,7 +4384,9 @@ befähigen|zu|Dat.|давать возможность, квалифициров
   function startOnboarding(){
     obQueue = [];
     if(!onboarded){
-      obQueue.push('lang');
+      // The language step also picks the theme, so themeAsked marks it as done
+      // (resuming an interrupted first run doesn't repeat finished steps).
+      if(!themeAsked) obQueue.push('lang');
       if(!dirAsked) obQueue.push('dir');
       obQueue.push('support');
     } else {
