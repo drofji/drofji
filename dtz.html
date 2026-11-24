@@ -329,7 +329,7 @@
   }
   .seen-badge.seen{ background:rgba(139,149,166,.12); border-color:var(--ink-dim); color:var(--ink-dim); }
 
-  .flap{
+  .flap{ position:relative;
     background:var(--flap-bg); border:1px solid var(--rule); border-radius:10px;
     padding:24px 14px; text-align:center; min-height:92px;
     display:flex; align-items:center; justify-content:center;
@@ -379,6 +379,24 @@
   .opt.wrong{ border-color:var(--red); background:rgba(224,86,104,.16); }
   .opt.dim{ opacity:.42; }
   .opt.selected{ border-color:var(--accent); box-shadow:0 0 0 1px var(--accent) inset; }
+  .opt-actions{ display:flex; gap:9px; margin-top:4px; }
+  .opt-actions .opt-confirm{ flex:2; margin-top:0; }
+  .opt-dontknow{ flex:1; padding:13px 10px; border-radius:11px; border:1px solid var(--rule); background:transparent; color:var(--ink-dim); font-size:13px; cursor:pointer; }
+  .opt-actions.done{ display:none; }
+  .listen-btn{ position:absolute; top:7px; right:8px; width:34px; height:34px; border-radius:50%; border:1px solid var(--rule); background:var(--panel-2); color:var(--ink); font-size:15px; cursor:pointer; display:none; }
+  .flap.can-listen .listen-btn{ display:block; }
+  .flap.can-listen{ padding-left:46px; padding-right:46px; }
+  .row-listen{ background:none; border:1px solid var(--rule); border-radius:9px; font-size:13px; padding:5px 8px; cursor:pointer; color:var(--ink); }
+  .kbd-hint{ display:none; text-align:center; font-family:'Space Mono',monospace; font-size:10.5px; color:var(--ink-dim); margin-top:8px; }
+  @media (hover:hover) and (pointer:fine){ .board[data-mode="choice"] .kbd-hint, .board[data-mode="order"] .kbd-hint{ display:block; } }
+  .goal-track{ background:var(--panel); border:1px solid var(--rule); border-radius:12px; padding:9px 12px; margin-bottom:12px; }
+  .goal-top{ display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--ink-dim); gap:10px; }
+  .goal-top b{ color:var(--ink); }
+  .goal-track .bar{ margin-top:7px; }
+  .goal-track.off .bar{ display:none; }
+  .mistakes-btn{ width:100%; margin-bottom:12px; padding:11px 12px; border-radius:12px; border:1px dashed var(--red); background:transparent; color:var(--red); font-size:13.5px; font-weight:600; cursor:pointer; display:none; }
+  .mistakes-btn.show{ display:block; }
+  .mistakes-btn.active{ border-style:solid; background:rgba(224,86,104,.12); }
   .opt-confirm{
     margin-top:4px; padding:13px; border-radius:11px; border:1px solid var(--accent);
     background:var(--accent); color:var(--on-accent); font-size:14px; font-weight:700; cursor:pointer;
@@ -447,6 +465,7 @@
   [dir="rtl"] *:not(.flap-word):not(.token-chip):not(.build-strip){ font-family: system-ui, -apple-system, "Segoe UI", Tahoma, "Noto Sans Arabic", sans-serif; }
   [dir="rtl"] .opt{ text-align:right; padding:13px 38px 13px 14px; }
   [dir="rtl"] .opt .idx{ left:auto; right:12px; }
+  [dir="rtl"] .listen-btn{ right:auto; left:8px; }
   [dir="rtl"] .build-strip, [dir="rtl"] .token-pool, [dir="rtl"] .case-helper{ direction:ltr; }
   [dir="rtl"] .dir-grid .pick-card{ text-align:right; }
   [dir="rtl"] .list-btn{ text-align:right; }
@@ -683,7 +702,14 @@
         </div>
       </div>
 
+      <div class="goal-track" id="goalTrack">
+        <div class="goal-top"><span><span id="goalLabelText">Цель на день</span>: <b id="goalText">0 / 20</b></span><span id="streakText">🔥 0</span></div>
+        <div class="bar"><div class="bar-fill" id="goalFill"></div></div>
+      </div>
+
       <div class="chips" id="chips" style="margin-bottom:12px;"></div>
+
+      <button class="mistakes-btn" id="mistakesBtn"></button>
 
       <div class="track" style="margin-bottom:14px;">
         <div class="track-top">
@@ -700,7 +726,7 @@
             <span class="seen-badge" id="seenBadge">Новая</span>
             <span id="deckLabel">В КОЛОДЕ: 0</span>
           </div>
-          <div class="flap"><div class="flap-word" id="ruWord">…</div></div>
+          <div class="flap" id="flap"><div class="flap-word" id="ruWord">…</div><button class="listen-btn" id="listenBtn" aria-label="Listen">🔊</button></div>
           <div class="flap-sub" id="flapSub"></div>
           <div class="dots" id="dots"></div>
           <div class="hint" id="hintText">нужно 2 верных ответа подряд</div>
@@ -718,6 +744,7 @@
           </div>
 
           <div class="feedback" id="feedback"></div>
+          <div class="kbd-hint" id="kbdHint"></div>
           <div class="order-next-wrap" id="orderNextWrap">
             <button class="order-next" id="orderNextBtn">Далее →</button>
           </div>
@@ -773,6 +800,11 @@
       <button class="list-btn" id="dirBtn">
         <span class="lb-ic">🔁</span>
         <span class="lb-text"><span id="btnDirLabel">Направление</span><span class="lb-sub" id="dirHint"></span></span>
+      </button>
+      <button class="list-btn" id="goalBtn">
+        <span class="lb-ic">🎯</span>
+        <span class="lb-text"><span id="btnGoalLabel">Цель на день</span><span class="lb-sub" id="goalHint"></span></span>
+        <span class="goal-value" id="goalValue"></span>
       </button>
       <button class="list-btn" id="speechBtn" role="switch" aria-checked="false">
         <span class="lb-ic">🔊</span>
@@ -915,7 +947,7 @@
 
   // ---------------- i18n ----------------
   const STRINGS = {
-    ru: { addWordHint:"в текущий раздел", exportHint:"CSV: материал и прогресс", importHint:"загрузить CSV", settingsHint:"интерфейс и оформление", resetHint:"статистика и выученные слова", phTranslation:"пример", phDeckName:"Мой словарь",
+    ru: { dontKnow:"Не знаю", mistakesBtn:"Повторить ошибки", mistakesExit:"Выйти из повторения ошибок", goalLabel:"Цель на день", goalOff:"без цели", goalDone:"цель выполнена 🎉", streakLabel:"дней подряд", goalSettingHint:"слов в день · нажми, чтобы изменить", listen:"Прослушать", addWordHint:"в текущий раздел", exportHint:"CSV: материал и прогресс", importHint:"загрузить CSV", settingsHint:"интерфейс и оформление", resetHint:"статистика и выученные слова", phTranslation:"пример", phDeckName:"Мой словарь",
       appSub: "Выбирай немецкое слово или артикль по подсказке — 2 верных ответа подряд, и карточка «уезжает» из колоды",
       manageBtn:"Слова", addWordBtn:"Слово", exportBtn:"Экспорт", importBtn:"Импорт",
       today:"Сегодня", allTime:"Всего", learnedSuffix:"выучено", learnedInSel:"ВЫУЧЕНО В ПОДБОРКЕ",
@@ -956,7 +988,7 @@
       langConfirmYes:"Да, продолжить",
       langConfirmNo:"Нет, выбрать другой",
     },
-    uk: { addWordHint:"у поточний розділ", exportHint:"CSV: матеріал і прогрес", importHint:"завантажити CSV", settingsHint:"інтерфейс і оформлення", resetHint:"статистика та вивчені слова", phTranslation:"приклад", phDeckName:"Мій словник",
+    uk: { dontKnow:"Не знаю", mistakesBtn:"Повторити помилки", mistakesExit:"Вийти з повторення помилок", goalLabel:"Ціль на день", goalOff:"без цілі", goalDone:"ціль виконано 🎉", streakLabel:"днів поспіль", goalSettingHint:"слів на день · натисни, щоб змінити", listen:"Прослухати", addWordHint:"у поточний розділ", exportHint:"CSV: матеріал і прогрес", importHint:"завантажити CSV", settingsHint:"інтерфейс і оформлення", resetHint:"статистика та вивчені слова", phTranslation:"приклад", phDeckName:"Мій словник",
       appSub: "Обирай німецьке слово чи артикль за підказкою — 2 правильні відповіді підряд, і картка «їде» з колоди",
       manageBtn:"Слова", addWordBtn:"Слово", exportBtn:"Експорт", importBtn:"Імпорт",
       today:"Сьогодні", allTime:"Всього", learnedSuffix:"вивчено", learnedInSel:"ВИВЧЕНО В ПІДБІРЦІ",
@@ -997,7 +1029,7 @@
       langConfirmYes:"Так, продовжити",
       langConfirmNo:"Ні, обрати іншу",
     },
-    en: { addWordHint:"to the current section", exportHint:"CSV: material and progress", importHint:"load a CSV file", settingsHint:"interface and appearance", resetHint:"statistics and learned words", phTranslation:"example", phDeckName:"My vocabulary",
+    en: { dontKnow:"I don't know", mistakesBtn:"Review mistakes", mistakesExit:"Exit mistake review", goalLabel:"Daily goal", goalOff:"no goal", goalDone:"goal reached 🎉", streakLabel:"days in a row", goalSettingHint:"words per day · tap to change", listen:"Listen", addWordHint:"to the current section", exportHint:"CSV: material and progress", importHint:"load a CSV file", settingsHint:"interface and appearance", resetHint:"statistics and learned words", phTranslation:"example", phDeckName:"My vocabulary",
       appSub: "Pick the German word or article by the hint — 2 correct answers in a row and the card leaves the deck",
       manageBtn:"Words", addWordBtn:"Word", exportBtn:"Export", importBtn:"Import",
       today:"Today", allTime:"All-time", learnedSuffix:"learned", learnedInSel:"LEARNED IN SELECTION",
@@ -1038,10 +1070,10 @@
       langConfirmYes:"Yes, continue",
       langConfirmNo:"No, choose another",
     },
-    fr: { addWordHint:"dans la section actuelle", exportHint:"CSV : contenu et progression", importHint:"charger un CSV", settingsHint:"interface et apparence", resetHint:"statistiques et mots appris", phTranslation:"exemple", phDeckName:"Mon vocabulaire", appSub:"Choisis le mot allemand ou l’article d’après l’indice — 2 bonnes réponses de suite et la carte quitte le paquet", manageBtn:"Mots", addWordBtn:"Mot", exportBtn:"Exporter", importBtn:"Importer", today:"Aujourd’hui", allTime:"Au total", learnedSuffix:"appris", learnedInSel:"APPRIS DANS LA SÉLECTION", newBadge:"Nouveau", seenBadge:"Révision", deckLabel:"DANS LE PAQUET", hintChoice:"2 bonnes réponses de suite nécessaires", speechLabel:"Voix", speechHint:"prononcer les mots allemands", confirmChoice:"Valider", dirLabel:"Sens", dirTargetShort:"FR", dirTitle:"Comment veux-tu apprendre ?", dirDesc:"Tu peux le changer à tout moment : Plus → Réglages.", dirDone:"Terminé", dirRuDe:"Français → allemand", dirRuDeSub:"tu vois la traduction, tu choisis le mot allemand", dirDeRu:"Allemand → français", dirDeRuSub:"tu vois le mot allemand, tu choisis la traduction", dirRandom:"Aléatoire", dirRandomSub:"le sens change au hasard", hintOrder:"touche les mots dans l’ordre pour former la phrase", doneTitle:"ALLE AN BORD 🚆", doneText:"Tu as appris tous les mots de cette sélection.", restart:"Recommencer", resetProgress:"Réinitialiser la progression", tip:"der/das/die — apprends l’article avec le mot", manageTitle:"Mots", search:"Rechercher un mot ou une traduction…", filterAll:"Tous", filterLearned:"Appris", filterHalf:"À moitié", filterNew:"Pas commencé", typeNoun:"Noms", typeVerb:"Verbes", typeAdj:"Adjectifs", typePhrase:"Expressions", errWordCyr:"Écris le mot allemand en lettres latines (ex. Beispiel). La traduction va dans le deuxième champ.", errSame:"Le mot et la traduction doivent être différents.", errTrLatin:"Les champs semblent inversés : la traduction est en lettres latines.", typeOther:"Autres", typeCase:"Article : cas", typeVerbprep:"Verbe + préposition", typeFrage:"Mots interrogatifs", typePrep:"Prépositions", typeOrder:"Ordre des mots", colEdit:"✎", colDelete:"🗑", confirmDeleteTitle:"Supprimer le mot ?", confirmDeleteText:"Cette action est irréversible.", cancel:"Annuler", delete:"Supprimer", save:"Enregistrer", create:"Créer", addWordTitle:"Nouveau mot", addWordDesc:"Ajoute un mot à la section actuelle", fieldType:"Type", fieldGender:"Genre", fieldWord:"Mot (allemand)", fieldTr:"Traduction", createDeckTitle:"Nouvelle section", fieldDeckName:"Nom", exportTitle:"Exporter", exportScope:"Que exporter", exportMode:"Contenu (pour tes sections)", exportFull:"Contenu + progression", exportMaterial:"Contenu seulement", downloadCsv:"Télécharger CSV", importResultTitle:"Import terminé", basicName:"De base", basicExportNote:"De base — progression seulement (le contenu est intégré à l’app)", empty:"Rien pour l’instant", newDeckPill:"+ Section", settingsTitle:"Réglages", settingsBtnLabel:"Langue et thème", navLearn:"Apprendre", navDecks:"Sections", navMore:"Plus", navData:"Données", reset:"Réinitialiser", confirmResetTitle:"Réinitialiser la progression ?", confirmResetDesc:"Toutes les statistiques et les mots appris seront effacés.", storageSession:"La progression n’est gardée que pour cette session", storageLocal:"La progression est enregistrée dans ce navigateur sur cet appareil", correctFull:"Correct ! Mot appris ✓", correctN:"Correct ! ", wrongPrefix:"Faux. Bonne réponse : ", genderQCorrect:"Correct : ", obLangTitle:"Choisis ta langue", obLangDesc:"Langue de l’interface et des traductions. Tu peux changer la langue et le thème à tout moment : Plus → Réglages.", obThemeLabel:"Thème", obThemeTitle:"Nouveaux thèmes", obThemeDesc:"Choisis l’apparence de l’app. Modifiable dans Plus → Réglages → Langue et thème.", stepOf:"Étape {n} sur {m}", skipAll:"Tout passer", deleteDeckTitle:"Supprimer la section ?", deleteDeckText:"La section « {name} » et tous ses mots seront supprimés. Cette action est irréversible.", next:"Suivant →", obSupportTitle:"Soutenir le développeur", obSupportDesc:"Cette app est gratuite. Si elle te plaît, un abonnement fait très plaisir.", linkedinLabel:"Se connecter sur LinkedIn", githubLabel:"Suivre sur GitHub", startLearning:"Commencer →", composePrompt:"🧩 Forme la phrase", translationPrefix:"traduction : ", erase:"Effacer", check:"Vérifier", langConfirmTitle:"Langue : {lang}", langConfirmText:"L’interface et les traductions seront dans cette langue. C’est bien ça ?", langConfirmYes:"Oui, continuer", langConfirmNo:"Non, en choisir une autre" },
-    it: { addWordHint:"nella sezione attuale", exportHint:"CSV: contenuto e progressi", importHint:"carica un CSV", settingsHint:"interfaccia e aspetto", resetHint:"statistiche e parole imparate", phTranslation:"esempio", phDeckName:"Il mio vocabolario", appSub:"Scegli la parola tedesca o l’articolo dall’indizio — 2 risposte giuste di fila e la carta esce dal mazzo", manageBtn:"Parole", addWordBtn:"Parola", exportBtn:"Esporta", importBtn:"Importa", today:"Oggi", allTime:"In totale", learnedSuffix:"imparate", learnedInSel:"IMPARATE NELLA SELEZIONE", newBadge:"Nuova", seenBadge:"Ripasso", deckLabel:"NEL MAZZO", hintChoice:"servono 2 risposte giuste di fila", speechLabel:"Voce", speechHint:"pronuncia le parole tedesche", confirmChoice:"Conferma", dirLabel:"Direzione", dirTargetShort:"IT", dirTitle:"Come vuoi imparare?", dirDesc:"Puoi cambiarlo in qualsiasi momento: Altro → Impostazioni.", dirDone:"Fatto", dirRuDe:"Italiano → tedesco", dirRuDeSub:"vedi la traduzione, scegli la parola tedesca", dirDeRu:"Tedesco → italiano", dirDeRuSub:"vedi la parola tedesca, scegli la traduzione", dirRandom:"Casuale", dirRandomSub:"la direzione cambia a caso", hintOrder:"tocca le parole in ordine per formare la frase", doneTitle:"ALLE AN BORD 🚆", doneText:"Hai imparato tutte le parole di questa selezione.", restart:"Ricomincia", resetProgress:"Azzera i progressi", tip:"der/das/die — impara l’articolo insieme alla parola", manageTitle:"Parole", search:"Cerca parola o traduzione…", filterAll:"Tutte", filterLearned:"Imparate", filterHalf:"A metà", filterNew:"Non iniziate", typeNoun:"Sostantivi", typeVerb:"Verbi", typeAdj:"Aggettivi", typePhrase:"Espressioni", errWordCyr:"Scrivi la parola tedesca in lettere latine (es. Beispiel). La traduzione va nel secondo campo.", errSame:"Parola e traduzione devono essere diverse.", errTrLatin:"I campi sembrano invertiti: la traduzione è in lettere latine.", typeOther:"Altro", typeCase:"Articolo: casi", typeVerbprep:"Verbo + preposizione", typeFrage:"Parole interrogative", typePrep:"Preposizioni", typeOrder:"Ordine delle parole", colEdit:"✎", colDelete:"🗑", confirmDeleteTitle:"Eliminare la parola?", confirmDeleteText:"L’azione non si può annullare.", cancel:"Annulla", delete:"Elimina", save:"Salva", create:"Crea", addWordTitle:"Nuova parola", addWordDesc:"Aggiungi una parola alla sezione attuale", fieldType:"Tipo", fieldGender:"Genere", fieldWord:"Parola (tedesco)", fieldTr:"Traduzione", createDeckTitle:"Nuova sezione", fieldDeckName:"Nome", exportTitle:"Esporta", exportScope:"Cosa esportare", exportMode:"Contenuto (per le tue sezioni)", exportFull:"Contenuto + progressi", exportMaterial:"Solo contenuto", downloadCsv:"Scarica CSV", importResultTitle:"Importazione completata", basicName:"Base", basicExportNote:"Base — solo progressi (il contenuto è integrato nell’app)", empty:"Ancora niente qui", newDeckPill:"+ Sezione", settingsTitle:"Impostazioni", settingsBtnLabel:"Lingua e tema", navLearn:"Impara", navDecks:"Sezioni", navMore:"Altro", navData:"Dati", reset:"Azzera", confirmResetTitle:"Azzerare i progressi?", confirmResetDesc:"Tutte le statistiche e le parole imparate verranno cancellate.", storageSession:"I progressi sono salvati solo per questa sessione", storageLocal:"I progressi sono salvati in questo browser su questo dispositivo", correctFull:"Giusto! Parola imparata ✓", correctN:"Giusto! ", wrongPrefix:"Sbagliato. Risposta giusta: ", genderQCorrect:"Giusto: ", obLangTitle:"Scegli la tua lingua", obLangDesc:"Lingua dell’interfaccia e delle traduzioni. Lingua e tema si possono cambiare in qualsiasi momento: Altro → Impostazioni.", obThemeLabel:"Tema", obThemeTitle:"Nuovi temi", obThemeDesc:"Scegli l’aspetto dell’app. Puoi cambiarlo in Altro → Impostazioni → Lingua e tema.", stepOf:"Passo {n} di {m}", skipAll:"Salta tutto", deleteDeckTitle:"Eliminare la sezione?", deleteDeckText:"La sezione «{name}» e tutte le sue parole verranno eliminate. L’azione non si può annullare.", next:"Avanti →", obSupportTitle:"Sostieni lo sviluppatore", obSupportDesc:"Questa app è gratuita. Se ti piace, un follow fa molto piacere.", linkedinLabel:"Collegati su LinkedIn", githubLabel:"Segui su GitHub", startLearning:"Inizia →", composePrompt:"🧩 Componi la frase", translationPrefix:"traduzione: ", erase:"Cancella", check:"Verifica", langConfirmTitle:"Lingua: {lang}", langConfirmText:"L’interfaccia e le traduzioni saranno in questa lingua. È corretto?", langConfirmYes:"Sì, continua", langConfirmNo:"No, scegline un’altra" },
-    fa: { addWordHint:"به بخش فعلی", exportHint:"CSV: محتوا و پیشرفت", importHint:"بارگذاری CSV", settingsHint:"رابط کاربری و ظاهر", resetHint:"آمار و واژه‌های یادگرفته", phTranslation:"مثال", phDeckName:"واژگان من", appSub:"بر اساس راهنما، واژه یا حرف تعریف آلمانی را انتخاب کن — با ۲ پاسخ درست پشت سر هم، کارت از دسته خارج می‌شود", manageBtn:"واژه‌ها", addWordBtn:"واژه", exportBtn:"خروجی گرفتن", importBtn:"وارد کردن", today:"امروز", allTime:"در مجموع", learnedSuffix:"یادگرفته", learnedInSel:"یادگرفته در این انتخاب", newBadge:"جدید", seenBadge:"مرور", deckLabel:"در دسته", hintChoice:"۲ پاسخ درست پشت سر هم لازم است", speechLabel:"صدا", speechHint:"تلفظ واژه‌های آلمانی", confirmChoice:"تأیید", dirLabel:"جهت", dirTargetShort:"FA", dirTitle:"چطور می‌خواهی یاد بگیری؟", dirDesc:"هر زمان می‌توانی تغییرش بدهی: بیشتر ← تنظیمات.", dirDone:"تمام", dirRuDe:"فارسی ← آلمانی", dirRuDeSub:"ترجمه را می‌بینی، واژهٔ آلمانی را انتخاب می‌کنی", dirDeRu:"آلمانی ← فارسی", dirDeRuSub:"واژهٔ آلمانی را می‌بینی، ترجمه را انتخاب می‌کنی", dirRandom:"تصادفی", dirRandomSub:"جهت به‌طور تصادفی عوض می‌شود", hintOrder:"واژه‌ها را به ترتیب لمس کن تا جمله ساخته شود", doneTitle:"ALLE AN BORD 🚆", doneText:"همهٔ واژه‌های این انتخاب را یاد گرفتی.", restart:"شروع دوباره", resetProgress:"بازنشانی پیشرفت", tip:"der/das/die — حرف تعریف را همراه واژه یاد بگیر", manageTitle:"واژه‌ها", search:"جستجوی واژه یا ترجمه…", filterAll:"همه", filterLearned:"یادگرفته", filterHalf:"نیمه‌کاره", filterNew:"شروع‌نشده", typeNoun:"اسم‌ها", typeVerb:"فعل‌ها", typeAdj:"صفت‌ها", typePhrase:"عبارت‌ها", errWordCyr:"واژهٔ آلمانی را با حروف لاتین بنویس (مثلاً Beispiel). ترجمه در فیلد دوم.", errSame:"واژه و ترجمه نباید یکسان باشند.", errTrLatin:"به نظر می‌رسد فیلدها جابه‌جا شده‌اند: ترجمه با حروف لاتین است.", typeOther:"سایر", typeCase:"حرف تعریف: حالت‌ها", typeVerbprep:"فعل + حرف اضافه", typeFrage:"واژه‌های پرسشی", typePrep:"حروف اضافه", typeOrder:"ترتیب واژه‌ها", colEdit:"✎", colDelete:"🗑", confirmDeleteTitle:"واژه حذف شود؟", confirmDeleteText:"این کار قابل بازگشت نیست.", cancel:"لغو", delete:"حذف", save:"ذخیره", create:"ایجاد", addWordTitle:"واژهٔ جدید", addWordDesc:"یک واژه به بخش فعلی اضافه کن", fieldType:"نوع", fieldGender:"جنس", fieldWord:"واژه (آلمانی)", fieldTr:"ترجمه", createDeckTitle:"بخش جدید", fieldDeckName:"نام", exportTitle:"خروجی گرفتن", exportScope:"چه چیزی خروجی گرفته شود", exportMode:"محتوا (برای بخش‌های خودت)", exportFull:"محتوا + پیشرفت", exportMaterial:"فقط محتوا", downloadCsv:"دانلود CSV", importResultTitle:"وارد کردن انجام شد", basicName:"پایه", basicExportNote:"پایه — فقط پیشرفت (محتوا داخل برنامه است)", empty:"هنوز چیزی اینجا نیست", newDeckPill:"+ بخش", settingsTitle:"تنظیمات", settingsBtnLabel:"زبان و پوسته", navLearn:"یادگیری", navDecks:"بخش‌ها", navMore:"بیشتر", navData:"داده‌ها", reset:"بازنشانی", confirmResetTitle:"پیشرفت بازنشانی شود؟", confirmResetDesc:"همهٔ آمار و واژه‌های یادگرفته پاک می‌شوند.", storageSession:"پیشرفت فقط برای این جلسه ذخیره می‌شود", storageLocal:"پیشرفت در این مرورگر و روی این دستگاه ذخیره می‌شود", correctFull:"درست است! واژه یاد گرفته شد ✓", correctN:"درست است! ", wrongPrefix:"نادرست. پاسخ درست: ", genderQCorrect:"درست: ", obLangTitle:"زبانت را انتخاب کن", obLangDesc:"زبان رابط کاربری و ترجمه‌ها. زبان و پوسته را هر زمان می‌توانی عوض کنی: بیشتر ← تنظیمات.", obThemeLabel:"پوسته", obThemeTitle:"پوسته‌های جدید", obThemeDesc:"ظاهر برنامه را انتخاب کن. در بیشتر ← تنظیمات ← زبان و پوسته قابل تغییر است.", stepOf:"مرحلهٔ {n} از {m}", skipAll:"رد کردن همه", deleteDeckTitle:"بخش حذف شود؟", deleteDeckText:"بخش «{name}» و همهٔ واژه‌هایش حذف می‌شوند. این کار قابل بازگشت نیست.", next:"بعدی ←", obSupportTitle:"حمایت از سازنده", obSupportDesc:"این برنامه رایگان است. اگر دوستش داری، دنبال کردن خیلی کمک می‌کند.", linkedinLabel:"ارتباط در LinkedIn", githubLabel:"دنبال کردن در GitHub", startLearning:"شروع یادگیری ←", composePrompt:"🧩 جمله را بساز", translationPrefix:"ترجمه: ", erase:"پاک کردن", check:"بررسی", langConfirmTitle:"زبان: {lang}", langConfirmText:"رابط کاربری و ترجمهٔ واژه‌ها به این زبان خواهد بود. درست است؟", langConfirmYes:"بله، ادامه", langConfirmNo:"نه، زبان دیگری" },
-    ar: { addWordHint:"إلى القسم الحالي", exportHint:"CSV: المحتوى والتقدم", importHint:"تحميل ملف CSV", settingsHint:"الواجهة والمظهر", resetHint:"الإحصاءات والكلمات المحفوظة", phTranslation:"مثال", phDeckName:"مفرداتي", appSub:"اختر الكلمة الألمانية أو أداة التعريف حسب التلميح — إجابتان صحيحتان متتاليتان وتخرج البطاقة من المجموعة", manageBtn:"الكلمات", addWordBtn:"كلمة", exportBtn:"تصدير", importBtn:"استيراد", today:"اليوم", allTime:"الإجمالي", learnedSuffix:"محفوظة", learnedInSel:"المحفوظ في هذا الاختيار", newBadge:"جديدة", seenBadge:"مراجعة", deckLabel:"في المجموعة", hintChoice:"تحتاج إلى إجابتين صحيحتين متتاليتين", speechLabel:"النطق", speechHint:"نطق الكلمات الألمانية", confirmChoice:"تأكيد", dirLabel:"الاتجاه", dirTargetShort:"AR", dirTitle:"كيف تريد أن تتعلم؟", dirDesc:"يمكنك تغييره في أي وقت: المزيد ← الإعدادات.", dirDone:"تم", dirRuDe:"العربية ← الألمانية", dirRuDeSub:"ترى الترجمة وتختار الكلمة الألمانية", dirDeRu:"الألمانية ← العربية", dirDeRuSub:"ترى الكلمة الألمانية وتختار الترجمة", dirRandom:"عشوائي", dirRandomSub:"يتغير الاتجاه عشوائياً", hintOrder:"المس الكلمات بالترتيب لتكوين الجملة", doneTitle:"ALLE AN BORD 🚆", doneText:"لقد تعلمت كل كلمات هذا الاختيار.", restart:"ابدأ من جديد", resetProgress:"إعادة ضبط التقدم", tip:"der/das/die — احفظ أداة التعريف مع الكلمة", manageTitle:"الكلمات", search:"ابحث عن كلمة أو ترجمة…", filterAll:"الكل", filterLearned:"محفوظة", filterHalf:"في المنتصف", filterNew:"لم تبدأ", typeNoun:"الأسماء", typeVerb:"الأفعال", typeAdj:"الصفات", typePhrase:"العبارات", errWordCyr:"اكتب الكلمة الألمانية بالحروف اللاتينية (مثل Beispiel). الترجمة في الحقل الثاني.", errSame:"يجب أن تختلف الكلمة عن الترجمة.", errTrLatin:"يبدو أن الحقلين مقلوبان: الترجمة مكتوبة بحروف لاتينية.", typeOther:"أخرى", typeCase:"أداة التعريف: الحالات", typeVerbprep:"فعل + حرف جر", typeFrage:"أدوات الاستفهام", typePrep:"حروف الجر", typeOrder:"ترتيب الكلمات", colEdit:"✎", colDelete:"🗑", confirmDeleteTitle:"حذف الكلمة؟", confirmDeleteText:"لا يمكن التراجع عن هذا الإجراء.", cancel:"إلغاء", delete:"حذف", save:"حفظ", create:"إنشاء", addWordTitle:"كلمة جديدة", addWordDesc:"أضف كلمة إلى القسم الحالي", fieldType:"النوع", fieldGender:"الجنس", fieldWord:"الكلمة (بالألمانية)", fieldTr:"الترجمة", createDeckTitle:"قسم جديد", fieldDeckName:"الاسم", exportTitle:"تصدير", exportScope:"ما الذي سيُصدَّر", exportMode:"المحتوى (لأقسامك الخاصة)", exportFull:"المحتوى + التقدم", exportMaterial:"المحتوى فقط", downloadCsv:"تنزيل CSV", importResultTitle:"اكتمل الاستيراد", basicName:"الأساسي", basicExportNote:"الأساسي — التقدم فقط (المحتوى مدمج في التطبيق)", empty:"لا يوجد شيء هنا بعد", newDeckPill:"+ قسم", settingsTitle:"الإعدادات", settingsBtnLabel:"اللغة والمظهر", navLearn:"تعلّم", navDecks:"الأقسام", navMore:"المزيد", navData:"البيانات", reset:"إعادة ضبط", confirmResetTitle:"إعادة ضبط التقدم؟", confirmResetDesc:"سيتم حذف كل الإحصاءات والكلمات المحفوظة.", storageSession:"يُحفظ التقدم لهذه الجلسة فقط", storageLocal:"يُحفظ التقدم في هذا المتصفح على هذا الجهاز", correctFull:"صحيح! تم حفظ الكلمة ✓", correctN:"صحيح! ", wrongPrefix:"خطأ. الإجابة الصحيحة: ", genderQCorrect:"صحيح: ", obLangTitle:"اختر لغتك", obLangDesc:"لغة الواجهة والترجمات. يمكنك تغيير اللغة والمظهر في أي وقت: المزيد ← الإعدادات.", obThemeLabel:"المظهر", obThemeTitle:"مظاهر جديدة", obThemeDesc:"اختر شكل التطبيق. يمكن تغييره من المزيد ← الإعدادات ← اللغة والمظهر.", stepOf:"الخطوة {n} من {m}", skipAll:"تخطي الكل", deleteDeckTitle:"حذف القسم؟", deleteDeckText:"سيتم حذف القسم «{name}» وكل كلماته. لا يمكن التراجع عن ذلك.", next:"التالي ←", obSupportTitle:"ادعم المطوّر", obSupportDesc:"هذا التطبيق مجاني. إذا أعجبك، فإن المتابعة تعني الكثير.", linkedinLabel:"تواصل على LinkedIn", githubLabel:"تابع على GitHub", startLearning:"ابدأ التعلم ←", composePrompt:"🧩 كوّن الجملة", translationPrefix:"الترجمة: ", erase:"مسح", check:"تحقق", langConfirmTitle:"اللغة: {lang}", langConfirmText:"ستكون الواجهة وترجمات الكلمات بهذه اللغة. هل هذا صحيح؟", langConfirmYes:"نعم، متابعة", langConfirmNo:"لا، اختر لغة أخرى" },
+    fr: { dontKnow:"Je ne sais pas", mistakesBtn:"Revoir les erreurs", mistakesExit:"Quitter la révision des erreurs", goalLabel:"Objectif du jour", goalOff:"sans objectif", goalDone:"objectif atteint 🎉", streakLabel:"jours d’affilée", goalSettingHint:"mots par jour · touche pour changer", listen:"Écouter", addWordHint:"dans la section actuelle", exportHint:"CSV : contenu et progression", importHint:"charger un CSV", settingsHint:"interface et apparence", resetHint:"statistiques et mots appris", phTranslation:"exemple", phDeckName:"Mon vocabulaire", appSub:"Choisis le mot allemand ou l’article d’après l’indice — 2 bonnes réponses de suite et la carte quitte le paquet", manageBtn:"Mots", addWordBtn:"Mot", exportBtn:"Exporter", importBtn:"Importer", today:"Aujourd’hui", allTime:"Au total", learnedSuffix:"appris", learnedInSel:"APPRIS DANS LA SÉLECTION", newBadge:"Nouveau", seenBadge:"Révision", deckLabel:"DANS LE PAQUET", hintChoice:"2 bonnes réponses de suite nécessaires", speechLabel:"Voix", speechHint:"prononcer les mots allemands", confirmChoice:"Valider", dirLabel:"Sens", dirTargetShort:"FR", dirTitle:"Comment veux-tu apprendre ?", dirDesc:"Tu peux le changer à tout moment : Plus → Réglages.", dirDone:"Terminé", dirRuDe:"Français → allemand", dirRuDeSub:"tu vois la traduction, tu choisis le mot allemand", dirDeRu:"Allemand → français", dirDeRuSub:"tu vois le mot allemand, tu choisis la traduction", dirRandom:"Aléatoire", dirRandomSub:"le sens change au hasard", hintOrder:"touche les mots dans l’ordre pour former la phrase", doneTitle:"ALLE AN BORD 🚆", doneText:"Tu as appris tous les mots de cette sélection.", restart:"Recommencer", resetProgress:"Réinitialiser la progression", tip:"der/das/die — apprends l’article avec le mot", manageTitle:"Mots", search:"Rechercher un mot ou une traduction…", filterAll:"Tous", filterLearned:"Appris", filterHalf:"À moitié", filterNew:"Pas commencé", typeNoun:"Noms", typeVerb:"Verbes", typeAdj:"Adjectifs", typePhrase:"Expressions", errWordCyr:"Écris le mot allemand en lettres latines (ex. Beispiel). La traduction va dans le deuxième champ.", errSame:"Le mot et la traduction doivent être différents.", errTrLatin:"Les champs semblent inversés : la traduction est en lettres latines.", typeOther:"Autres", typeCase:"Article : cas", typeVerbprep:"Verbe + préposition", typeFrage:"Mots interrogatifs", typePrep:"Prépositions", typeOrder:"Ordre des mots", colEdit:"✎", colDelete:"🗑", confirmDeleteTitle:"Supprimer le mot ?", confirmDeleteText:"Cette action est irréversible.", cancel:"Annuler", delete:"Supprimer", save:"Enregistrer", create:"Créer", addWordTitle:"Nouveau mot", addWordDesc:"Ajoute un mot à la section actuelle", fieldType:"Type", fieldGender:"Genre", fieldWord:"Mot (allemand)", fieldTr:"Traduction", createDeckTitle:"Nouvelle section", fieldDeckName:"Nom", exportTitle:"Exporter", exportScope:"Que exporter", exportMode:"Contenu (pour tes sections)", exportFull:"Contenu + progression", exportMaterial:"Contenu seulement", downloadCsv:"Télécharger CSV", importResultTitle:"Import terminé", basicName:"De base", basicExportNote:"De base — progression seulement (le contenu est intégré à l’app)", empty:"Rien pour l’instant", newDeckPill:"+ Section", settingsTitle:"Réglages", settingsBtnLabel:"Langue et thème", navLearn:"Apprendre", navDecks:"Sections", navMore:"Plus", navData:"Données", reset:"Réinitialiser", confirmResetTitle:"Réinitialiser la progression ?", confirmResetDesc:"Toutes les statistiques et les mots appris seront effacés.", storageSession:"La progression n’est gardée que pour cette session", storageLocal:"La progression est enregistrée dans ce navigateur sur cet appareil", correctFull:"Correct ! Mot appris ✓", correctN:"Correct ! ", wrongPrefix:"Faux. Bonne réponse : ", genderQCorrect:"Correct : ", obLangTitle:"Choisis ta langue", obLangDesc:"Langue de l’interface et des traductions. Tu peux changer la langue et le thème à tout moment : Plus → Réglages.", obThemeLabel:"Thème", obThemeTitle:"Nouveaux thèmes", obThemeDesc:"Choisis l’apparence de l’app. Modifiable dans Plus → Réglages → Langue et thème.", stepOf:"Étape {n} sur {m}", skipAll:"Tout passer", deleteDeckTitle:"Supprimer la section ?", deleteDeckText:"La section « {name} » et tous ses mots seront supprimés. Cette action est irréversible.", next:"Suivant →", obSupportTitle:"Soutenir le développeur", obSupportDesc:"Cette app est gratuite. Si elle te plaît, un abonnement fait très plaisir.", linkedinLabel:"Se connecter sur LinkedIn", githubLabel:"Suivre sur GitHub", startLearning:"Commencer →", composePrompt:"🧩 Forme la phrase", translationPrefix:"traduction : ", erase:"Effacer", check:"Vérifier", langConfirmTitle:"Langue : {lang}", langConfirmText:"L’interface et les traductions seront dans cette langue. C’est bien ça ?", langConfirmYes:"Oui, continuer", langConfirmNo:"Non, en choisir une autre" },
+    it: { dontKnow:"Non lo so", mistakesBtn:"Ripassa gli errori", mistakesExit:"Esci dal ripasso errori", goalLabel:"Obiettivo del giorno", goalOff:"nessun obiettivo", goalDone:"obiettivo raggiunto 🎉", streakLabel:"giorni di fila", goalSettingHint:"parole al giorno · tocca per cambiare", listen:"Ascolta", addWordHint:"nella sezione attuale", exportHint:"CSV: contenuto e progressi", importHint:"carica un CSV", settingsHint:"interfaccia e aspetto", resetHint:"statistiche e parole imparate", phTranslation:"esempio", phDeckName:"Il mio vocabolario", appSub:"Scegli la parola tedesca o l’articolo dall’indizio — 2 risposte giuste di fila e la carta esce dal mazzo", manageBtn:"Parole", addWordBtn:"Parola", exportBtn:"Esporta", importBtn:"Importa", today:"Oggi", allTime:"In totale", learnedSuffix:"imparate", learnedInSel:"IMPARATE NELLA SELEZIONE", newBadge:"Nuova", seenBadge:"Ripasso", deckLabel:"NEL MAZZO", hintChoice:"servono 2 risposte giuste di fila", speechLabel:"Voce", speechHint:"pronuncia le parole tedesche", confirmChoice:"Conferma", dirLabel:"Direzione", dirTargetShort:"IT", dirTitle:"Come vuoi imparare?", dirDesc:"Puoi cambiarlo in qualsiasi momento: Altro → Impostazioni.", dirDone:"Fatto", dirRuDe:"Italiano → tedesco", dirRuDeSub:"vedi la traduzione, scegli la parola tedesca", dirDeRu:"Tedesco → italiano", dirDeRuSub:"vedi la parola tedesca, scegli la traduzione", dirRandom:"Casuale", dirRandomSub:"la direzione cambia a caso", hintOrder:"tocca le parole in ordine per formare la frase", doneTitle:"ALLE AN BORD 🚆", doneText:"Hai imparato tutte le parole di questa selezione.", restart:"Ricomincia", resetProgress:"Azzera i progressi", tip:"der/das/die — impara l’articolo insieme alla parola", manageTitle:"Parole", search:"Cerca parola o traduzione…", filterAll:"Tutte", filterLearned:"Imparate", filterHalf:"A metà", filterNew:"Non iniziate", typeNoun:"Sostantivi", typeVerb:"Verbi", typeAdj:"Aggettivi", typePhrase:"Espressioni", errWordCyr:"Scrivi la parola tedesca in lettere latine (es. Beispiel). La traduzione va nel secondo campo.", errSame:"Parola e traduzione devono essere diverse.", errTrLatin:"I campi sembrano invertiti: la traduzione è in lettere latine.", typeOther:"Altro", typeCase:"Articolo: casi", typeVerbprep:"Verbo + preposizione", typeFrage:"Parole interrogative", typePrep:"Preposizioni", typeOrder:"Ordine delle parole", colEdit:"✎", colDelete:"🗑", confirmDeleteTitle:"Eliminare la parola?", confirmDeleteText:"L’azione non si può annullare.", cancel:"Annulla", delete:"Elimina", save:"Salva", create:"Crea", addWordTitle:"Nuova parola", addWordDesc:"Aggiungi una parola alla sezione attuale", fieldType:"Tipo", fieldGender:"Genere", fieldWord:"Parola (tedesco)", fieldTr:"Traduzione", createDeckTitle:"Nuova sezione", fieldDeckName:"Nome", exportTitle:"Esporta", exportScope:"Cosa esportare", exportMode:"Contenuto (per le tue sezioni)", exportFull:"Contenuto + progressi", exportMaterial:"Solo contenuto", downloadCsv:"Scarica CSV", importResultTitle:"Importazione completata", basicName:"Base", basicExportNote:"Base — solo progressi (il contenuto è integrato nell’app)", empty:"Ancora niente qui", newDeckPill:"+ Sezione", settingsTitle:"Impostazioni", settingsBtnLabel:"Lingua e tema", navLearn:"Impara", navDecks:"Sezioni", navMore:"Altro", navData:"Dati", reset:"Azzera", confirmResetTitle:"Azzerare i progressi?", confirmResetDesc:"Tutte le statistiche e le parole imparate verranno cancellate.", storageSession:"I progressi sono salvati solo per questa sessione", storageLocal:"I progressi sono salvati in questo browser su questo dispositivo", correctFull:"Giusto! Parola imparata ✓", correctN:"Giusto! ", wrongPrefix:"Sbagliato. Risposta giusta: ", genderQCorrect:"Giusto: ", obLangTitle:"Scegli la tua lingua", obLangDesc:"Lingua dell’interfaccia e delle traduzioni. Lingua e tema si possono cambiare in qualsiasi momento: Altro → Impostazioni.", obThemeLabel:"Tema", obThemeTitle:"Nuovi temi", obThemeDesc:"Scegli l’aspetto dell’app. Puoi cambiarlo in Altro → Impostazioni → Lingua e tema.", stepOf:"Passo {n} di {m}", skipAll:"Salta tutto", deleteDeckTitle:"Eliminare la sezione?", deleteDeckText:"La sezione «{name}» e tutte le sue parole verranno eliminate. L’azione non si può annullare.", next:"Avanti →", obSupportTitle:"Sostieni lo sviluppatore", obSupportDesc:"Questa app è gratuita. Se ti piace, un follow fa molto piacere.", linkedinLabel:"Collegati su LinkedIn", githubLabel:"Segui su GitHub", startLearning:"Inizia →", composePrompt:"🧩 Componi la frase", translationPrefix:"traduzione: ", erase:"Cancella", check:"Verifica", langConfirmTitle:"Lingua: {lang}", langConfirmText:"L’interfaccia e le traduzioni saranno in questa lingua. È corretto?", langConfirmYes:"Sì, continua", langConfirmNo:"No, scegline un’altra" },
+    fa: { dontKnow:"نمی‌دانم", mistakesBtn:"مرور اشتباه‌ها", mistakesExit:"خروج از مرور اشتباه‌ها", goalLabel:"هدف روزانه", goalOff:"بدون هدف", goalDone:"هدف انجام شد 🎉", streakLabel:"روز پیاپی", goalSettingHint:"واژه در روز · برای تغییر لمس کن", listen:"گوش دادن", addWordHint:"به بخش فعلی", exportHint:"CSV: محتوا و پیشرفت", importHint:"بارگذاری CSV", settingsHint:"رابط کاربری و ظاهر", resetHint:"آمار و واژه‌های یادگرفته", phTranslation:"مثال", phDeckName:"واژگان من", appSub:"بر اساس راهنما، واژه یا حرف تعریف آلمانی را انتخاب کن — با ۲ پاسخ درست پشت سر هم، کارت از دسته خارج می‌شود", manageBtn:"واژه‌ها", addWordBtn:"واژه", exportBtn:"خروجی گرفتن", importBtn:"وارد کردن", today:"امروز", allTime:"در مجموع", learnedSuffix:"یادگرفته", learnedInSel:"یادگرفته در این انتخاب", newBadge:"جدید", seenBadge:"مرور", deckLabel:"در دسته", hintChoice:"۲ پاسخ درست پشت سر هم لازم است", speechLabel:"صدا", speechHint:"تلفظ واژه‌های آلمانی", confirmChoice:"تأیید", dirLabel:"جهت", dirTargetShort:"FA", dirTitle:"چطور می‌خواهی یاد بگیری؟", dirDesc:"هر زمان می‌توانی تغییرش بدهی: بیشتر ← تنظیمات.", dirDone:"تمام", dirRuDe:"فارسی ← آلمانی", dirRuDeSub:"ترجمه را می‌بینی، واژهٔ آلمانی را انتخاب می‌کنی", dirDeRu:"آلمانی ← فارسی", dirDeRuSub:"واژهٔ آلمانی را می‌بینی، ترجمه را انتخاب می‌کنی", dirRandom:"تصادفی", dirRandomSub:"جهت به‌طور تصادفی عوض می‌شود", hintOrder:"واژه‌ها را به ترتیب لمس کن تا جمله ساخته شود", doneTitle:"ALLE AN BORD 🚆", doneText:"همهٔ واژه‌های این انتخاب را یاد گرفتی.", restart:"شروع دوباره", resetProgress:"بازنشانی پیشرفت", tip:"der/das/die — حرف تعریف را همراه واژه یاد بگیر", manageTitle:"واژه‌ها", search:"جستجوی واژه یا ترجمه…", filterAll:"همه", filterLearned:"یادگرفته", filterHalf:"نیمه‌کاره", filterNew:"شروع‌نشده", typeNoun:"اسم‌ها", typeVerb:"فعل‌ها", typeAdj:"صفت‌ها", typePhrase:"عبارت‌ها", errWordCyr:"واژهٔ آلمانی را با حروف لاتین بنویس (مثلاً Beispiel). ترجمه در فیلد دوم.", errSame:"واژه و ترجمه نباید یکسان باشند.", errTrLatin:"به نظر می‌رسد فیلدها جابه‌جا شده‌اند: ترجمه با حروف لاتین است.", typeOther:"سایر", typeCase:"حرف تعریف: حالت‌ها", typeVerbprep:"فعل + حرف اضافه", typeFrage:"واژه‌های پرسشی", typePrep:"حروف اضافه", typeOrder:"ترتیب واژه‌ها", colEdit:"✎", colDelete:"🗑", confirmDeleteTitle:"واژه حذف شود؟", confirmDeleteText:"این کار قابل بازگشت نیست.", cancel:"لغو", delete:"حذف", save:"ذخیره", create:"ایجاد", addWordTitle:"واژهٔ جدید", addWordDesc:"یک واژه به بخش فعلی اضافه کن", fieldType:"نوع", fieldGender:"جنس", fieldWord:"واژه (آلمانی)", fieldTr:"ترجمه", createDeckTitle:"بخش جدید", fieldDeckName:"نام", exportTitle:"خروجی گرفتن", exportScope:"چه چیزی خروجی گرفته شود", exportMode:"محتوا (برای بخش‌های خودت)", exportFull:"محتوا + پیشرفت", exportMaterial:"فقط محتوا", downloadCsv:"دانلود CSV", importResultTitle:"وارد کردن انجام شد", basicName:"پایه", basicExportNote:"پایه — فقط پیشرفت (محتوا داخل برنامه است)", empty:"هنوز چیزی اینجا نیست", newDeckPill:"+ بخش", settingsTitle:"تنظیمات", settingsBtnLabel:"زبان و پوسته", navLearn:"یادگیری", navDecks:"بخش‌ها", navMore:"بیشتر", navData:"داده‌ها", reset:"بازنشانی", confirmResetTitle:"پیشرفت بازنشانی شود؟", confirmResetDesc:"همهٔ آمار و واژه‌های یادگرفته پاک می‌شوند.", storageSession:"پیشرفت فقط برای این جلسه ذخیره می‌شود", storageLocal:"پیشرفت در این مرورگر و روی این دستگاه ذخیره می‌شود", correctFull:"درست است! واژه یاد گرفته شد ✓", correctN:"درست است! ", wrongPrefix:"نادرست. پاسخ درست: ", genderQCorrect:"درست: ", obLangTitle:"زبانت را انتخاب کن", obLangDesc:"زبان رابط کاربری و ترجمه‌ها. زبان و پوسته را هر زمان می‌توانی عوض کنی: بیشتر ← تنظیمات.", obThemeLabel:"پوسته", obThemeTitle:"پوسته‌های جدید", obThemeDesc:"ظاهر برنامه را انتخاب کن. در بیشتر ← تنظیمات ← زبان و پوسته قابل تغییر است.", stepOf:"مرحلهٔ {n} از {m}", skipAll:"رد کردن همه", deleteDeckTitle:"بخش حذف شود؟", deleteDeckText:"بخش «{name}» و همهٔ واژه‌هایش حذف می‌شوند. این کار قابل بازگشت نیست.", next:"بعدی ←", obSupportTitle:"حمایت از سازنده", obSupportDesc:"این برنامه رایگان است. اگر دوستش داری، دنبال کردن خیلی کمک می‌کند.", linkedinLabel:"ارتباط در LinkedIn", githubLabel:"دنبال کردن در GitHub", startLearning:"شروع یادگیری ←", composePrompt:"🧩 جمله را بساز", translationPrefix:"ترجمه: ", erase:"پاک کردن", check:"بررسی", langConfirmTitle:"زبان: {lang}", langConfirmText:"رابط کاربری و ترجمهٔ واژه‌ها به این زبان خواهد بود. درست است؟", langConfirmYes:"بله، ادامه", langConfirmNo:"نه، زبان دیگری" },
+    ar: { dontKnow:"لا أعرف", mistakesBtn:"مراجعة الأخطاء", mistakesExit:"الخروج من مراجعة الأخطاء", goalLabel:"هدف اليوم", goalOff:"بلا هدف", goalDone:"تحقق الهدف 🎉", streakLabel:"أيام متتالية", goalSettingHint:"كلمة يومياً · المس للتغيير", listen:"استمع", addWordHint:"إلى القسم الحالي", exportHint:"CSV: المحتوى والتقدم", importHint:"تحميل ملف CSV", settingsHint:"الواجهة والمظهر", resetHint:"الإحصاءات والكلمات المحفوظة", phTranslation:"مثال", phDeckName:"مفرداتي", appSub:"اختر الكلمة الألمانية أو أداة التعريف حسب التلميح — إجابتان صحيحتان متتاليتان وتخرج البطاقة من المجموعة", manageBtn:"الكلمات", addWordBtn:"كلمة", exportBtn:"تصدير", importBtn:"استيراد", today:"اليوم", allTime:"الإجمالي", learnedSuffix:"محفوظة", learnedInSel:"المحفوظ في هذا الاختيار", newBadge:"جديدة", seenBadge:"مراجعة", deckLabel:"في المجموعة", hintChoice:"تحتاج إلى إجابتين صحيحتين متتاليتين", speechLabel:"النطق", speechHint:"نطق الكلمات الألمانية", confirmChoice:"تأكيد", dirLabel:"الاتجاه", dirTargetShort:"AR", dirTitle:"كيف تريد أن تتعلم؟", dirDesc:"يمكنك تغييره في أي وقت: المزيد ← الإعدادات.", dirDone:"تم", dirRuDe:"العربية ← الألمانية", dirRuDeSub:"ترى الترجمة وتختار الكلمة الألمانية", dirDeRu:"الألمانية ← العربية", dirDeRuSub:"ترى الكلمة الألمانية وتختار الترجمة", dirRandom:"عشوائي", dirRandomSub:"يتغير الاتجاه عشوائياً", hintOrder:"المس الكلمات بالترتيب لتكوين الجملة", doneTitle:"ALLE AN BORD 🚆", doneText:"لقد تعلمت كل كلمات هذا الاختيار.", restart:"ابدأ من جديد", resetProgress:"إعادة ضبط التقدم", tip:"der/das/die — احفظ أداة التعريف مع الكلمة", manageTitle:"الكلمات", search:"ابحث عن كلمة أو ترجمة…", filterAll:"الكل", filterLearned:"محفوظة", filterHalf:"في المنتصف", filterNew:"لم تبدأ", typeNoun:"الأسماء", typeVerb:"الأفعال", typeAdj:"الصفات", typePhrase:"العبارات", errWordCyr:"اكتب الكلمة الألمانية بالحروف اللاتينية (مثل Beispiel). الترجمة في الحقل الثاني.", errSame:"يجب أن تختلف الكلمة عن الترجمة.", errTrLatin:"يبدو أن الحقلين مقلوبان: الترجمة مكتوبة بحروف لاتينية.", typeOther:"أخرى", typeCase:"أداة التعريف: الحالات", typeVerbprep:"فعل + حرف جر", typeFrage:"أدوات الاستفهام", typePrep:"حروف الجر", typeOrder:"ترتيب الكلمات", colEdit:"✎", colDelete:"🗑", confirmDeleteTitle:"حذف الكلمة؟", confirmDeleteText:"لا يمكن التراجع عن هذا الإجراء.", cancel:"إلغاء", delete:"حذف", save:"حفظ", create:"إنشاء", addWordTitle:"كلمة جديدة", addWordDesc:"أضف كلمة إلى القسم الحالي", fieldType:"النوع", fieldGender:"الجنس", fieldWord:"الكلمة (بالألمانية)", fieldTr:"الترجمة", createDeckTitle:"قسم جديد", fieldDeckName:"الاسم", exportTitle:"تصدير", exportScope:"ما الذي سيُصدَّر", exportMode:"المحتوى (لأقسامك الخاصة)", exportFull:"المحتوى + التقدم", exportMaterial:"المحتوى فقط", downloadCsv:"تنزيل CSV", importResultTitle:"اكتمل الاستيراد", basicName:"الأساسي", basicExportNote:"الأساسي — التقدم فقط (المحتوى مدمج في التطبيق)", empty:"لا يوجد شيء هنا بعد", newDeckPill:"+ قسم", settingsTitle:"الإعدادات", settingsBtnLabel:"اللغة والمظهر", navLearn:"تعلّم", navDecks:"الأقسام", navMore:"المزيد", navData:"البيانات", reset:"إعادة ضبط", confirmResetTitle:"إعادة ضبط التقدم؟", confirmResetDesc:"سيتم حذف كل الإحصاءات والكلمات المحفوظة.", storageSession:"يُحفظ التقدم لهذه الجلسة فقط", storageLocal:"يُحفظ التقدم في هذا المتصفح على هذا الجهاز", correctFull:"صحيح! تم حفظ الكلمة ✓", correctN:"صحيح! ", wrongPrefix:"خطأ. الإجابة الصحيحة: ", genderQCorrect:"صحيح: ", obLangTitle:"اختر لغتك", obLangDesc:"لغة الواجهة والترجمات. يمكنك تغيير اللغة والمظهر في أي وقت: المزيد ← الإعدادات.", obThemeLabel:"المظهر", obThemeTitle:"مظاهر جديدة", obThemeDesc:"اختر شكل التطبيق. يمكن تغييره من المزيد ← الإعدادات ← اللغة والمظهر.", stepOf:"الخطوة {n} من {m}", skipAll:"تخطي الكل", deleteDeckTitle:"حذف القسم؟", deleteDeckText:"سيتم حذف القسم «{name}» وكل كلماته. لا يمكن التراجع عن ذلك.", next:"التالي ←", obSupportTitle:"ادعم المطوّر", obSupportDesc:"هذا التطبيق مجاني. إذا أعجبك، فإن المتابعة تعني الكثير.", linkedinLabel:"تواصل على LinkedIn", githubLabel:"تابع على GitHub", startLearning:"ابدأ التعلم ←", composePrompt:"🧩 كوّن الجملة", translationPrefix:"الترجمة: ", erase:"مسح", check:"تحقق", langConfirmTitle:"اللغة: {lang}", langConfirmText:"ستكون الواجهة وترجمات الكلمات بهذه اللغة. هل هذا صحيح؟", langConfirmYes:"نعم، متابعة", langConfirmNo:"لا، اختر لغة أخرى" },
   };
   let uiLang = "ru";
   const RTL_LANGS = ['fa','ar'];
@@ -4705,6 +4737,10 @@ order:Falls Sie Fragen haben , stehe ich Ihnen gern zur Verfügung .|If you have
   let quizDir = "ru-de";   // "ru-de" | "de-ru" | "random"
   let dirAsked = false;     // one-time direction prompt already shown
   let themeAsked = false;   // one-time theme prompt already shown
+  let dailyGoal = 20;       // correct words per day; 0 = no goal
+  let dayStreak = { last:"", count:0 };   // consecutive days with the goal reached
+  let mistakes = {};        // id -> true for words answered wrong and not yet fixed
+  let mistakeMode = false;  // practise only the mistakes
   let onboarded = false;
 
   function todayKey(){
@@ -4753,7 +4789,7 @@ order:Falls Sie Fragen haben , stehe ich Ihnen gern zur Verfügung .|If you have
   function buildPayload(){
     return JSON.stringify({
       version:5, streaks, learned, shownIds, pendingReview, renderCount, allTimeShown, today,
-      selectedCats:[...selectedCats], currentDeckId, customDecks, customWords, uiLang, theme, onboarded, speechOn, quizDir, dirAsked, themeAsked,
+      selectedCats:[...selectedCats], currentDeckId, customDecks, customWords, uiLang, theme, onboarded, speechOn, quizDir, dirAsked, themeAsked, dailyGoal, dayStreak, mistakes,
     });
   }
   async function saveProgress(){
@@ -4800,6 +4836,9 @@ order:Falls Sie Fragen haben , stehe ich Ihnen gern zur Verfügung .|If you have
       if(["ru-de","de-ru","random"].includes(data.quizDir)) quizDir = data.quizDir;
       dirAsked = !!data.dirAsked;
       themeAsked = !!data.themeAsked;
+      if(typeof data.dailyGoal === 'number') dailyGoal = data.dailyGoal;
+      if(data.dayStreak && typeof data.dayStreak.count === 'number') dayStreak = data.dayStreak;
+      if(data.mistakes && typeof data.mistakes === 'object') mistakes = data.mistakes;
       onboarded = !!data.onboarded;
     }
   }
@@ -4836,8 +4875,10 @@ order:Falls Sie Fragen haben , stehe ich Ihnen gern zur Verfügung .|If you have
   }
 
   function activePool(){
+    if(mistakeMode) return ALL.filter(w=>mistakes[w.id]);
     return ALL.filter(w=>selectedCats.has(w.cat) && !learned[w.id]);
   }
+  function mistakesCount(){ return ALL.filter(w=>mistakes[w.id]).length; }
 
   function selectionTotal(){
     return ALL.filter(w=>selectedCats.has(w.cat)).length;
@@ -5094,9 +5135,12 @@ order:Falls Sie Fragen haben , stehe ich Ihnen gern zur Verfügung .|If you have
     const grandTotal = allDeckIds().reduce((s,id)=>s+wordsForDeck(id).length,0);
     const allLearned = Object.keys(learned).length;
     els.allTimeLearned.textContent = allLearned + " / " + grandTotal + " " + t("learnedSuffix");
+    renderGoal();
+    renderMistakesBtn();
   }
 
   function renderQuestion(){
+    if(mistakeMode && activePool().length === 0){ mistakeMode = false; renderMistakesBtn(); }
     const pool = activePool();
     if(pool.length === 0){
       els.quizArea.style.display = "none";
@@ -5128,6 +5172,14 @@ order:Falls Sie Fragen haben , stehe ich Ihnen gern zur Verfügung .|If you have
     els.board.dataset.submode = question.cat;
     renderDots();
     renderStats();
+    // German text on the card → offer the listen button
+    const cardGerman = question.cat === "case" ? question.word
+      : question.dir === "de-ru" ? germanLabelOf(question)
+      : question.cat === "verbprep" ? question.verb : "";
+    document.getElementById('flap').classList.toggle('can-listen', !!(speechSupported && cardGerman));
+    document.getElementById('listenBtn').onclick = ()=> speakNow(cardGerman);
+    document.getElementById('listenBtn').title = t('listen');
+    document.getElementById('kbdHint').textContent = question.cat === "order" ? "Enter ↵ · ⌫" : "1–5 · Enter ↵";
 
     if(question.cat === "order"){
       els.board.dataset.mode = "order";
@@ -5152,6 +5204,11 @@ order:Falls Sie Fragen haben , stehe ich Ihnen gern zur Verfügung .|If you have
     window.speechSynthesis.addEventListener && window.speechSynthesis.addEventListener('voiceschanged', pickGermanVoice);
   }
   function speechActive(){ return speechOn && speechSupported; }
+  // Tap-to-listen works even when automatic speech is off.
+  function speakNow(text){ const prev = speechOn; speechOn = true; try{ speakDe(text); } finally { speechOn = prev; } }
+  let nextTimer = null;
+  function scheduleNext(ms){ clearTimeout(nextTimer); nextTimer = setTimeout(()=>{ nextTimer = null; renderQuestion(); }, ms); }
+  function skipWait(){ if(nextTimer){ clearTimeout(nextTimer); nextTimer = null; renderQuestion(); return true; } return false; }
   function speakDe(text){
     if(!speechActive() || !text) return;
     const clean = String(text).replace(/\(\+[^)]*\)/g, "").replace(/\.\.\./g, "").replace(/\s+/g, " ").trim();
@@ -5225,6 +5282,44 @@ order:Falls Sie Fragen haben , stehe ich Ihnen gern zur Verfügung .|If you have
     if(changed && currentQuestion && currentQuestion.cat !== "order" && !locked) renderQuestion();
   });
 
+  // Keyboard: 1–5 pick an option, Enter confirms / skips the pause, Backspace erases in word order.
+  document.addEventListener('keydown', (e)=>{
+    if(e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+    if(document.querySelector('.modal-overlay.show')) return;
+    if(!document.getElementById('pageLearn').classList.contains('active')) return;
+    const mode = els.board.dataset.mode;
+    if(e.key === 'Enter' || e.key === ' '){
+      if(skipWait()){ e.preventDefault(); return; }
+      if(mode === 'choice'){
+        const c = els.options.querySelector('.opt-confirm');
+        if(c && !c.disabled && !locked){ e.preventDefault(); c.click(); }
+      } else if(mode === 'order'){
+        if(els.orderNextWrap.style.display === 'block'){ e.preventDefault(); els.orderNextBtn.click(); }
+        else if(!els.checkBtn.disabled){ e.preventDefault(); els.checkBtn.click(); }
+      }
+      return;
+    }
+    if(mode === 'choice' && !locked && /^[1-9]$/.test(e.key)){
+      const opts = els.options.querySelectorAll('.opt');
+      const b = opts[parseInt(e.key,10)-1];
+      if(b){ e.preventDefault(); b.click(); }
+    }
+    if(mode === 'order' && e.key === 'Backspace' && !els.undoBtn.disabled){ e.preventDefault(); els.undoBtn.click(); }
+  });
+
+  document.getElementById('mistakesBtn').addEventListener('click', ()=>{
+    if(locked) return;
+    mistakeMode = !mistakeMode && mistakesCount() > 0;
+    renderMistakesBtn();
+    renderQuestion();
+  });
+  document.getElementById('goalBtn').addEventListener('click', async ()=>{
+    const steps = [10, 20, 30, 50, 0];
+    dailyGoal = steps[(steps.indexOf(dailyGoal) + 1) % steps.length];
+    renderGoal();
+    await saveProgress();
+  });
+
   function renderChoiceQuestion(question){
     currentOptions = buildOptions(question);
 
@@ -5278,7 +5373,19 @@ order:Falls Sie Fragen haben , stehe ich Ihnen gern zur Verfügung .|If you have
       selectedOpt.btn.classList.remove('selected');
       handleAnswer(selectedOpt.opt, question, selectedOpt.btn);
     });
-    if(confirmMode) els.options.appendChild(confirmBtn);
+    const dontKnowBtn = document.createElement('button');
+    dontKnowBtn.className = 'opt-dontknow';
+    dontKnowBtn.textContent = t("dontKnow");
+    dontKnowBtn.addEventListener('click', ()=>{
+      if(locked) return;
+      Array.from(els.options.querySelectorAll('.opt')).forEach(b=>b.classList.remove('selected'));
+      handleAnswer({ isCorrect:false }, question, dontKnowBtn);
+    });
+    const actions = document.createElement('div');
+    actions.className = 'opt-actions';
+    actions.appendChild(dontKnowBtn);
+    if(confirmMode) actions.appendChild(confirmBtn);
+    els.options.appendChild(actions);
   }
 
   function recordAnswer(question, isCorrect){
@@ -5287,10 +5394,51 @@ order:Falls Sie Fragen haben , stehe ich Ihnen gern zur Verfügung .|If you have
     allTimeShown++;
     if(isCorrect){
       today.correctIds[question.id] = true;
+      delete mistakes[question.id];
     } else {
       today.wrong++;
       pendingReview[question.id] = renderCount + 10 + Math.floor(Math.random()*6);
+      mistakes[question.id] = true;
     }
+    updateDayStreak();
+    renderMistakesBtn();
+  }
+  function dayKeyOffset(days){
+    const d = new Date(); d.setDate(d.getDate() + days);
+    return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+  }
+  function todayCorrectCount(){ return Object.keys(today.correctIds).length; }
+  function dayGoalReached(){ return dailyGoal > 0 ? todayCorrectCount() >= dailyGoal : today.shown > 0; }
+  function updateDayStreak(){
+    const key = todayKey();
+    if(dayStreak.last === key || !dayGoalReached()) return;
+    dayStreak = { last:key, count: dayStreak.last === dayKeyOffset(-1) ? dayStreak.count + 1 : 1 };
+  }
+  function currentStreak(){
+    return (dayStreak.last === todayKey() || dayStreak.last === dayKeyOffset(-1)) ? dayStreak.count : 0;
+  }
+  function renderGoal(){
+    const track = document.getElementById('goalTrack');
+    if(!track) return;
+    document.getElementById('goalLabelText').textContent = t('goalLabel');
+    const n = todayCorrectCount();
+    track.classList.toggle('off', dailyGoal === 0);
+    document.getElementById('goalText').textContent = dailyGoal > 0
+      ? (n >= dailyGoal ? n + " / " + dailyGoal + " · " + t('goalDone') : n + " / " + dailyGoal)
+      : t('goalOff');
+    document.getElementById('goalFill').style.width = (dailyGoal > 0 ? Math.min(100, n / dailyGoal * 100) : 0).toFixed(1) + "%";
+    document.getElementById('streakText').textContent = "🔥 " + currentStreak() + " " + t('streakLabel');
+    document.getElementById('btnGoalLabel').textContent = t('goalLabel');
+    const gh = t('goalSettingHint'), tapPart = gh.includes('·') ? gh.split('·').slice(1).join('·').trim() : '';
+    document.getElementById('goalHint').textContent = dailyGoal > 0 ? dailyGoal + " " + gh : t('goalOff') + (tapPart ? " · " + tapPart : "");
+  }
+  function renderMistakesBtn(){
+    const b = document.getElementById('mistakesBtn');
+    if(!b) return;
+    const n = mistakesCount();
+    b.classList.toggle('show', mistakeMode || n > 0);
+    b.classList.toggle('active', mistakeMode);
+    b.textContent = mistakeMode ? "✕ " + t('mistakesExit') + " (" + n + ")" : "🔁 " + t('mistakesBtn') + " (" + n + ")";
   }
 
   async function handleAnswer(chosen, question, btnEl){
@@ -5299,8 +5447,8 @@ order:Falls Sie Fragen haben , stehe ich Ihnen gern zur Verfügung .|If you have
 
     const allBtns = Array.from(els.options.querySelectorAll('.opt'));
     allBtns.forEach(b=>b.disabled = true);
-    const confirmEl = els.options.querySelector('.opt-confirm');
-    if(confirmEl) confirmEl.style.display = "none";
+    const actionsEl = els.options.querySelector('.opt-actions');
+    if(actionsEl) actionsEl.classList.add('done');
 
     const isCorrect = !!chosen.isCorrect;
     const correctOpt = currentOptions.find(o=>o.isCorrect);
@@ -5342,7 +5490,7 @@ order:Falls Sie Fragen haben , stehe ich Ihnen gern zur Verfügung .|If you have
     renderStats();
     await saveProgress();
 
-    setTimeout(renderQuestion, isCorrect ? (speechActive() ? 900 : 700) : (speechActive() ? 2200 : 1500));
+    scheduleNext(isCorrect ? (speechActive() ? 900 : 700) : (speechActive() ? 2200 : 1500));
   }
 
   // ---- Sentence word-order puzzle ----
@@ -5444,7 +5592,7 @@ order:Falls Sie Fragen haben , stehe ich Ihnen gern zur Verfügung .|If you have
       renderStats();
       speakDe(joinSentence(question.tokens));
       await saveProgress();
-      setTimeout(renderQuestion, speechActive() ? 1800 : 900);
+      scheduleNext(speechActive() ? 1800 : 900);
     } else {
       streaks[question.id] = 0;
       els.feedback.innerHTML = t("wrongPrefix") + "<br><b>" + joinSentence(question.tokens) + "</b>";
@@ -5742,6 +5890,14 @@ order:Falls Sie Fragen haben , stehe ich Ihnen gern zur Verfügung .|If you have
       tag.textContent = catInfo ? t(catInfo.tKey) : w.cat;
       main.appendChild(de); main.appendChild(ru); main.appendChild(tag);
       row.appendChild(main);
+      if(speechSupported){
+        const ls = document.createElement('button');
+        ls.className = 'row-listen';
+        ls.textContent = '🔊';
+        ls.title = t('listen');
+        ls.addEventListener('click', (e)=>{ e.stopPropagation(); speakNow(wordDisplayLabel(w)); });
+        row.appendChild(ls);
+      }
 
       if(isCustom || w.own){
         const actions = document.createElement('div');
