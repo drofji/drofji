@@ -439,6 +439,14 @@
   .deck-item .dk-meta{ font-size:11px; color:var(--ink-dim); margin-top:2px; }
   .deck-item .dk-check{ color:var(--accent); font-size:16px; }
   .deck-item .dk-del{ background:none; border:1px solid var(--rule); border-radius:9px; color:var(--red); font-size:14px; padding:6px 9px; cursor:pointer; }
+  .lang-confirm-alt{ font-size:11.5px; opacity:.85; margin-top:-6px; }
+  /* Right-to-left interface (Farsi, Arabic); German text keeps its own direction */
+  .opt, .flap-word, .flap-sub, .ru-hint, .feedback, .word-de, .word-ru, .modal-desc, .modal-title{ unicode-bidi: plaintext; }
+  [dir="rtl"] .opt{ text-align:right; padding:13px 38px 13px 14px; }
+  [dir="rtl"] .opt .idx{ left:auto; right:12px; }
+  [dir="rtl"] .build-strip, [dir="rtl"] .token-pool{ direction:ltr; }
+  [dir="rtl"] .dir-grid .pick-card{ text-align:right; }
+  [dir="rtl"] .list-btn{ text-align:right; }
   .ob-steps{ display:flex; align-items:center; gap:10px; margin:-2px 0 14px; }
   .ob-steps .ob-count{ font-family:'Space Mono',monospace; font-size:10.5px; letter-spacing:.06em; color:var(--ink-dim); text-transform:uppercase; white-space:nowrap; }
   .ob-steps .ob-dots{ display:flex; gap:5px; flex:1; }
@@ -584,6 +592,19 @@
     <div class="theme-grid" id="themeGrid"></div>
     <div class="modal-actions">
       <button class="btn-primary" id="langNextBtn">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Language confirmation (sits above the language picker) -->
+<div class="modal-overlay" id="langConfirmModal">
+  <div class="modal-card">
+    <div class="modal-title" id="langConfirmTitle"></div>
+    <div class="modal-desc" id="langConfirmText"></div>
+    <div class="modal-desc lang-confirm-alt" id="langConfirmAlt"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" id="langConfirmNo"></button>
+      <button class="btn-primary" id="langConfirmYes"></button>
     </div>
   </div>
 </div>
@@ -891,7 +912,7 @@
 
   // ---------------- i18n ----------------
   const STRINGS = {
-    ru: {
+    ru: { addWordHint:"в текущий раздел", exportHint:"CSV: материал и прогресс", importHint:"загрузить CSV", settingsHint:"интерфейс и оформление", resetHint:"статистика и выученные слова", phTranslation:"пример", phDeckName:"Мой словарь",
       appSub: "Выбирай немецкое слово или артикль по подсказке — 2 верных ответа подряд, и карточка «уезжает» из колоды",
       manageBtn:"Слова", addWordBtn:"Слово", exportBtn:"Экспорт", importBtn:"Импорт",
       today:"Сегодня", allTime:"Всего", learnedSuffix:"выучено", learnedInSel:"ВЫУЧЕНО В ПОДБОРКЕ",
@@ -918,15 +939,21 @@
       correctFull:"Верно! Слово выучено ✓", correctN:"Верно! ",
       wrongPrefix:"Неверно. Правильно: ",
       genderQCorrect:"Правильно: ",
-      obLangTitle:"Выбери язык", obLangDesc:"Язык интерфейса и переводов с немецкого",
+      obLangTitle:"Выбери язык", obLangDesc:"Язык интерфейса и переводов слов. Язык и тему можно поменять в любой момент: «Ещё» → «Настройки».",
       obThemeLabel:"Тема оформления", obThemeTitle:"Новые темы оформления", obThemeDesc:"Выбери, как будет выглядеть приложение. Изменить можно в «Ещё» → «Настройки» → «Язык и тема».", stepOf:"Шаг {n} из {m}", skipAll:"Пропустить всё", deleteDeckTitle:"Удалить раздел?", deleteDeckText:"Раздел «{name}» и все его слова будут удалены. Это нельзя отменить.", next:"Далее →",
       obSupportTitle:"Поддержать разработчика",
       obSupportDesc:"Приложение бесплатное. Если понравилось — буду рад коннекту и подписке.",
       linkedinLabel:"Добавиться в LinkedIn", githubLabel:"Подписаться на GitHub",
       startLearning:"Начать обучение →",
       composePrompt:"🧩 Собери предложение", translationPrefix:"перевод: ",
+      erase:"Стереть",
+      check:"Проверить",
+      langConfirmTitle:"Язык: {lang}",
+      langConfirmText:"Интерфейс и переводы слов будут на этом языке. Всё верно?",
+      langConfirmYes:"Да, продолжить",
+      langConfirmNo:"Нет, выбрать другой",
     },
-    uk: {
+    uk: { addWordHint:"у поточний розділ", exportHint:"CSV: матеріал і прогрес", importHint:"завантажити CSV", settingsHint:"інтерфейс і оформлення", resetHint:"статистика та вивчені слова", phTranslation:"приклад", phDeckName:"Мій словник",
       appSub: "Обирай німецьке слово чи артикль за підказкою — 2 правильні відповіді підряд, і картка «їде» з колоди",
       manageBtn:"Слова", addWordBtn:"Слово", exportBtn:"Експорт", importBtn:"Імпорт",
       today:"Сьогодні", allTime:"Всього", learnedSuffix:"вивчено", learnedInSel:"ВИВЧЕНО В ПІДБІРЦІ",
@@ -953,20 +980,26 @@
       correctFull:"Правильно! Слово вивчено ✓", correctN:"Правильно! ",
       wrongPrefix:"Неправильно. Правильна відповідь: ",
       genderQCorrect:"Правильно: ",
-      obLangTitle:"Обери мову", obLangDesc:"Мова інтерфейсу та перекладів з німецької",
+      obLangTitle:"Обери мову", obLangDesc:"Мова інтерфейсу. Мову й тему можна змінити будь-коли: «Ще» → «Налаштування».",
       obThemeLabel:"Тема оформлення", obThemeTitle:"Нові теми оформлення", obThemeDesc:"Обери, як виглядатиме застосунок. Змінити можна в «Ще» → «Налаштування» → «Мова і тема».", stepOf:"Крок {n} з {m}", skipAll:"Пропустити все", deleteDeckTitle:"Видалити розділ?", deleteDeckText:"Розділ «{name}» і всі його слова буде видалено. Це не можна скасувати.", next:"Далі →",
       obSupportTitle:"Підтримати розробника",
       obSupportDesc:"Застосунок безкоштовний. Якщо сподобався — буду радий конекту й підписці.",
       linkedinLabel:"Додати в LinkedIn", githubLabel:"Підписатись на GitHub",
       startLearning:"Почати навчання →",
       composePrompt:"🧩 Склади речення", translationPrefix:"переклад: ",
+      erase:"Стерти",
+      check:"Перевірити",
+      langConfirmTitle:"Мова: {lang}",
+      langConfirmText:"Інтерфейс буде цією мовою (переклади слів — російською). Усе правильно?",
+      langConfirmYes:"Так, продовжити",
+      langConfirmNo:"Ні, обрати іншу",
     },
-    en: {
+    en: { addWordHint:"to the current section", exportHint:"CSV: material and progress", importHint:"load a CSV file", settingsHint:"interface and appearance", resetHint:"statistics and learned words", phTranslation:"example", phDeckName:"My vocabulary",
       appSub: "Pick the German word or article by the hint — 2 correct answers in a row and the card leaves the deck",
       manageBtn:"Words", addWordBtn:"Word", exportBtn:"Export", importBtn:"Import",
       today:"Today", allTime:"All-time", learnedSuffix:"learned", learnedInSel:"LEARNED IN SELECTION",
       newBadge:"New", seenBadge:"Repeat", deckLabel:"IN DECK",
-      hintChoice:"need 2 correct answers in a row", speechLabel:"Speech", speechHint:"pronounce German words", confirmChoice:"Confirm", dirLabel:"Direction", dirTargetShort:"RU", dirTitle:"How do you want to learn?", dirDesc:"You can change this anytime: More → Settings.", dirDone:"Done", dirRuDe:"Translation → German", dirRuDeSub:"see the translation, pick the German word", dirDeRu:"German → translation", dirDeRuSub:"see the German word, pick the translation", dirRandom:"Random", dirRandomSub:"direction changes randomly", hintOrder:"tap the words in order to build the sentence",
+      hintChoice:"need 2 correct answers in a row", speechLabel:"Speech", speechHint:"pronounce German words", confirmChoice:"Confirm", dirLabel:"Direction", dirTargetShort:"EN", dirTitle:"How do you want to learn?", dirDesc:"You can change this anytime: More → Settings.", dirDone:"Done", dirRuDe:"English → German", dirRuDeSub:"see the translation, pick the German word", dirDeRu:"German → English", dirDeRuSub:"see the German word, pick the translation", dirRandom:"Random", dirRandomSub:"direction changes randomly", hintOrder:"tap the words in order to build the sentence",
       doneTitle:"ALLE AN BORD 🚆", doneText:"You've learned every word in this selection.", restart:"Start over",
       resetProgress:"Reset progress", tip:"der/das/die — learn the article together with the word",
       manageTitle:"Words", search:"Search word or translation…",
@@ -988,17 +1021,32 @@
       correctFull:"Correct! Word learned ✓", correctN:"Correct! ",
       wrongPrefix:"Incorrect. Correct answer: ",
       genderQCorrect:"Correct: ",
-      obLangTitle:"Choose your language", obLangDesc:"Interface language and translations from German",
+      obLangTitle:"Choose your language", obLangDesc:"Language of the interface and word translations. You can change language and theme anytime: More → Settings.",
       obThemeLabel:"Theme", obThemeTitle:"New themes", obThemeDesc:"Choose how the app looks. You can change it in More → Settings → Language & theme.", stepOf:"Step {n} of {m}", skipAll:"Skip all", deleteDeckTitle:"Delete section?", deleteDeckText:"The section “{name}” and all its words will be deleted. This cannot be undone.", next:"Next →",
       obSupportTitle:"Support the developer",
       obSupportDesc:"This app is free. If you like it, a follow means a lot.",
       linkedinLabel:"Connect on LinkedIn", githubLabel:"Follow on GitHub",
       startLearning:"Start learning →",
       composePrompt:"🧩 Build the sentence", translationPrefix:"translation: ",
+      erase:"Erase",
+      check:"Check",
+      langConfirmTitle:"Language: {lang}",
+      langConfirmText:"The interface and word translations will be in this language. Is that right?",
+      langConfirmYes:"Yes, continue",
+      langConfirmNo:"No, choose another",
     },
+    fr: { addWordHint:"dans la section actuelle", exportHint:"CSV : contenu et progression", importHint:"charger un CSV", settingsHint:"interface et apparence", resetHint:"statistiques et mots appris", phTranslation:"exemple", phDeckName:"Mon vocabulaire", appSub:"Choisis le mot allemand ou l’article d’après l’indice — 2 bonnes réponses de suite et la carte quitte le paquet", manageBtn:"Mots", addWordBtn:"Mot", exportBtn:"Exporter", importBtn:"Importer", today:"Aujourd’hui", allTime:"Au total", learnedSuffix:"appris", learnedInSel:"APPRIS DANS LA SÉLECTION", newBadge:"Nouveau", seenBadge:"Révision", deckLabel:"DANS LE PAQUET", hintChoice:"2 bonnes réponses de suite nécessaires", speechLabel:"Voix", speechHint:"prononcer les mots allemands", confirmChoice:"Valider", dirLabel:"Sens", dirTargetShort:"FR", dirTitle:"Comment veux-tu apprendre ?", dirDesc:"Tu peux le changer à tout moment : Plus → Réglages.", dirDone:"Terminé", dirRuDe:"Français → allemand", dirRuDeSub:"tu vois la traduction, tu choisis le mot allemand", dirDeRu:"Allemand → français", dirDeRuSub:"tu vois le mot allemand, tu choisis la traduction", dirRandom:"Aléatoire", dirRandomSub:"le sens change au hasard", hintOrder:"touche les mots dans l’ordre pour former la phrase", doneTitle:"ALLE AN BORD 🚆", doneText:"Tu as appris tous les mots de cette sélection.", restart:"Recommencer", resetProgress:"Réinitialiser la progression", tip:"der/das/die — apprends l’article avec le mot", manageTitle:"Mots", search:"Rechercher un mot ou une traduction…", filterAll:"Tous", filterLearned:"Appris", filterHalf:"À moitié", filterNew:"Pas commencé", typeNoun:"Noms", typeVerb:"Verbes", typeAdj:"Adjectifs", typePhrase:"Expressions", errWordCyr:"Écris le mot allemand en lettres latines (ex. Beispiel). La traduction va dans le deuxième champ.", errSame:"Le mot et la traduction doivent être différents.", errTrLatin:"Les champs semblent inversés : la traduction est en lettres latines.", typeOther:"Autres", typeCase:"Article : cas", typeVerbprep:"Verbe + préposition", typeFrage:"Mots interrogatifs", typePrep:"Prépositions", typeOrder:"Ordre des mots", colEdit:"✎", colDelete:"🗑", confirmDeleteTitle:"Supprimer le mot ?", confirmDeleteText:"Cette action est irréversible.", cancel:"Annuler", delete:"Supprimer", save:"Enregistrer", create:"Créer", addWordTitle:"Nouveau mot", addWordDesc:"Ajoute un mot à la section actuelle", fieldType:"Type", fieldGender:"Genre", fieldWord:"Mot (allemand)", fieldTr:"Traduction", createDeckTitle:"Nouvelle section", fieldDeckName:"Nom", exportTitle:"Exporter", exportScope:"Que exporter", exportMode:"Contenu (pour tes sections)", exportFull:"Contenu + progression", exportMaterial:"Contenu seulement", downloadCsv:"Télécharger CSV", importResultTitle:"Import terminé", basicName:"De base", basicExportNote:"De base — progression seulement (le contenu est intégré à l’app)", empty:"Rien pour l’instant", newDeckPill:"+ Section", settingsTitle:"Réglages", settingsBtnLabel:"Langue et thème", navLearn:"Apprendre", navDecks:"Sections", navMore:"Plus", navData:"Données", reset:"Réinitialiser", confirmResetTitle:"Réinitialiser la progression ?", confirmResetDesc:"Toutes les statistiques et les mots appris seront effacés.", storageSession:"La progression n’est gardée que pour cette session", storageLocal:"La progression est enregistrée dans ce navigateur sur cet appareil", correctFull:"Correct ! Mot appris ✓", correctN:"Correct ! ", wrongPrefix:"Faux. Bonne réponse : ", genderQCorrect:"Correct : ", obLangTitle:"Choisis ta langue", obLangDesc:"Langue de l’interface et des traductions. Tu peux changer la langue et le thème à tout moment : Plus → Réglages.", obThemeLabel:"Thème", obThemeTitle:"Nouveaux thèmes", obThemeDesc:"Choisis l’apparence de l’app. Modifiable dans Plus → Réglages → Langue et thème.", stepOf:"Étape {n} sur {m}", skipAll:"Tout passer", deleteDeckTitle:"Supprimer la section ?", deleteDeckText:"La section « {name} » et tous ses mots seront supprimés. Cette action est irréversible.", next:"Suivant →", obSupportTitle:"Soutenir le développeur", obSupportDesc:"Cette app est gratuite. Si elle te plaît, un abonnement fait très plaisir.", linkedinLabel:"Se connecter sur LinkedIn", githubLabel:"Suivre sur GitHub", startLearning:"Commencer →", composePrompt:"🧩 Forme la phrase", translationPrefix:"traduction : ", erase:"Effacer", check:"Vérifier", langConfirmTitle:"Langue : {lang}", langConfirmText:"L’interface et les traductions seront dans cette langue. C’est bien ça ?", langConfirmYes:"Oui, continuer", langConfirmNo:"Non, en choisir une autre" },
+    it: { addWordHint:"nella sezione attuale", exportHint:"CSV: contenuto e progressi", importHint:"carica un CSV", settingsHint:"interfaccia e aspetto", resetHint:"statistiche e parole imparate", phTranslation:"esempio", phDeckName:"Il mio vocabolario", appSub:"Scegli la parola tedesca o l’articolo dall’indizio — 2 risposte giuste di fila e la carta esce dal mazzo", manageBtn:"Parole", addWordBtn:"Parola", exportBtn:"Esporta", importBtn:"Importa", today:"Oggi", allTime:"In totale", learnedSuffix:"imparate", learnedInSel:"IMPARATE NELLA SELEZIONE", newBadge:"Nuova", seenBadge:"Ripasso", deckLabel:"NEL MAZZO", hintChoice:"servono 2 risposte giuste di fila", speechLabel:"Voce", speechHint:"pronuncia le parole tedesche", confirmChoice:"Conferma", dirLabel:"Direzione", dirTargetShort:"IT", dirTitle:"Come vuoi imparare?", dirDesc:"Puoi cambiarlo in qualsiasi momento: Altro → Impostazioni.", dirDone:"Fatto", dirRuDe:"Italiano → tedesco", dirRuDeSub:"vedi la traduzione, scegli la parola tedesca", dirDeRu:"Tedesco → italiano", dirDeRuSub:"vedi la parola tedesca, scegli la traduzione", dirRandom:"Casuale", dirRandomSub:"la direzione cambia a caso", hintOrder:"tocca le parole in ordine per formare la frase", doneTitle:"ALLE AN BORD 🚆", doneText:"Hai imparato tutte le parole di questa selezione.", restart:"Ricomincia", resetProgress:"Azzera i progressi", tip:"der/das/die — impara l’articolo insieme alla parola", manageTitle:"Parole", search:"Cerca parola o traduzione…", filterAll:"Tutte", filterLearned:"Imparate", filterHalf:"A metà", filterNew:"Non iniziate", typeNoun:"Sostantivi", typeVerb:"Verbi", typeAdj:"Aggettivi", typePhrase:"Espressioni", errWordCyr:"Scrivi la parola tedesca in lettere latine (es. Beispiel). La traduzione va nel secondo campo.", errSame:"Parola e traduzione devono essere diverse.", errTrLatin:"I campi sembrano invertiti: la traduzione è in lettere latine.", typeOther:"Altro", typeCase:"Articolo: casi", typeVerbprep:"Verbo + preposizione", typeFrage:"Parole interrogative", typePrep:"Preposizioni", typeOrder:"Ordine delle parole", colEdit:"✎", colDelete:"🗑", confirmDeleteTitle:"Eliminare la parola?", confirmDeleteText:"L’azione non si può annullare.", cancel:"Annulla", delete:"Elimina", save:"Salva", create:"Crea", addWordTitle:"Nuova parola", addWordDesc:"Aggiungi una parola alla sezione attuale", fieldType:"Tipo", fieldGender:"Genere", fieldWord:"Parola (tedesco)", fieldTr:"Traduzione", createDeckTitle:"Nuova sezione", fieldDeckName:"Nome", exportTitle:"Esporta", exportScope:"Cosa esportare", exportMode:"Contenuto (per le tue sezioni)", exportFull:"Contenuto + progressi", exportMaterial:"Solo contenuto", downloadCsv:"Scarica CSV", importResultTitle:"Importazione completata", basicName:"Base", basicExportNote:"Base — solo progressi (il contenuto è integrato nell’app)", empty:"Ancora niente qui", newDeckPill:"+ Sezione", settingsTitle:"Impostazioni", settingsBtnLabel:"Lingua e tema", navLearn:"Impara", navDecks:"Sezioni", navMore:"Altro", navData:"Dati", reset:"Azzera", confirmResetTitle:"Azzerare i progressi?", confirmResetDesc:"Tutte le statistiche e le parole imparate verranno cancellate.", storageSession:"I progressi sono salvati solo per questa sessione", storageLocal:"I progressi sono salvati in questo browser su questo dispositivo", correctFull:"Giusto! Parola imparata ✓", correctN:"Giusto! ", wrongPrefix:"Sbagliato. Risposta giusta: ", genderQCorrect:"Giusto: ", obLangTitle:"Scegli la tua lingua", obLangDesc:"Lingua dell’interfaccia e delle traduzioni. Lingua e tema si possono cambiare in qualsiasi momento: Altro → Impostazioni.", obThemeLabel:"Tema", obThemeTitle:"Nuovi temi", obThemeDesc:"Scegli l’aspetto dell’app. Puoi cambiarlo in Altro → Impostazioni → Lingua e tema.", stepOf:"Passo {n} di {m}", skipAll:"Salta tutto", deleteDeckTitle:"Eliminare la sezione?", deleteDeckText:"La sezione «{name}» e tutte le sue parole verranno eliminate. L’azione non si può annullare.", next:"Avanti →", obSupportTitle:"Sostieni lo sviluppatore", obSupportDesc:"Questa app è gratuita. Se ti piace, un follow fa molto piacere.", linkedinLabel:"Collegati su LinkedIn", githubLabel:"Segui su GitHub", startLearning:"Inizia →", composePrompt:"🧩 Componi la frase", translationPrefix:"traduzione: ", erase:"Cancella", check:"Verifica", langConfirmTitle:"Lingua: {lang}", langConfirmText:"L’interfaccia e le traduzioni saranno in questa lingua. È corretto?", langConfirmYes:"Sì, continua", langConfirmNo:"No, scegline un’altra" },
+    fa: { addWordHint:"به بخش فعلی", exportHint:"CSV: محتوا و پیشرفت", importHint:"بارگذاری CSV", settingsHint:"رابط کاربری و ظاهر", resetHint:"آمار و واژه‌های یادگرفته", phTranslation:"مثال", phDeckName:"واژگان من", appSub:"بر اساس راهنما، واژه یا حرف تعریف آلمانی را انتخاب کن — با ۲ پاسخ درست پشت سر هم، کارت از دسته خارج می‌شود", manageBtn:"واژه‌ها", addWordBtn:"واژه", exportBtn:"خروجی گرفتن", importBtn:"وارد کردن", today:"امروز", allTime:"در مجموع", learnedSuffix:"یادگرفته", learnedInSel:"یادگرفته در این انتخاب", newBadge:"جدید", seenBadge:"مرور", deckLabel:"در دسته", hintChoice:"۲ پاسخ درست پشت سر هم لازم است", speechLabel:"صدا", speechHint:"تلفظ واژه‌های آلمانی", confirmChoice:"تأیید", dirLabel:"جهت", dirTargetShort:"FA", dirTitle:"چطور می‌خواهی یاد بگیری؟", dirDesc:"هر زمان می‌توانی تغییرش بدهی: بیشتر ← تنظیمات.", dirDone:"تمام", dirRuDe:"فارسی ← آلمانی", dirRuDeSub:"ترجمه را می‌بینی، واژهٔ آلمانی را انتخاب می‌کنی", dirDeRu:"آلمانی ← فارسی", dirDeRuSub:"واژهٔ آلمانی را می‌بینی، ترجمه را انتخاب می‌کنی", dirRandom:"تصادفی", dirRandomSub:"جهت به‌طور تصادفی عوض می‌شود", hintOrder:"واژه‌ها را به ترتیب لمس کن تا جمله ساخته شود", doneTitle:"ALLE AN BORD 🚆", doneText:"همهٔ واژه‌های این انتخاب را یاد گرفتی.", restart:"شروع دوباره", resetProgress:"بازنشانی پیشرفت", tip:"der/das/die — حرف تعریف را همراه واژه یاد بگیر", manageTitle:"واژه‌ها", search:"جستجوی واژه یا ترجمه…", filterAll:"همه", filterLearned:"یادگرفته", filterHalf:"نیمه‌کاره", filterNew:"شروع‌نشده", typeNoun:"اسم‌ها", typeVerb:"فعل‌ها", typeAdj:"صفت‌ها", typePhrase:"عبارت‌ها", errWordCyr:"واژهٔ آلمانی را با حروف لاتین بنویس (مثلاً Beispiel). ترجمه در فیلد دوم.", errSame:"واژه و ترجمه نباید یکسان باشند.", errTrLatin:"به نظر می‌رسد فیلدها جابه‌جا شده‌اند: ترجمه با حروف لاتین است.", typeOther:"سایر", typeCase:"حرف تعریف: حالت‌ها", typeVerbprep:"فعل + حرف اضافه", typeFrage:"واژه‌های پرسشی", typePrep:"حروف اضافه", typeOrder:"ترتیب واژه‌ها", colEdit:"✎", colDelete:"🗑", confirmDeleteTitle:"واژه حذف شود؟", confirmDeleteText:"این کار قابل بازگشت نیست.", cancel:"لغو", delete:"حذف", save:"ذخیره", create:"ایجاد", addWordTitle:"واژهٔ جدید", addWordDesc:"یک واژه به بخش فعلی اضافه کن", fieldType:"نوع", fieldGender:"جنس", fieldWord:"واژه (آلمانی)", fieldTr:"ترجمه", createDeckTitle:"بخش جدید", fieldDeckName:"نام", exportTitle:"خروجی گرفتن", exportScope:"چه چیزی خروجی گرفته شود", exportMode:"محتوا (برای بخش‌های خودت)", exportFull:"محتوا + پیشرفت", exportMaterial:"فقط محتوا", downloadCsv:"دانلود CSV", importResultTitle:"وارد کردن انجام شد", basicName:"پایه", basicExportNote:"پایه — فقط پیشرفت (محتوا داخل برنامه است)", empty:"هنوز چیزی اینجا نیست", newDeckPill:"+ بخش", settingsTitle:"تنظیمات", settingsBtnLabel:"زبان و پوسته", navLearn:"یادگیری", navDecks:"بخش‌ها", navMore:"بیشتر", navData:"داده‌ها", reset:"بازنشانی", confirmResetTitle:"پیشرفت بازنشانی شود؟", confirmResetDesc:"همهٔ آمار و واژه‌های یادگرفته پاک می‌شوند.", storageSession:"پیشرفت فقط برای این جلسه ذخیره می‌شود", storageLocal:"پیشرفت در این مرورگر و روی این دستگاه ذخیره می‌شود", correctFull:"درست است! واژه یاد گرفته شد ✓", correctN:"درست است! ", wrongPrefix:"نادرست. پاسخ درست: ", genderQCorrect:"درست: ", obLangTitle:"زبانت را انتخاب کن", obLangDesc:"زبان رابط کاربری و ترجمه‌ها. زبان و پوسته را هر زمان می‌توانی عوض کنی: بیشتر ← تنظیمات.", obThemeLabel:"پوسته", obThemeTitle:"پوسته‌های جدید", obThemeDesc:"ظاهر برنامه را انتخاب کن. در بیشتر ← تنظیمات ← زبان و پوسته قابل تغییر است.", stepOf:"مرحلهٔ {n} از {m}", skipAll:"رد کردن همه", deleteDeckTitle:"بخش حذف شود؟", deleteDeckText:"بخش «{name}» و همهٔ واژه‌هایش حذف می‌شوند. این کار قابل بازگشت نیست.", next:"بعدی ←", obSupportTitle:"حمایت از سازنده", obSupportDesc:"این برنامه رایگان است. اگر دوستش داری، دنبال کردن خیلی کمک می‌کند.", linkedinLabel:"ارتباط در LinkedIn", githubLabel:"دنبال کردن در GitHub", startLearning:"شروع یادگیری ←", composePrompt:"🧩 جمله را بساز", translationPrefix:"ترجمه: ", erase:"پاک کردن", check:"بررسی", langConfirmTitle:"زبان: {lang}", langConfirmText:"رابط کاربری و ترجمهٔ واژه‌ها به این زبان خواهد بود. درست است؟", langConfirmYes:"بله، ادامه", langConfirmNo:"نه، زبان دیگری" },
+    ar: { addWordHint:"إلى القسم الحالي", exportHint:"CSV: المحتوى والتقدم", importHint:"تحميل ملف CSV", settingsHint:"الواجهة والمظهر", resetHint:"الإحصاءات والكلمات المحفوظة", phTranslation:"مثال", phDeckName:"مفرداتي", appSub:"اختر الكلمة الألمانية أو أداة التعريف حسب التلميح — إجابتان صحيحتان متتاليتان وتخرج البطاقة من المجموعة", manageBtn:"الكلمات", addWordBtn:"كلمة", exportBtn:"تصدير", importBtn:"استيراد", today:"اليوم", allTime:"الإجمالي", learnedSuffix:"محفوظة", learnedInSel:"المحفوظ في هذا الاختيار", newBadge:"جديدة", seenBadge:"مراجعة", deckLabel:"في المجموعة", hintChoice:"تحتاج إلى إجابتين صحيحتين متتاليتين", speechLabel:"النطق", speechHint:"نطق الكلمات الألمانية", confirmChoice:"تأكيد", dirLabel:"الاتجاه", dirTargetShort:"AR", dirTitle:"كيف تريد أن تتعلم؟", dirDesc:"يمكنك تغييره في أي وقت: المزيد ← الإعدادات.", dirDone:"تم", dirRuDe:"العربية ← الألمانية", dirRuDeSub:"ترى الترجمة وتختار الكلمة الألمانية", dirDeRu:"الألمانية ← العربية", dirDeRuSub:"ترى الكلمة الألمانية وتختار الترجمة", dirRandom:"عشوائي", dirRandomSub:"يتغير الاتجاه عشوائياً", hintOrder:"المس الكلمات بالترتيب لتكوين الجملة", doneTitle:"ALLE AN BORD 🚆", doneText:"لقد تعلمت كل كلمات هذا الاختيار.", restart:"ابدأ من جديد", resetProgress:"إعادة ضبط التقدم", tip:"der/das/die — احفظ أداة التعريف مع الكلمة", manageTitle:"الكلمات", search:"ابحث عن كلمة أو ترجمة…", filterAll:"الكل", filterLearned:"محفوظة", filterHalf:"في المنتصف", filterNew:"لم تبدأ", typeNoun:"الأسماء", typeVerb:"الأفعال", typeAdj:"الصفات", typePhrase:"العبارات", errWordCyr:"اكتب الكلمة الألمانية بالحروف اللاتينية (مثل Beispiel). الترجمة في الحقل الثاني.", errSame:"يجب أن تختلف الكلمة عن الترجمة.", errTrLatin:"يبدو أن الحقلين مقلوبان: الترجمة مكتوبة بحروف لاتينية.", typeOther:"أخرى", typeCase:"أداة التعريف: الحالات", typeVerbprep:"فعل + حرف جر", typeFrage:"أدوات الاستفهام", typePrep:"حروف الجر", typeOrder:"ترتيب الكلمات", colEdit:"✎", colDelete:"🗑", confirmDeleteTitle:"حذف الكلمة؟", confirmDeleteText:"لا يمكن التراجع عن هذا الإجراء.", cancel:"إلغاء", delete:"حذف", save:"حفظ", create:"إنشاء", addWordTitle:"كلمة جديدة", addWordDesc:"أضف كلمة إلى القسم الحالي", fieldType:"النوع", fieldGender:"الجنس", fieldWord:"الكلمة (بالألمانية)", fieldTr:"الترجمة", createDeckTitle:"قسم جديد", fieldDeckName:"الاسم", exportTitle:"تصدير", exportScope:"ما الذي سيُصدَّر", exportMode:"المحتوى (لأقسامك الخاصة)", exportFull:"المحتوى + التقدم", exportMaterial:"المحتوى فقط", downloadCsv:"تنزيل CSV", importResultTitle:"اكتمل الاستيراد", basicName:"الأساسي", basicExportNote:"الأساسي — التقدم فقط (المحتوى مدمج في التطبيق)", empty:"لا يوجد شيء هنا بعد", newDeckPill:"+ قسم", settingsTitle:"الإعدادات", settingsBtnLabel:"اللغة والمظهر", navLearn:"تعلّم", navDecks:"الأقسام", navMore:"المزيد", navData:"البيانات", reset:"إعادة ضبط", confirmResetTitle:"إعادة ضبط التقدم؟", confirmResetDesc:"سيتم حذف كل الإحصاءات والكلمات المحفوظة.", storageSession:"يُحفظ التقدم لهذه الجلسة فقط", storageLocal:"يُحفظ التقدم في هذا المتصفح على هذا الجهاز", correctFull:"صحيح! تم حفظ الكلمة ✓", correctN:"صحيح! ", wrongPrefix:"خطأ. الإجابة الصحيحة: ", genderQCorrect:"صحيح: ", obLangTitle:"اختر لغتك", obLangDesc:"لغة الواجهة والترجمات. يمكنك تغيير اللغة والمظهر في أي وقت: المزيد ← الإعدادات.", obThemeLabel:"المظهر", obThemeTitle:"مظاهر جديدة", obThemeDesc:"اختر شكل التطبيق. يمكن تغييره من المزيد ← الإعدادات ← اللغة والمظهر.", stepOf:"الخطوة {n} من {m}", skipAll:"تخطي الكل", deleteDeckTitle:"حذف القسم؟", deleteDeckText:"سيتم حذف القسم «{name}» وكل كلماته. لا يمكن التراجع عن ذلك.", next:"التالي ←", obSupportTitle:"ادعم المطوّر", obSupportDesc:"هذا التطبيق مجاني. إذا أعجبك، فإن المتابعة تعني الكثير.", linkedinLabel:"تواصل على LinkedIn", githubLabel:"تابع على GitHub", startLearning:"ابدأ التعلم ←", composePrompt:"🧩 كوّن الجملة", translationPrefix:"الترجمة: ", erase:"مسح", check:"تحقق", langConfirmTitle:"اللغة: {lang}", langConfirmText:"ستكون الواجهة وترجمات الكلمات بهذه اللغة. هل هذا صحيح؟", langConfirmYes:"نعم، متابعة", langConfirmNo:"لا، اختر لغة أخرى" },
   };
   let uiLang = "ru";
-  function t(key){ return (STRINGS[uiLang] && STRINGS[uiLang][key]) || STRINGS.ru[key] || key; }
+  const RTL_LANGS = ['fa','ar'];
+  const LANG_FALLBACK = { uk:'ru', ru:'ru' };   // everyone else falls back to English
+  function tl(lang, key){
+    return (STRINGS[lang] && STRINGS[lang][key]) || STRINGS[LANG_FALLBACK[lang]||'en'][key] || STRINGS.ru[key] || key;
+  }
+  function t(key){ return tl(uiLang, key); }
 
   const RAW_DER = `
 Morgen|Утро
@@ -1009,9 +1057,9 @@ Kollege|Коллега
 Freund|Друг
 Name|Имя, наименование
 Pass|Паспорт
-Deutschland|Германия
-Österreich|Австрия
-Russland|Россия
+Staat|Государство
+Ausländer|Иностранец
+Wohnsitz|Место жительства
 Zoll|Таможня
 Anfang|Начало
 Geldautomat|Банкомат
@@ -1109,7 +1157,7 @@ Restaurant|Ресторан
 Menü|Комплексный обед; меню (в программе)
 Gericht|Блюдо; суд
 Messer|Нож
-Löffel|Ложка
+Besteck|Столовые приборы
 Glas|Стакан; стекло
 Angebot|Предложение
 Geschäft|Магазин; сделка, бизнес
@@ -2247,7 +2295,8 @@ Charakter|Характер
 Dialekt|Диалект
 Dialog|Диалог
 Druck|Давление; печать
-Durchschnitt|Среднее значение`;
+Durchschnitt|Среднее значение
+Löffel|Ложка`;
   const RAW_DAS_LIST = `
 Land|Страна; сельская местность
 Fahrrad|Велосипед
@@ -2751,11 +2800,1722 @@ neigen|zu|Dat.|быть склонным к
 befähigen|zu|Dat.|давать возможность, квалифицировать`;
 
 
+  // Word translations for interface languages other than Russian/Ukrainian.
+  // Line: translation key | en | fr | it | fa | ar   (key = cat:article:word, vp:verb:prep:case, order:tokens)
+  const TR_LANGS = ['en','fr','it','fa','ar'];
+  const RAW_I18N = `
+noun:der:Morgen|Morning|Matin|Mattina|صبح|صباح
+noun:der:Tag|Day|Jour|Giorno|روز|يوم
+noun:der:Abend|Evening|Soir|Sera|عصر، شب|مساء
+noun:der:Herr|Mr.; gentleman|Monsieur|Signore|آقا|السيد
+noun:der:Kollege|Colleague|Collègue|Collega|همکار|زميل
+noun:der:Freund|Friend|Ami|Amico|دوست|صديق
+noun:der:Name|Name|Nom|Nome|نام|اسم
+noun:der:Pass|Passport|Passeport|Passaporto|گذرنامه|جواز سفر
+noun:der:Staat|State|État|Stato|دولت، کشور|دولة
+noun:der:Ausländer|Foreigner|Étranger|Straniero|خارجی، بیگانه|أجنبي
+noun:der:Wohnsitz|Place of residence|Domicile|Residenza|محل اقامت|مكان الإقامة
+noun:der:Zoll|Customs|Douane|Dogana|گمرک|الجمارك
+noun:der:Anfang|Beginning|Début|Inizio|شروع|بداية
+noun:der:Geldautomat|Cash machine, ATM|Distributeur de billets|Bancomat|خودپرداز|صراف آلي
+noun:der:Schein|Banknote; certificate|Billet de banque; attestation|Banconota; certificato|اسکناس؛ گواهی|ورقة نقدية؛ شهادة
+noun:der:Umtauschkurs|Exchange rate|Taux de change|Tasso di cambio|نرخ تبدیل ارز|سعر الصرف
+noun:der:Scheck|Cheque|Chèque|Assegno|چک|شيك
+noun:der:Platz|Place, seat; square|Place|Posto; piazza|جا، صندلی؛ میدان|مكان، مقعد؛ ساحة
+noun:der:Flughafen|Airport|Aéroport|Aeroporto|فرودگاه|مطار
+noun:der:Markt|Market|Marché|Mercato|بازار|سوق
+noun:der:Bus|Bus|Bus|Autobus|اتوبوس|حافلة
+noun:der:Fahrschein|Ticket (transport)|Titre de transport|Biglietto (trasporti)|بلیت (وسیله نقلیه)|تذكرة مواصلات
+noun:der:Fahrer|Driver|Chauffeur|Autista|راننده|سائق
+noun:der:Taxistand|Taxi rank|Station de taxis|Posteggio dei taxi|ایستگاه تاکسی|موقف سيارات الأجرة
+noun:der:Schlüssel|Key|Clé|Chiave|کلید|مفتاح
+noun:der:Anzug|Suit|Costume|Abito (da uomo)|کت و شلوار|بدلة
+noun:der:Tisch|Table|Table|Tavolo|میز|طاولة
+noun:der:Stuhl|Chair|Chaise|Sedia|صندلی|كرسي
+noun:der:Ober|Waiter (old-fashioned)|Garçon (vieilli)|Cameriere (antiquato)|پیشخدمت (قدیمی)|نادل (قديم)
+noun:der:Teller|Plate|Assiette|Piatto|بشقاب|صحن
+noun:der:Rest|Rest, remainder|Reste|Resto|باقیمانده|الباقي
+noun:der:Stock|Floor (storey); stick|Étage; bâton|Piano (edificio); bastone|طبقه؛ چوبدستی|طابق؛ عصا
+noun:der:Augenblick|Moment|Instant|Attimo|لحظه|برهة
+noun:der:Preis|Price|Prix|Prezzo|قیمت|سعر
+noun:der:Brief|Letter|Lettre|Lettera|نامه|رسالة
+noun:der:Schalter|Counter (ticket window); switch|Guichet; interrupteur|Sportello; interruttore|باجه؛ کلید برق|شباك؛ مفتاح كهربائي
+noun:der:Ausweis|ID card|Pièce d’identité|Documento d’identità|کارت شناسایی|بطاقة هوية
+noun:der:Apparat|Device, apparatus|Appareil (technique)|Apparecchio|دستگاه|جهاز
+noun:der:Bahnhof|Railway station|Gare|Stazione ferroviaria|ایستگاه راه‌آهن|محطة القطار
+noun:der:Zug|Train|Train|Treno|قطار|قطار
+noun:der:Anschluss|Connection (transport)|Correspondance|Coincidenza|اتصال (تعویض قطار)|وصلة، تبديل
+noun:der:Bahnsteig|Platform|Quai|Binario, banchina|سکوی قطار|رصيف المحطة
+noun:der:Zuschlag|Supplement, surcharge|Supplément|Supplemento|هزینه اضافی|رسوم إضافية
+noun:der:Gepäckschein|Baggage receipt|Bulletin de bagages|Scontrino bagagli|رسید بار|إيصال الأمتعة
+noun:der:Wagen|Carriage; car|Wagon; voiture|Vagone; auto|واگن؛ خودرو|عربة؛ سيارة
+noun:der:Fahrplan|Timetable|Horaire|Orario|جدول زمانی حرکت|جدول المواعيد
+noun:der:Flug|Flight|Vol|Volo|پرواز|رحلة جوية
+noun:der:Flugplatz|Airfield|Aérodrome|Aerodromo|فرودگاه کوچک|مطار صغير
+noun:der:Führerschein|Driving licence|Permis de conduire|Patente di guida|گواهینامه رانندگی|رخصة القيادة
+noun:der:Reifen|Tyre|Pneu|Pneumatico|لاستیک|إطار السيارة
+noun:der:Motor|Engine|Moteur|Motore|موتور|محرك
+noun:der:Arzt|Doctor|Médecin|Medico|پزشک|طبيب
+noun:der:Schmerz|Pain|Douleur|Dolore|درد|ألم
+noun:der:Kopf|Head|Tête|Testa|سر|رأس
+noun:der:Magen|Stomach|Estomac|Stomaco|معده|معدة
+noun:der:Unfall|Accident|Accident|Incidente|تصادف، حادثه|حادث
+noun:der:Antrag|Application (form)|Demande|Domanda (richiesta)|درخواست|طلب
+noun:der:Aufenthaltstitel|Residence permit|Titre de séjour|Permesso di soggiorno|اجازه اقامت|تصريح الإقامة
+noun:der:Mietvertrag|Rental agreement|Bail|Contratto d’affitto|قرارداد اجاره|عقد الإيجار
+noun:der:Vermieter|Landlord|Bailleur|Locatore|موجر، صاحبخانه|المؤجِّر
+noun:der:Mieter|Tenant|Locataire|Inquilino|مستأجر|المستأجر
+noun:der:Umzug|Move (house)|Déménagement|Trasloco|اسباب‌کشی|الانتقال (تغيير السكن)
+noun:der:Vertrag|Contract|Contrat|Contratto|قرارداد|عقد
+noun:der:Nachweis|Proof, certificate|Justificatif|Attestato, prova|مدرک، گواهی|إثبات
+noun:der:Lebenslauf|CV|CV|Curriculum vitae|رزومه|سيرة ذاتية
+noun:der:Arbeitsvertrag|Employment contract|Contrat de travail|Contratto di lavoro|قرارداد کار|عقد العمل
+noun:der:Lohn|Wage (hourly, workers)|Salaire (ouvrier)|Salario (operai)|دستمزد|أجر (للعمال)
+noun:der:Urlaub|Holiday, leave|Congés|Ferie|مرخصی|إجازة
+noun:der:Feiertag|Public holiday|Jour férié|Giorno festivo|روز تعطیل رسمی|عطلة رسمية
+noun:der:Kontostand|Account balance|Solde du compte|Saldo del conto|موجودی حساب|رصيد الحساب
+noun:der:Hausarzt|Family doctor, GP|Médecin traitant|Medico di famiglia|پزشک خانواده|طبيب الأسرة
+noun:der:Nachbar|Neighbour|Voisin|Vicino di casa|همسایه|جار
+noun:der:Sachbearbeiter|Clerk (at an authority)|Agent administratif|Impiegato (dell’ufficio)|کارمند اداره|موظف المعاملات
+noun:der:Müll|Rubbish, waste|Déchets|Spazzatura|زباله|قمامة
+noun:der:Strom|Electricity|Électricité|Corrente elettrica|برق|كهرباء
+noun:der:Kindergarten|Kindergarten|Jardin d’enfants|Asilo|مهدکودک|روضة أطفال
+noun:der:Unterricht|Lesson, classes|Cours (enseignement)|Lezione|درس، کلاس|درس، حصة
+noun:der:Kurs|Course|Cours (formation)|Corso|دوره آموزشی|دورة
+noun:das:Russisch|Russian (language)|Russe (langue)|Russo (lingua)|زبان روسی|اللغة الروسية
+noun:das:Englisch|English (language)|Anglais (langue)|Inglese (lingua)|زبان انگلیسی|اللغة الإنجليزية
+noun:das:Deutsch|German (language)|Allemand (langue)|Tedesco (lingua)|زبان آلمانی|اللغة الألمانية
+noun:das:Gepäck|Luggage|Bagages|Bagaglio|بار، چمدان|أمتعة
+noun:das:Geld|Money|Argent|Soldi|پول|مال، نقود
+noun:das:Kleingeld|Small change|Monnaie|Spiccioli|پول خرد|فكة
+noun:das:Viertel|Quarter|Quart|Quarto|یک‌چهارم|ربع
+noun:das:Fünftel|Fifth (part)|Cinquième|Quinto|یک‌پنجم|خُمس
+noun:das:Jahr|Year|Année|Anno|سال|سنة
+noun:das:Stadion|Stadium|Stade|Stadio|ورزشگاه|ملعب
+noun:das:Haus|House|Maison|Casa|خانه|بيت
+noun:das:Krankenhaus|Hospital|Hôpital|Ospedale|بیمارستان|مستشفى
+noun:das:Rathaus|Town hall|Mairie|Municipio|شهرداری|دار البلدية
+noun:das:Arbeitsamt|Job centre (old name)|Agence pour l’emploi (ancien nom)|Ufficio di collocamento (vecchio nome)|اداره کار (نام قدیمی)|مكتب العمل (اسم قديم)
+noun:das:Ende|End|Fin|Fine|پایان|نهاية
+noun:das:Taxi|Taxi|Taxi|Taxi|تاکسی|سيارة أجرة
+noun:das:Hotel|Hotel|Hôtel|Albergo|هتل|فندق
+noun:das:Zimmer|Room|Chambre, pièce|Stanza|اتاق|غرفة
+noun:das:Einzelzimmer|Single room|Chambre simple|Camera singola|اتاق یک‌نفره|غرفة مفردة
+noun:das:Doppelzimmer|Double room|Chambre double|Camera doppia|اتاق دونفره|غرفة مزدوجة
+noun:das:Bad|Bathroom|Salle de bains|Bagno|حمام|حمّام
+noun:das:WC|Toilet (door sign)|Toilettes (panneau)|Gabinetto (cartello)|توالت (تابلو)|مرحاض (لافتة)
+noun:das:Frühstück|Breakfast|Petit-déjeuner|Colazione|صبحانه|فطور
+noun:das:Hemd|Shirt|Chemise|Camicia|پیراهن|قميص
+noun:das:Restaurant|Restaurant|Restaurant|Ristorante|رستوران|مطعم
+noun:das:Menü|Set meal; menu (in a program)|Menu (formule); menu (programme)|Menù fisso; menu (programma)|غذای ست؛ منو (برنامه)|وجبة كاملة؛ قائمة (برنامج)
+noun:das:Gericht|Dish; court|Plat; tribunal|Piatto (pietanza); tribunale|غذا؛ دادگاه|طبق؛ محكمة
+noun:das:Messer|Knife|Couteau|Coltello|چاقو|سكين
+noun:das:Besteck|Cutlery|Couverts|Posate|قاشق و چنگال|أدوات المائدة
+noun:das:Glas|Glass (for drinking); glass|Verre|Bicchiere; vetro|لیوان؛ شیشه|كوب؛ زجاج
+noun:das:Angebot|Offer|Offre|Offerta|پیشنهاد (فروش)، عرضه|عرض
+noun:das:Geschäft|Shop; business|Magasin; affaire|Negozio; affare|مغازه؛ کسب‌وکار|متجر؛ صفقة
+noun:das:Gerät|Appliance, device|Appareil|Dispositivo|وسیله، دستگاه|جهاز، أداة
+noun:das:Gespräch|Conversation|Conversation|Conversazione|گفتگو|محادثة
+noun:das:Gleis|Track (railway)|Voie (ferrée)|Binario|خط ریل|سكة
+noun:das:Fenster|Window|Fenêtre|Finestra|پنجره|نافذة
+noun:das:Bett|Bed|Lit|Letto|تخت|سرير
+noun:das:Flugzeug|Aeroplane|Avion|Aereo|هواپیما|طائرة
+noun:das:Flugticket|Plane ticket|Billet d’avion|Biglietto aereo|بلیت هواپیما|تذكرة طيران
+noun:das:Übergepäck|Excess baggage|Excédent de bagages|Bagaglio in eccesso|بار اضافی|وزن زائد للأمتعة
+noun:das:Wasser|Water|Eau|Acqua|آب|ماء
+noun:das:Büro|Office|Bureau|Ufficio|دفتر کار|مكتب
+noun:das:Auto|Car|Voiture|Automobile|خودرو|سيارة
+noun:das:Fahrzeug|Vehicle|Véhicule|Veicolo|وسیله نقلیه|مركبة
+noun:das:Licht|Light|Lumière|Luce|نور|ضوء
+noun:das:Fieber|Fever|Fièvre|Febbre|تب|حُمّى
+noun:das:Ausland|Abroad|Étranger (pays)|Estero|خارج از کشور|الخارج
+noun:das:Fundbüro|Lost property office|Objets trouvés|Ufficio oggetti smarriti|دفتر اشیای گمشده|مكتب المفقودات
+noun:das:Amt|Office, authority|Administration, service|Ufficio pubblico|اداره|دائرة حكومية
+noun:das:Formular|Form|Formulaire|Modulo|فرم|استمارة
+noun:das:Konto|Bank account|Compte bancaire|Conto (bancario)|حساب بانکی|حساب مصرفي
+noun:das:Kindergeld|Child benefit|Allocations familiales|Assegni familiari|کمک‌هزینه فرزند|إعانة الأطفال
+noun:das:Jobcenter|Job centre|Jobcenter (agence pour l’emploi)|Jobcenter (centro per l’impiego)|جاب‌سنتر|مركز العمل
+noun:das:Gehalt|Salary (employees)|Salaire (employés)|Stipendio|حقوق|راتب
+noun:das:Rezept|Prescription; recipe|Ordonnance; recette|Ricetta|نسخه؛ دستور پخت|وصفة طبية؛ وصفة طعام
+noun:das:Kind|Child|Enfant|Bambino|کودک|طفل
+noun:das:Internet|Internet|Internet|Internet|اینترنت|الإنترنت
+noun:die:Nacht|Night|Nuit|Notte|شب|ليل
+noun:die:Entschuldigung|Apology|Excuse|Scusa|عذرخواهی|اعتذار
+noun:die:Frau|Woman; wife; Mrs.|Femme; épouse; Madame|Donna; moglie; signora|زن؛ همسر؛ خانم|امرأة؛ زوجة؛ السيدة
+noun:die:Kollegin|Colleague (female)|Collègue (femme)|Collega (donna)|همکار (زن)|زميلة
+noun:die:Freundin|Friend (female); girlfriend|Amie; petite amie|Amica; fidanzata|دوست (دختر)|صديقة
+noun:die:Reise|Journey, trip|Voyage|Viaggio|سفر|رحلة
+noun:die:Ukraine|Ukraine|Ukraine|Ucraina|اوکراین|أوكرانيا
+noun:die:Zollerklärung|Customs declaration|Déclaration de douane|Dichiarazione doganale|اظهارنامه گمرکی|بيان جمركي
+noun:die:Sache|Thing, matter|Chose, affaire|Cosa, faccenda|چیز، موضوع|شيء، أمر
+noun:die:Tasche|Bag; pocket|Sac; poche|Borsa; tasca|کیف؛ جیب|حقيبة؛ جيب
+noun:die:Zigarette|Cigarette|Cigarette|Sigaretta|سیگار|سيجارة
+noun:die:Bank|Bank; bench|Banque; banc|Banca; panchina|بانک؛ نیمکت|بنك؛ مقعد
+noun:die:Währung|Currency|Monnaie (devise)|Valuta|ارز، واحد پول|عملة
+noun:die:Karte|Card; map; ticket|Carte; billet|Carta; biglietto; mappa|کارت؛ نقشه|بطاقة؛ خريطة
+noun:die:Uhr|Clock, watch; o’clock|Montre, horloge; heure|Orologio; ora (orario)|ساعت|ساعة
+noun:die:Zeit|Time|Temps|Tempo|زمان|وقت
+noun:die:Arbeit|Work|Travail|Lavoro|کار|عمل
+noun:die:Straße|Street|Rue|Strada|خیابان|شارع
+noun:die:U-Bahn|Underground, metro|Métro|Metropolitana|مترو|مترو الأنفاق
+noun:die:S-Bahn|Suburban train|RER, train de banlieue|Treno suburbano|قطار شهری|قطار الضواحي
+noun:die:Straßenbahn|Tram|Tramway|Tram|تراموا|ترام
+noun:die:Station|Station, stop|Station|Stazione, fermata|ایستگاه|محطة
+noun:die:Mitte|Middle, centre|Milieu, centre|Centro, metà|وسط، مرکز|وسط، مركز
+noun:die:Apotheke|Pharmacy|Pharmacie|Farmacia|داروخانه|صيدلية
+noun:die:Kreuzung|Crossroads|Carrefour|Incrocio|چهارراه|تقاطع
+noun:die:Richtung|Direction|Direction|Direzione|جهت|اتجاه
+noun:die:Ecke|Corner|Coin|Angolo|گوشه|زاوية، ركن
+noun:die:Fahrt|Ride, journey|Trajet|Viaggio, corsa|سفر کوتاه، مسیر|رحلة، مشوار
+noun:die:Dusche|Shower|Douche|Doccia|دوش|دُش
+noun:die:Toilette|Toilet|Toilettes|Bagno, toilette|توالت|مرحاض
+noun:die:Rechnung|Bill, invoice|Facture, addition|Conto, fattura|صورت‌حساب|فاتورة
+noun:die:Gaststätte|Inn, restaurant|Auberge, restaurant|Trattoria|رستوران، مهمانخانه|مطعم شعبي
+noun:die:Speisekarte|Menu (in a restaurant)|Carte (au restaurant)|Menù (al ristorante)|منوی غذا|قائمة الطعام
+noun:die:Gabel|Fork|Fourchette|Forchetta|چنگال|شوكة
+noun:die:Ware|Goods|Marchandise|Merce|کالا|بضاعة
+noun:die:Abteilung|Department|Service, département|Reparto|بخش|قسم
+noun:die:Kabine|Cabin, booth|Cabine|Cabina|کابین|كابينة
+noun:die:Kasse|Till, checkout|Caisse|Cassa|صندوق (پرداخت)|صندوق الدفع
+noun:die:Quittung|Receipt|Reçu|Ricevuta|رسید|إيصال
+noun:die:Farbe|Colour; paint|Couleur; peinture|Colore; vernice|رنگ|لون؛ طلاء
+noun:die:Bekleidung|Clothing (formal, in shops)|Habillement|Abbigliamento|پوشاک|ملبوسات
+noun:die:Wäsche|Laundry; underwear|Linge|Biancheria|لباس‌های شستنی؛ لباس زیر|غسيل؛ ملابس داخلية
+noun:die:Post|Post office; mail|Poste; courrier|Posta|پست|البريد
+noun:die:Luft|Air|Air|Aria|هوا|هواء
+noun:die:Marke|Stamp; brand|Timbre; marque|Francobollo; marca|تمبر؛ برند|طابع؛ علامة تجارية
+noun:die:Stunde|Hour; lesson|Heure; cours|Ora; lezione|ساعت؛ جلسه درس|ساعة؛ حصة
+noun:die:Vorwahl|Area code|Indicatif téléphonique|Prefisso telefonico|پیش‌شماره|رمز المنطقة
+noun:die:Eisenbahn|Railway|Chemin de fer|Ferrovia|راه‌آهن|سكة حديد
+noun:die:Auskunft|Information; information desk|Renseignement; bureau d’information|Informazione; ufficio informazioni|اطلاعات؛ باجه اطلاعات|معلومات؛ مكتب الاستعلامات
+noun:die:Fahrkarte|Ticket|Billet|Biglietto|بلیت|تذكرة
+noun:die:Gepäckaufbewahrung|Left-luggage office|Consigne|Deposito bagagli|انبار امانات|مكتب حفظ الأمتعة
+noun:die:Tür|Door|Porte|Porta|در|باب
+noun:die:Verspätung|Delay|Retard|Ritardo|تأخیر|تأخير
+noun:die:Gesellschaft|Society; company|Société; compagnie|Società; compagnia|جامعه؛ شرکت|مجتمع؛ شركة
+noun:die:Maschine|Machine; plane (colloquial)|Machine; avion (fam.)|Macchina; aereo (colloq.)|ماشین، دستگاه؛ هواپیما (محاوره)|آلة؛ طائرة (عامية)
+noun:die:Abfertigung|Check-in, processing|Enregistrement, formalités|Accettazione, disbrigo|پذیرش، انجام تشریفات|إجراءات، تسجيل الدخول
+noun:die:Bordkarte|Boarding pass|Carte d’embarquement|Carta d’imbarco|کارت پرواز|بطاقة الصعود
+noun:die:Reihe|Row; turn|Rangée; tour|Fila; turno|ردیف؛ نوبت|صف؛ دور
+noun:die:Linie|Line, route|Ligne|Linea|خط، مسیر|خط
+noun:die:Tüte|Paper/plastic bag|Sachet|Sacchetto|کیسه|كيس
+noun:die:Arznei|Medicine (formal)|Remède (soutenu)|Farmaco (formale)|دارو (ادبی)|دواء (رسمي)
+noun:die:Autobahn|Motorway|Autoroute|Autostrada|آزادراه|طريق سريع
+noun:die:Polizei|Police|Police|Polizia|پلیس|شرطة
+noun:die:Leitung|Management; line, cable|Direction; ligne, conduite|Direzione; linea, condotta|مدیریت؛ خط، سیم|إدارة؛ خط، سلك
+noun:die:Schuld|Guilt; debt|Faute; dette|Colpa; debito|تقصیر؛ بدهی|ذنب؛ دَين
+noun:die:Brücke|Bridge|Pont|Ponte|پل|جسر
+noun:die:Ordnung|Order|Ordre|Ordine|نظم|نظام، ترتيب
+noun:die:Unterkunft|Accommodation|Hébergement|Alloggio|محل اقامت، اسکان|سكن، مأوى
+noun:die:Panne|Breakdown|Panne|Guasto|خرابی (خودرو)|عطل
+noun:die:Stelle|Place; position, job|Endroit; poste, emploi|Posto; posto di lavoro|جا؛ شغل، موقعیت شغلی|مكان؛ وظيفة شاغرة
+noun:die:Hilfe|Help|Aide|Aiuto|کمک|مساعدة
+noun:die:Batterie|Battery|Pile, batterie|Batteria, pila|باتری|بطارية
+noun:die:Sprechstunde|Consulting hours (doctor)|Heures de consultation|Orario di ambulatorio|ساعات پذیرش (مطب)|ساعات العيادة
+noun:die:Bremse|Brake|Frein|Freno|ترمز|فرامل
+noun:die:Spritze|Syringe; injection|Seringue; piqûre|Siringa; iniezione|سرنگ؛ آمپول|حقنة
+noun:die:Werkstatt|Workshop, garage|Atelier, garage|Officina|کارگاه، تعمیرگاه|ورشة
+noun:die:Aufenthaltserlaubnis|Residence permit (permit)|Permis de séjour|Autorizzazione al soggiorno|مجوز اقامت|إذن الإقامة
+noun:die:Ausländerbehörde|Immigration office|Service des étrangers|Ufficio stranieri|اداره اتباع خارجی|دائرة الأجانب
+noun:die:Anmeldung|Registration|Inscription, déclaration|Iscrizione, registrazione|ثبت‌نام، ثبت|تسجيل
+noun:die:Abmeldung|Deregistration|Désinscription|Cancellazione (dall’anagrafe)|لغو ثبت|إلغاء التسجيل
+noun:die:Miete|Rent|Loyer|Affitto|اجاره‌بها|إيجار
+noun:die:Kündigung|Notice, termination|Résiliation, licenciement|Disdetta, licenziamento|فسخ قرارداد، اخراج|إنهاء العقد، فصل
+noun:die:Nebenkostenabrechnung|Utility bill statement|Décompte des charges|Conguaglio delle spese condominiali|صورت‌حساب هزینه‌های جانبی|كشف حساب التكاليف الإضافية
+noun:die:Wohnung|Flat, apartment|Appartement|Appartamento|آپارتمان|شقة
+noun:die:Heizung|Heating|Chauffage|Riscaldamento|شوفاژ، گرمایش|تدفئة
+noun:die:Unterschrift|Signature|Signature|Firma|امضا|توقيع
+noun:die:Bescheinigung|Certificate|Attestation|Certificato|گواهی|شهادة، إفادة
+noun:die:Versicherung|Insurance|Assurance|Assicurazione|بیمه|تأمين
+noun:die:Krankenkasse|Health insurance fund|Caisse d’assurance maladie|Cassa malattia|صندوق بیمه درمانی|صندوق التأمين الصحي
+noun:die:Arbeitsagentur|Employment agency|Agence pour l’emploi|Agenzia per il lavoro|آژانس کار|وكالة التوظيف
+noun:die:Bewerbung|Job application|Candidature|Candidatura|درخواست کار|طلب توظيف
+noun:die:Kündigungsfrist|Notice period|Délai de préavis|Termine di preavviso|مهلت فسخ قرارداد|مهلة الإنذار
+noun:die:Steuer|Tax|Impôt|Tassa|مالیات|ضريبة
+noun:die:Überweisung|Bank transfer; referral|Virement; lettre d’orientation|Bonifico; impegnativa|انتقال پول؛ ارجاع پزشکی|تحويل مصرفي؛ إحالة طبية
+noun:die:Bankkarte|Bank card|Carte bancaire|Carta bancaria|کارت بانکی|بطاقة مصرفية
+noun:die:Grundschule|Primary school|École primaire|Scuola elementare|دبستان|مدرسة ابتدائية
+noun:die:Ausbildung|Vocational training|Formation professionnelle|Formazione professionale|آموزش حرفه‌ای|تدريب مهني
+noun:die:Impfung|Vaccination|Vaccination|Vaccinazione|واکسیناسیون|تطعيم
+noun:die:Nachbarschaft|Neighbourhood|Voisinage|Vicinato|همسایگی، محله|الجوار
+noun:die:Familie|Family|Famille|Famiglia|خانواده|عائلة
+noun:die:Geburt|Birth|Naissance|Nascita|تولد|ولادة
+noun:die:Ehe|Marriage|Mariage|Matrimonio|ازدواج|زواج
+noun:die:Scheidung|Divorce|Divorce|Divorzio|طلاق|طلاق
+noun:die:Mülltrennung|Waste separation|Tri des déchets|Raccolta differenziata|تفکیک زباله|فرز النفايات
+noun:die:Behörde|Authority|Autorité, administration|Autorità|اداره دولتی|سلطة، جهة رسمية
+verb::sprechen|to speak, to talk|parler|parlare|صحبت کردن|يتكلم
+verb::stehen|to stand|être debout|stare in piedi|ایستادن|يقف
+verb::verstehen|to understand|comprendre|capire|فهمیدن|يفهم
+verb::gehen|to go, to walk|aller|andare|رفتن|يذهب
+verb::kommen|to come|venir|venire|آمدن|يأتي
+verb::bekommen|to get, to receive|recevoir, obtenir|ricevere, ottenere|دریافت کردن، گرفتن|يحصل على
+verb::ankommen|to arrive|arriver|arrivare|رسیدن|يصل
+verb::nehmen|to take|prendre|prendere|برداشتن، گرفتن|يأخذ
+verb::annehmen|to accept|accepter|accettare|پذیرفتن|يقبل
+verb::mitnehmen|to take along|emporter|portare con sé|با خود بردن|يأخذ معه
+verb::geben|to give|donner|dare|دادن|يعطي
+verb::aufgeben|to check in (luggage), to post; to give up|enregistrer (bagages), expédier; abandonner|spedire, consegnare; rinunciare|تحویل دادن (بار)؛ دست کشیدن|يسلّم (أمتعة)؛ يتخلى عن
+verb::fahren|to drive, to travel|aller (en véhicule), conduire|andare (con un mezzo), guidare|رانندگی کردن، با وسیله رفتن|يسافر، يقود
+verb::abfahren|to depart (transport)|partir (transport)|partire (mezzi)|حرکت کردن (وسیله نقلیه)|يغادر (وسيلة نقل)
+verb::schreiben|to write|écrire|scrivere|نوشتن|يكتب
+verb::steigen|to climb; to get on (transport)|monter|salire|بالا رفتن؛ سوار شدن|يصعد؛ يركب
+verb::umsteigen|to change (trains)|changer (de train)|cambiare (mezzo)|تعویض وسیله نقلیه|يبدّل (وسيلة النقل)
+verb::aussteigen|to get off|descendre (du véhicule)|scendere|پیاده شدن|ينزل (من وسيلة نقل)
+verb::lassen|to let, to leave|laisser|lasciare|اجازه دادن، گذاشتن|يدع، يترك
+verb::halten|to hold; to stop|tenir; s’arrêter|tenere; fermarsi|نگه داشتن؛ ایستادن|يمسك؛ يتوقف
+verb::bleiben|to stay|rester|restare|ماندن|يبقى
+verb::trinken|to drink|boire|bere|نوشیدن|يشرب
+verb::sehen|to see|voir|vedere|دیدن|يرى
+verb::nachsehen|to look up, to check|vérifier, regarder|controllare, guardare|نگاه کردن، بررسی کردن|يتحقق، يبحث
+verb::bieten|to provide, to offer (opportunity)|offrir (une possibilité)|offrire (una possibilità)|فراهم کردن، ارائه دادن|يوفّر، يتيح
+verb::anbieten|to offer (goods, service, help)|proposer (produit, service, aide)|proporre (merce, servizio, aiuto)|پیشنهاد کردن (کالا، خدمت، کمک)|يعرض (سلعة، خدمة، مساعدة)
+verb::liegen|to lie (be located)|être couché, se trouver|giacere, trovarsi|دراز کشیدن؛ قرار داشتن|يرقد؛ يقع
+verb::rufen|to call (out)|appeler (crier)|chiamare (gridare)|صدا زدن|ينادي
+verb::aufrufen|to call up (by name, number)|appeler (par nom, numéro)|chiamare (per nome, numero)|صدا زدن (با نام یا شماره)|ينادي (بالاسم أو الرقم)
+verb::anrufen|to phone|téléphoner à, appeler|telefonare a, chiamare|تلفن زدن|يتصل هاتفياً
+verb::ausrufen|to exclaim; to announce|s’écrier; annoncer|esclamare; annunciare|فریاد زدن؛ اعلام کردن|يهتف؛ يعلن
+verb::schließen|to close|fermer|chiudere|بستن|يغلق
+verb::schlafen|to sleep|dormir|dormire|خوابیدن|ينام
+verb::fliegen|to fly|voler (en avion)|volare|پرواز کردن|يطير
+verb::abfliegen|to take off (plane), to depart|décoller, partir (en avion)|decollare, partire (in aereo)|پرواز کردن (حرکت هواپیما)|يقلع
+verb::beginnen|to begin|commencer|cominciare|شروع کردن|يبدأ
+verb::helfen|to help|aider|aiutare|کمک کردن|يساعد
+verb::lesen|to read|lire|leggere|خواندن|يقرأ
+verb::biegen|to bend|plier, courber|piegare|خم کردن|يثني
+verb::abbiegen|to turn (off a road)|tourner|svoltare|پیچیدن (در مسیر)|ينعطف
+verb::ziehen|to pull; to move|tirer; déménager|tirare; trasferirsi|کشیدن؛ نقل مکان کردن|يسحب؛ ينتقل
+verb::anziehen|to put on (clothes)|mettre (un vêtement)|indossare|پوشیدن|يرتدي
+verb::ausziehen|to take off (clothes); to move out|enlever (vêtement); déménager|togliersi (vestiti); lasciare la casa|درآوردن (لباس)؛ از خانه رفتن|يخلع؛ يخرج من السكن
+verb::stehlen|to steal|voler (dérober)|rubare|دزدیدن|يسرق
+verb::finden|to find; to think (opinion)|trouver; penser|trovare; ritenere|پیدا کردن؛ به نظر رسیدن|يجد؛ يرى (رأي)
+verb::entscheiden|to decide|décider|decidere|تصمیم گرفتن|يقرر
+verb::verlieren|to lose|perdre|perdere|گم کردن، باختن|يفقد
+verb::essen|to eat|manger|mangiare|خوردن|يأكل
+verb::waschen|to wash|laver|lavare|شستن|يغسل
+verb::gefallen|to please (to like)|plaire|piacere|خوش آمدن، پسندیدن|يُعجب
+verb::entschuldigen|to excuse; (refl.) to apologise|excuser; (pron.) s’excuser|scusare; (rifl.) scusarsi|بخشیدن؛ عذرخواهی کردن|يعذر؛ يعتذر
+verb::vorstellen|to introduce; (refl.) to introduce oneself; to imagine|présenter; (pron.) se présenter|presentare; (rifl.) presentarsi|معرفی کردن؛ خود را معرفی کردن|يقدّم؛ يعرّف بنفسه
+verb::heißen|to be called|s’appeler|chiamarsi|نام داشتن|يُسمّى
+verb::aufmachen|to open (colloquial)|ouvrir (fam.)|aprire (colloq.)|باز کردن (محاوره)|يفتح (عامية)
+verb::zahlen|to pay|payer|pagare|پرداختن|يدفع
+verb::wechseln|to change (money)|changer (de l’argent)|cambiare (soldi)|عوض کردن، تبدیل ارز|يصرف (نقود)، يغيّر
+verb::einlösen|to cash (a cheque)|encaisser|incassare|نقد کردن|يصرف (شيكاً)
+verb::kosten|to cost|coûter|costare|قیمت داشتن|يبلغ ثمنه
+verb::reisen|to travel|voyager|viaggiare|سفر کردن|يسافر
+verb::umtauschen|to exchange (goods, currency)|échanger|cambiare (merce, valuta)|تعویض کردن (کالا)|يستبدل
+verb::warten|to wait|attendre|aspettare|منتظر ماندن|ينتظر
+verb::entwerten|to validate (a ticket)|composter|obliterare|باطل کردن بلیت|يختم التذكرة
+verb::fragen|to ask|demander|chiedere|پرسیدن|يسأل
+verb::bestellen|to order|commander|ordinare|سفارش دادن|يطلب
+verb::ausfüllen|to fill in|remplir|compilare|پر کردن (فرم)|يملأ (استمارة)
+verb::reinigen|to clean (dry-clean)|nettoyer|pulire (in tintoria)|تمیز کردن (خشک‌شویی)|ينظّف (تنظيف جاف)
+verb::wohnen|to live (reside)|habiter|abitare|زندگی کردن، ساکن بودن|يسكن
+verb::abreisen|to leave (a hotel, a town)|partir (de l’hôtel, de la ville)|partire (dall’albergo, dalla città)|ترک کردن (هتل، شهر)|يغادر (الفندق، المدينة)
+verb::machen|to make, to do|faire|fare|انجام دادن، درست کردن|يفعل، يصنع
+verb::bedienen|to serve (customers)|servir (des clients)|servire (clienti)|خدمت کردن (به مشتری)|يخدم (الزبائن)
+verb::wählen|to choose; to dial|choisir; composer (un numéro)|scegliere; comporre (un numero)|انتخاب کردن؛ شماره گرفتن|يختار؛ يطلب رقماً
+verb::schmecken|to taste good|avoir bon goût|piacere (cibo)|خوشمزه بودن|يكون لذيذاً
+verb::kaufen|to buy|acheter|comprare|خریدن|يشتري
+verb::wünschen|to wish|souhaiter|augurare|آرزو کردن|يتمنى
+verb::zeigen|to show|montrer|mostrare|نشان دادن|يُري
+verb::arbeiten|to work|travailler|lavorare|کار کردن|يعمل
+verb::anprobieren|to try on|essayer (un vêtement)|provare (un vestito)|پرو کردن|يقيس (ملابس)
+verb::passen|to fit, to suit|aller (bien), convenir|stare bene, andare bene|اندازه بودن، مناسب بودن|يناسب
+verb::packen|to pack|faire (ses bagages), emballer|fare (le valigie), impacchettare|بسته‌بندی کردن|يحزم
+verb::abholen|to pick up, to collect|aller chercher|andare a prendere|تحویل گرفتن، دنبال کسی رفتن|يستلم، يصطحب
+verb::schicken|to send|envoyer|mandare|فرستادن|يرسل
+verb::öffnen|to open|ouvrir|aprire|باز کردن|يفتح
+verb::anschnallen|to fasten (seat belt)|attacher (sa ceinture)|allacciare (la cintura)|بستن کمربند|يربط حزام الأمان
+verb::dauern|to last|durer|durare|طول کشیدن|يستغرق
+verb::einstellen|to adjust; to hire|régler; embaucher|regolare; assumere|تنظیم کردن؛ استخدام کردن|يضبط؛ يوظّف
+verb::tanken|to refuel|faire le plein|fare benzina|بنزین زدن|يملأ الوقود
+verb::reparieren|to repair|réparer|riparare|تعمیر کردن|يصلح
+verb::glauben|to believe; to suppose|croire; supposer|credere; ritenere|باور کردن؛ گمان کردن|يصدّق؛ يظن
+verb::stellen|to put (upright)|mettre (debout), poser|mettere (in piedi)|گذاشتن (به حالت ایستاده)|يضع (واقفاً)
+verb::überprüfen|to check (thoroughly), to inspect|contrôler, revérifier|verificare, controllare|بازبینی کردن|يفحص، يراجع
+verb::abschleppen|to tow away|remorquer|rimorchiare|یدک کشیدن|يقطر (سيارة)
+verb::stimmen|to be correct|être juste|essere giusto|درست بودن|يكون صحيحاً
+verb::rauchen|to smoke|fumer|fumare|سیگار کشیدن|يدخّن
+verb::landen|to land|atterrir|atterrare|فرود آمدن|يهبط
+verb::verkaufen|to sell|vendre|vendere|فروختن|يبيع
+verb::bremsen|to brake|freiner|frenare|ترمز کردن|يفرمل
+verb::legen|to lay, to put (flat)|poser (à plat)|mettere (disteso)|گذاشتن (به حالت خوابیده)|يضع (مستلقياً)
+verb::passieren|to happen|se passer|succedere|اتفاق افتادن|يحدث
+verb::verletzen|to injure|blesser|ferire|زخمی کردن، آسیب زدن|يجرح
+verb::wiederholen|to repeat|répéter|ripetere|تکرار کردن|يكرر
+verb::möchten|would like|voudrais|vorrei|مایل بودن، دوست داشتن|يودّ
+verb::antworten|to answer|répondre|rispondere|جواب دادن|يجيب
+verb::reservieren|to reserve (table, room)|réserver (table, chambre)|prenotare (tavolo, camera)|رزرو کردن (میز، اتاق)|يحجز (طاولة، غرفة)
+verb::telefonieren|to talk on the phone|téléphoner|telefonare|تلفنی صحبت کردن|يتحدث بالهاتف
+verb::ausrichten|to pass on (a message)|transmettre (un message)|riferire (un messaggio)|پیغام رساندن|ينقل رسالة
+verb::hören|to hear|entendre|sentire|شنیدن|يسمع
+verb::buchen|to book (trip, ticket)|réserver (voyage, billet)|prenotare (viaggio, biglietto)|رزرو کردن (سفر، بلیت)|يحجز (رحلة، تذكرة)
+verb::führen|to lead; to manage|mener; diriger|condurre; dirigere|هدایت کردن؛ اداره کردن|يقود؛ يدير
+verb::parken|to park|se garer|parcheggiare|پارک کردن|يركن السيارة
+verb::wecken|to wake (someone)|réveiller|svegliare|بیدار کردن|يوقظ
+verb::sagen|to say|dire|dire|گفتن|يقول
+verb::fühlen|to feel|sentir|sentire (provare)|احساس کردن|يشعر
+verb::besetzen|to occupy (a seat)|occuper (une place)|occupare (un posto)|اشغال کردن (جا)|يشغل (مكاناً)
+verb::fehlen|to be missing|manquer|mancare|کم بودن، غایب بودن|ينقص، يغيب
+verb::empfehlen|to recommend|recommander|consigliare|توصیه کردن|يوصي
+verb::mögen|to like|aimer (bien)|piacere (gradire)|دوست داشتن|يحب
+verb::wollen|to want (intention)|vouloir|volere|خواستن|يريد
+verb::müssen|must, to have to|devoir (nécessité)|dovere (necessità)|مجبور بودن|يجب عليه
+verb::sollen|should, to be supposed to|devoir (selon une consigne)|dovere (su indicazione)|باید (طبق دستور)|ينبغي عليه
+verb::dürfen|may, to be allowed to|avoir le droit de, pouvoir|potere (avere il permesso)|اجازه داشتن|يُسمح له
+verb::können|can, to be able to|pouvoir, savoir faire|potere, sapere|توانستن|يستطيع
+verb::kennen|to know (be acquainted with)|connaître|conoscere|شناختن|يعرف (شخصاً أو مكاناً)
+verb::nennen|to name|nommer|nominare, chiamare|نامیدن|يسمّي
+verb::brennen|to burn|brûler|bruciare|سوختن|يحترق
+verb::rennen|to run|courir|correre|دویدن|يركض
+verb::wenden|to turn round; (refl.) to turn to|tourner; (pron.) s’adresser à|girare; (rifl.) rivolgersi a|برگرداندن؛ مراجعه کردن به|يدير؛ يتوجه إلى
+verb::senden|to send (letter, file)|envoyer (lettre, fichier)|inviare (lettera, file)|ارسال کردن (نامه، فایل)|يرسل (رسالة، ملفاً)
+verb::denken|to think|penser|pensare|فکر کردن|يفكر
+verb::sein|to be|être|essere|بودن|يكون
+verb::haben|to have|avoir|avere|داشتن|يملك
+verb::werden|to become|devenir|diventare|شدن|يصبح
+verb::wissen|to know (a fact)|savoir|sapere|دانستن|يعرف (معلومة)
+verb::tun|to do (general)|faire (général)|fare (generico)|کردن|يفعل
+verb::bringen|to bring|apporter|portare|آوردن|يحضر
+verb::sich bewerben|to apply (for a job)|postuler|candidarsi|درخواست دادن (برای کار)|يتقدم بطلب
+verb::kündigen|to resign; to give notice|démissionner; résilier|licenziarsi; disdire|استعفا دادن؛ فسخ کردن|يستقيل؛ يُنهي العقد
+verb::beantragen|to apply for (document, benefit)|faire une demande de|richiedere (documento, sussidio)|تقاضا کردن (مدرک، کمک‌هزینه)|يقدم طلباً للحصول على
+verb::sich anmelden|to register|s’inscrire, se déclarer|iscriversi, registrarsi|ثبت‌نام کردن|يسجّل نفسه
+verb::sich abmelden|to deregister|se désinscrire|cancellarsi|لغو ثبت کردن|يلغي تسجيله
+verb::unterschreiben|to sign|signer|firmare|امضا کردن|يوقّع
+verb::vereinbaren|to arrange, to agree on|convenir, fixer|concordare, fissare|توافق کردن، قرار گذاشتن|يتفق على
+verb::sich informieren|to find out, to get informed|s’informer|informarsi|اطلاعات کسب کردن|يستعلم
+verb::teilnehmen|to take part|participer|partecipare|شرکت کردن|يشارك
+verb::sich erkundigen|to enquire|se renseigner|informarsi (chiedere)|پرس‌وجو کردن|يستفسر
+verb::sich kümmern|to take care (of)|s’occuper (de)|occuparsi (di)|مراقبت کردن، رسیدگی کردن|يعتني
+verb::erledigen|to get done, to settle|régler, s’occuper de|sbrigare|انجام دادن، رسیدگی کردن|ينجز
+verb::funktionieren|to work (function)|fonctionner|funzionare|کار کردن (دستگاه)|يعمل (جهاز)
+verb::vermieten|to let, to rent out|louer (en tant que propriétaire)|affittare (dare in affitto)|اجاره دادن|يؤجّر
+verb::mieten|to rent|louer (en tant que locataire)|prendere in affitto|اجاره کردن|يستأجر
+verb::überweisen|to transfer (money)|virer (de l’argent)|bonificare|واریز کردن (پول)|يحوّل (مالاً)
+verb::sparen|to save|économiser|risparmiare|پس‌انداز کردن|يدّخر
+verb::verdienen|to earn|gagner (de l’argent)|guadagnare|درآمد داشتن|يكسب
+verb::umziehen|to move (house)|déménager|traslocare|اسباب‌کشی کردن|ينتقل (السكن)
+verb::sich einigen|to come to an agreement|se mettre d’accord|mettersi d’accordo|به توافق رسیدن|يتفقون
+verb::sich freuen|to be glad|se réjouir|rallegrarsi|خوشحال شدن|يفرح
+verb::sich ärgern|to be annoyed|s’énerver|arrabbiarsi|عصبانی شدن|ينزعج
+verb::sich vorbereiten|to prepare (oneself)|se préparer|prepararsi|آماده شدن|يستعد
+verb::beraten|to advise|conseiller|consigliare (consulenza)|مشاوره دادن|يستشير، ينصح
+verb::betreuen|to look after|s’occuper de, encadrer|assistere, seguire|مراقبت کردن، سرپرستی کردن|يرعى
+verb::versichern|to insure|assurer|assicurare|بیمه کردن|يؤمّن
+verb::impfen|to vaccinate|vacciner|vaccinare|واکسن زدن|يطعّم
+verb::untersuchen|to examine|examiner|visitare, esaminare|معاینه کردن|يفحص (طبياً)
+verb::behandeln|to treat|soigner, traiter|curare, trattare|درمان کردن؛ رفتار کردن|يعالج؛ يعامل
+verb::erhalten|to receive (formal)|recevoir (soutenu)|ricevere (formale)|دریافت کردن (رسمی)|يتسلّم (رسمي)
+verb::ausstellen|to issue (a document)|délivrer (un document)|rilasciare (un documento)|صادر کردن (مدرک)|يُصدر (وثيقة)
+verb::prüfen|to test, to examine|vérifier, examiner (un candidat)|esaminare, verificare|آزمودن، امتحان گرفتن|يختبر، يمتحن
+verb::gelten|to be valid|être valable|essere valido|معتبر بودن|يكون سارياً
+verb::verlängern|to extend|prolonger|prolungare|تمدید کردن|يمدّد
+verb::ablaufen|to expire|expirer|scadere|منقضی شدن|تنتهي صلاحيته
+verb::sich verspäten|to be late|être en retard|essere in ritardo|دیر کردن|يتأخر
+verb::trennen|to separate, to sort|séparer, trier|separare, differenziare|جدا کردن، تفکیک کردن|يفصل، يفرز
+verb::sich engagieren|to be actively involved|s’engager|impegnarsi|فعالانه مشارکت کردن|ينخرط، يلتزم
+frage::woher|where from|d’où|da dove|از کجا|من أين
+frage::wohin|where to|où (direction)|dove (direzione)|به کجا|إلى أين
+frage::wo|where|où|dove|کجا|أين
+frage::wie|how|comment|come|چطور|كيف
+frage::wer|who|qui|chi|چه کسی|مَن
+frage::wofür|what for, for what|pour quoi|per che cosa|برای چه چیزی|لأجل ماذا
+frage::wie viel|how much, how many|combien|quanto|چقدر، چند|كم
+frage::was|what|quoi, que|che cosa|چه، چه چیزی|ماذا
+frage::wann|when|quand|quando|کی، چه وقت|متى
+frage::womit|with what|avec quoi|con che cosa|با چه چیزی|بماذا
+frage::warum|why|pourquoi|perché|چرا|لماذا
+frage::wen|whom|qui (COD)|chi (compl. oggetto)|چه کسی را|مَن (مفعول به)
+frage::welche|which|quel, quelle|quale|کدام|أيّ
+frage::wozu|what for, for what purpose|dans quel but|a che scopo|به چه منظور|لأي غرض
+prep::bis|until, up to|jusqu’à|fino a|تا|حتى
+prep::ohne|without|sans|senza|بدون|بدون
+prep::für|for|pour|per|برای|لِـ، من أجل
+prep::um|around; at (time)|autour de; à (heure)|intorno a; alle (ora)|دور؛ ساعتِ|حول؛ في الساعة
+prep::durch|through; because of|à travers; à cause de|attraverso; a causa di|از میانِ؛ به‌خاطر|عبر؛ بسبب
+prep::gegen|against; around (time)|contre; vers (heure)|contro; verso (ora)|علیه؛ حدودِ (زمان)|ضد؛ نحو (الوقت)
+prep::in|in, into|dans, en|in|در، به داخلِ|في، إلى داخل
+prep::an|at, on (vertical surface)|à, contre (surface verticale)|a, su (superficie verticale)|کنارِ، روی (سطح عمودی)|عند، على (سطح عمودي)
+prep::auf|on (horizontal surface)|sur|su|روی (سطح افقی)|على (سطح أفقي)
+prep::neben|next to|à côté de|accanto a|کنارِ|بجانب
+prep::hinter|behind|derrière|dietro|پشتِ|خلف
+prep::über|over, above; about|au-dessus de; au sujet de|sopra; su (argomento)|بالای؛ دربارهٔ|فوق؛ عن
+prep::unter|under; among|sous; parmi|sotto; tra|زیرِ؛ در میانِ|تحت؛ بين
+prep::vor|in front of; before|devant; avant|davanti a; prima di|جلوی؛ قبل از|أمام؛ قبل
+prep::zwischen|between|entre|tra|بین|بين
+prep::von|from; of|de|da; di|از|مِن
+prep::zu|to (someone, somewhere)|chez, à|da, a|به، نزدِ|إلى
+prep::seit|since|depuis|da (tempo)|از (زمانی)|منذ
+prep::aus|out of, from|de, hors de|da, fuori da|از (درون)|من (داخل)
+prep::mit|with|avec|con|با|مع
+prep::nach|after; to (city, country); according to|après; à, en (ville, pays); selon|dopo; a, in (città, paese); secondo|بعد از؛ به (شهر، کشور)؛ طبقِ|بعد؛ إلى (مدينة، بلد)؛ حسب
+prep::bei|at, near; at someone’s place|chez, près de|presso, da|نزدِ، پیشِ|عند، لدى
+prep::ab|from (starting)|à partir de|a partire da|از (شروع)|ابتداءً من
+prep::gegenüber|opposite; compared to|en face de; par rapport à|di fronte a; rispetto a|روبه‌روی؛ در مقایسه با|مقابل؛ مقارنة بـ
+prep::außer|except|sauf|tranne|به‌جز|ما عدا
+other::jetzt|now|maintenant|adesso|اکنون، الان|الآن
+other::nun|now, well|maintenant, eh bien|ora, dunque|حالا، خب|الآن، إذن
+other::also|so, therefore|donc|quindi|پس، بنابراین|إذن
+other::gleich|right away; same|tout de suite; égal|subito; uguale|فوراً؛ یکسان|حالاً؛ متساوٍ
+other::sofort|immediately|immédiatement|immediatamente|بلافاصله|فوراً
+other::bald|soon|bientôt|presto|به‌زودی|قريباً
+other::während|during; while|pendant|durante; mentre|در طولِ؛ در حالی که|أثناء؛ بينما
+other::wahr|true|vrai|vero|درست، واقعی|صحيح، حقيقي
+other::wahrlich|verily (literary)|en vérité (litt.)|in verità (lett.)|به‌راستی (ادبی)|حقاً (أدبي)
+other::recht|quite, rather; right|assez; juste|piuttosto; giusto|نسبتاً؛ درست|إلى حد ما؛ صحيح
+other::genau|exactly|exactement|esattamente|دقیقاً|بالضبط
+other::richtig|correct, right|correct|corretto, giusto|درست، صحیح|صحيح
+other::wirklich|really|vraiment|davvero|واقعاً|حقاً
+other::möglich|possible|possible|possibile|ممکن|ممكن
+other::vielleicht|maybe, perhaps|peut-être|forse|شاید|ربما
+other::darum|that’s why|voilà pourquoi|ecco perché|به همین دلیل|ولهذا
+other::aber|but|mais|ma|اما|لكن
+other::nur|only|seulement|solo|فقط|فقط
+other::jedoch|however|cependant|tuttavia|با این حال|غير أن
+other::sondern|but (rather) (after a negation)|mais (après une négation)|ma (dopo una negazione)|بلکه|بل
+other::sehr|very|très|molto|خیلی|جداً
+other::so|so, like this|ainsi, si|così|این‌طور، آن‌قدر|هكذا
+other::sowie|as well as|ainsi que|nonché|و همچنین|وكذلك
+other::dass|that (conjunction)|que (conjonction)|che (congiunzione)|که (حرف ربط)|أنّ
+other::weil|because|parce que|perché (causale)|چون|لأنّ
+other::hier|here|ici|qui|اینجا|هنا
+other::dort|there|là-bas|là|آنجا|هناك
+other::da|there, here; since|là; puisque|lì, qui; poiché|آنجا؛ چون|هنا، هناك؛ بما أنّ
+other::zuerst|first, at first|d’abord|prima, innanzitutto|اول، ابتدا|أولاً
+other::je|ever|jamais (un jour)|mai (qualche volta)|هرگز (تاکنون)|في أي وقت
+other::solch|such|tel|tale|چنین|مثل هذا
+other::nebenan|next door|à côté (voisin)|accanto (vicino)|همسایه، در کنار|بجوار
+other::damit|so that; with it|pour que; avec cela|affinché; con ciò|تا؛ با آن|لكي؛ بذلك
+other::davor|before that|avant cela|prima di ciò|قبل از آن|قبل ذلك
+other::davon|of it, about it|de cela|di ciò|از آن، دربارهٔ آن|عن ذلك
+other::darauf|on it; afterwards|là-dessus; ensuite|su ciò; poi|روی آن؛ سپس|عليه؛ بعد ذلك
+other::dabei|in doing so, at the same time|en même temps, ce faisant|nel farlo, allo stesso tempo|در این حین|في أثناء ذلك
+other::danach|after that|après cela|dopo di ciò|بعد از آن|بعد ذلك
+other::dafür|for it|pour cela|per questo|برای آن|لأجل ذلك
+other::dann|then|ensuite, alors|poi, allora|بعد، سپس|ثم
+other::daneben|next to it; besides|à côté; en outre|accanto; inoltre|کنار آن؛ علاوه بر آن|بجانبه؛ إضافة إلى ذلك
+other::damals|back then|à l’époque|a quel tempo|آن زمان (در گذشته)|آنذاك
+other::oft|often|souvent|spesso|اغلب|غالباً
+other::manchmal|sometimes|parfois|a volte|گاهی|أحياناً
+other::immer|always|toujours|sempre|همیشه|دائماً
+other::bevor|before (conjunction)|avant que|prima che|پیش از آنکه|قبل أن
+other::na|well (interjection)|eh bien|beh|خب|حسناً
+other::früh|early|tôt|presto (di buon’ora)|زود|مبكراً
+other::spät|late|tard|tardi|دیر|متأخراً
+verb::abraten|to advise against|déconseiller|sconsigliare|منصرف کردن|ينصح بعدم
+verb::ähneln|to resemble|ressembler à|somigliare a|شبیه بودن به|يشبه
+verb::auffallen|to strike, to be noticed|frapper, se faire remarquer|saltare all’occhio|به چشم آمدن|يلفت النظر
+verb::ausweichen|to avoid, to dodge|éviter, esquiver|evitare, schivare|طفره رفتن، پرهیز کردن|يتجنب، يتفادى
+verb::begegnen|to meet (by chance)|rencontrer (par hasard)|incontrare (per caso)|اتفاقی برخوردن|يصادف
+verb::beistehen|to stand by, to support|soutenir (dans une difficulté)|stare vicino a, sostenere|حمایت کردن (در سختی)|يساند
+verb::beitreten|to join (an organisation)|adhérer à|aderire a|عضو شدن (در سازمان)|ينضم إلى
+verb::danken|to thank|remercier|ringraziare|تشکر کردن|يشكر
+verb::dienen|to serve|servir à|servire a|خدمت کردن|يخدم
+verb::drohen|to threaten|menacer|minacciare|تهدید کردن|يهدد
+verb::einfallen|to occur to (an idea)|venir à l’esprit|venire in mente|به ذهن رسیدن|يخطر بالبال
+verb::entfallen|to slip one’s mind|échapper (oublier)|sfuggire (dimenticare)|از یاد رفتن|يغيب عن الذاكرة
+verb::folgen|to follow|suivre|seguire|دنبال کردن|يتبع
+verb::gehören|to belong to|appartenir à|appartenere a|تعلق داشتن به|يخص، ينتمي إلى
+verb::gelingen|to succeed (manage)|réussir (à qn)|riuscire|موفق شدن، از عهده برآمدن|ينجح (يتمكن)
+verb::genügen|to be enough|suffire|bastare|کافی بودن|يكفي
+verb::gratulieren|to congratulate|féliciter|congratularsi con|تبریک گفتن|يهنئ
+verb::leichtfallen|to come easily|être facile pour qn|riuscire facile|آسان بودن برای کسی|يسهل عليه
+verb::leidtun|to be sorry|regretter, être désolé|dispiacere|متأسف بودن|يأسف
+verb::missfallen|to displease|déplaire|non piacere|خوش نیامدن|لا يعجب
+verb::misslingen|to fail|échouer, rater|fallire, non riuscire|شکست خوردن، نشدن|يفشل
+verb::nützen|to be useful|être utile|essere utile|مفید بودن|ينفع
+verb::schaden|to harm|nuire|nuocere|آسیب رساندن|يضر
+verb::schwerfallen|to be difficult for|être difficile pour qn|riuscire difficile|دشوار بودن برای کسی|يصعب عليه
+verb::vertrauen|to trust|faire confiance|fidarsi di|اعتماد کردن|يثق
+verb::widersprechen|to contradict|contredire|contraddire|مخالفت کردن، تناقض داشتن|يعارض
+verb::zuhören|to listen (to someone)|écouter (qn)|ascoltare (qualcuno)|با دقت گوش دادن|يستمع إلى
+verb::zustimmen|to agree|approuver, être d’accord|essere d’accordo|موافقت کردن|يوافق
+verb::abgewöhnen|to break (someone) of a habit|désaccoutumer, se déshabituer|disabituare, smettere|ترک دادن عادت|يقلع عن عادة
+verb::angewöhnen|to get into the habit of|s’habituer à (prendre l’habitude)|abituarsi a|عادت کردن به|يعتاد على
+verb::beschreiben|to describe|décrire|descrivere|توصیف کردن|يصف
+verb::bestätigen|to confirm|confirmer|confermare|تأیید کردن|يؤكد
+verb::borgen|to lend, to borrow (colloquial)|prêter (fam.)|prestare (colloq.)|قرض دادن (محاوره)|يُسلف (عامية)
+verb::entziehen|to withdraw (rights, permit)|retirer (droits, permis)|revocare (diritti, permesso)|سلب کردن (حق، مجوز)|يسحب (حقاً، رخصة)
+verb::erklären|to explain|expliquer|spiegare|توضیح دادن|يشرح
+verb::erlauben|to allow|permettre|permettere|اجازه دادن|يسمح
+verb::erleichtern|to make easier|faciliter|facilitare|آسان کردن|يسهّل
+verb::ermöglichen|to make possible|permettre, rendre possible|rendere possibile|ممکن ساختن|يتيح
+verb::erzählen|to tell (a story)|raconter|raccontare|تعریف کردن|يحكي
+verb::gestatten|to permit (polite)|permettre (poli)|consentire (cortese)|اجازه دادن (مؤدبانه)|يأذن (بأدب)
+verb::leihen|to lend; to borrow|prêter; emprunter|prestare; prendere in prestito|قرض دادن؛ قرض گرفتن|يُعير؛ يستعير
+verb::liefern|to deliver, to supply|livrer, fournir|consegnare, fornire|تحویل دادن، تأمین کردن|يسلّم، يورّد
+verb::mitteilen|to inform (formal)|communiquer (soutenu)|comunicare (formale)|اطلاع دادن (رسمی)|يُبلغ (رسمي)
+verb::präsentieren|to present|présenter (une présentation)|presentare (in pubblico)|ارائه کردن|يعرض، يقدّم عرضاً
+verb::schenken|to give (as a present)|offrir (en cadeau)|regalare|هدیه دادن|يُهدي
+verb::schulden|to owe|devoir (de l’argent)|dovere (soldi)|بدهکار بودن|يدين بـ
+verb::servieren|to serve (food)|servir (un plat)|servire (cibo)|سرو کردن (غذا)|يقدّم (الطعام)
+verb::spenden|to donate|faire un don|donare|اهدا کردن (پول)|يتبرع
+verb::verbieten|to forbid|interdire|vietare|ممنوع کردن|يمنع
+verb::verdanken|to owe (something to someone)|devoir (qch à qn)|dovere (qualcosa a qualcuno)|مدیون بودن|يدين له بـ
+verb::verheimlichen|to conceal|dissimuler|tenere nascosto|پنهان کردن|يُخفي
+verb::vermitteln|to mediate; to convey (knowledge)|servir d’intermédiaire; transmettre|mediare; trasmettere (conoscenze)|میانجی‌گری کردن؛ انتقال دادن (دانش)|يتوسط؛ ينقل (المعرفة)
+verb::verraten|to give away (a secret)|révéler, trahir|rivelare, tradire|فاش کردن|يُفشي (سراً)
+verb::verschweigen|to keep quiet about|taire|tacere|مسکوت گذاشتن|يكتم
+verb::versprechen|to promise|promettre|promettere|قول دادن|يعد
+verb::verzeihen|to forgive|pardonner|perdonare|بخشیدن|يغفر
+verb::vorlesen|to read aloud|lire à haute voix|leggere ad alta voce|بلند خواندن|يقرأ بصوت عالٍ
+verb::vorschlagen|to suggest (an idea)|proposer (une idée)|proporre (un’idea)|پیشنهاد دادن (ایده)|يقترح
+verb::wegnehmen|to take away|enlever, retirer|togliere|گرفتن، بردن|ينتزع
+verb::wiedergeben|to give back; to reproduce|rendre; reproduire|restituire; riprodurre|پس دادن؛ بازگو کردن|يُرجع؛ يعيد عرض
+verb::zuordnen|to assign, to match|attribuer, classer|assegnare, abbinare|تخصیص دادن، مرتبط کردن|يُسند، يصنّف
+verb::zurückbringen|to bring back|rapporter|riportare|برگرداندن|يعيد (إحضار)
+adj::alt|old|vieux|vecchio|پیر، قدیمی|قديم، عجوز
+adj::jung|young|jeune|giovane|جوان|شاب
+adj::groß|big, tall|grand|grande, alto|بزرگ، بلند|كبير، طويل
+adj::klein|small|petit|piccolo|کوچک|صغير
+adj::gut|good|bon|buono|خوب|جيد
+adj::schlecht|bad|mauvais|cattivo|بد|سيئ
+adj::schön|beautiful|beau|bello|زیبا|جميل
+adj::hässlich|ugly|laid|brutto|زشت|قبيح
+adj::neu|new|nouveau|nuovo|نو، جدید|جديد
+adj::teuer|expensive|cher|caro|گران|غالٍ
+adj::billig|cheap|bon marché|economico|ارزان|رخيص
+adj::schnell|fast|rapide|veloce|سریع|سريع
+adj::langsam|slow|lent|lento|کند|بطيء
+adj::heiß|hot|chaud (brûlant)|caldissimo, bollente|داغ|ساخن جداً
+adj::kalt|cold|froid|freddo|سرد|بارد
+adj::warm|warm|chaud (tiède)|caldo|گرم|دافئ
+adj::leicht|light; easy|léger; facile|leggero; facile|سبک؛ آسان|خفيف؛ سهل
+adj::schwer|heavy; difficult|lourd; difficile|pesante; difficile|سنگین؛ سخت|ثقيل؛ صعب
+adj::voll|full|plein|pieno|پر|ممتلئ
+adj::leer|empty|vide|vuoto|خالی|فارغ
+adj::falsch|wrong, false|faux|sbagliato, falso|نادرست، غلط|خاطئ
+adj::freundlich|friendly|aimable|gentile, cordiale|مهربان، دوستانه|ودود
+adj::nett|nice|sympa|simpatico, carino|خوب، دلپذیر|لطيف
+adj::gesund|healthy|en bonne santé|sano|سالم|سليم، صحي
+adj::krank|ill, sick|malade|malato|بیمار|مريض
+adj::müde|tired|fatigué|stanco|خسته|متعب
+adj::hungrig|hungry|affamé|affamato|گرسنه|جائع
+adj::durstig|thirsty|assoiffé|assetato|تشنه|عطشان
+adj::glücklich|happy|heureux|felice|خوشبخت، خوشحال|سعيد
+adj::traurig|sad|triste|triste|غمگین|حزين
+adj::wichtig|important|important|importante|مهم|مهم
+adj::interessant|interesting|intéressant|interessante|جالب|مثير للاهتمام
+adj::langweilig|boring|ennuyeux|noioso|کسل‌کننده|ممل
+adj::laut|loud|bruyant, fort|rumoroso, forte|بلند (صدا)|عالي الصوت
+adj::leise|quiet|silencieux, bas|silenzioso, piano|آرام (صدا)|هادئ (صوت منخفض)
+adj::arm|poor|pauvre|povero|فقیر|فقير
+adj::reich|rich|riche|ricco|ثروتمند|غني
+adj::bekannt|well-known; familiar|connu|noto, conosciuto|معروف، آشنا|معروف
+adj::unbekannt|unknown|inconnu|sconosciuto|ناشناخته|مجهول
+adj::beliebt|popular|apprécié, populaire|amato, popolare|محبوب|محبوب
+adj::fleißig|hard-working|travailleur|diligente|سخت‌کوش|مجتهد
+adj::faul|lazy|paresseux|pigro|تنبل|كسول
+adj::ruhig|calm, quiet|calme|calmo, tranquillo|آرام|هادئ
+adj::nervös|nervous|nerveux|nervoso|عصبی|متوتر
+adj::lustig|funny|drôle|divertente|بامزه|مضحك
+adj::ernst|serious|sérieux|serio|جدی|جاد
+adj::dumm|stupid|bête|stupido|احمق|غبي
+adj::klug|clever|intelligent, sage|intelligente, saggio|باهوش|ذكي
+adj::intelligent|intelligent|intelligent (intellectuel)|intelligente (intellettuale)|هوشمند|ذكي (فكرياً)
+adj::modern|modern|moderne|moderno|مدرن|حديث
+adj::altmodisch|old-fashioned|démodé|antiquato|قدیمی، از مد افتاده|قديم الطراز
+adj::sauber|clean|propre|pulito|تمیز|نظيف
+adj::schmutzig|dirty|sale|sporco|کثیف|متسخ
+adj::trocken|dry|sec|secco|خشک|جاف
+adj::nass|wet|mouillé|bagnato|خیس|مبلل
+adj::hell|bright, light|clair|chiaro|روشن|فاتح، مضيء
+adj::dunkel|dark|sombre|scuro|تاریک|مظلم، داكن
+adj::breit|wide|large|largo|پهن|عريض
+adj::schmal|narrow|étroit|stretto|باریک|ضيق
+adj::eng|tight, cramped|serré, exigu|stretto (angusto)|تنگ|ضيق (مزدحم)
+adj::tief|deep|profond|profondo|عمیق|عميق
+adj::flach|flat, shallow|plat|piatto, basso|صاف، کم‌عمق|مسطح، ضحل
+adj::stark|strong|fort|forte|قوی|قوي
+adj::schwach|weak|faible|debole|ضعیف|ضعيف
+adj::gefährlich|dangerous|dangereux|pericoloso|خطرناک|خطير
+adj::sicher|safe; sure|sûr|sicuro|امن؛ مطمئن|آمن؛ متأكد
+adj::unmöglich|impossible|impossible|impossibile|غیرممکن|مستحيل
+adj::pünktlich|punctual|ponctuel|puntuale|وقت‌شناس|دقيق في المواعيد
+adj::bequem|comfortable|confortable|comodo|راحت|مريح
+adj::anstrengend|exhausting, strenuous|fatigant|faticoso|خسته‌کننده|مرهق
+adj::abhängig|dependent|dépendant|dipendente|وابسته|معتمد على، تابع
+adj::unabhängig|independent|indépendant|indipendente|مستقل|مستقل
+adj::aktiv|active|actif|attivo|فعال|نشيط
+adj::passiv|passive|passif|passivo|منفعل|سلبي
+adj::ähnlich|similar|semblable|simile|مشابه|مشابه
+adj::verschieden|various, different|divers, différent|diverso, vario|گوناگون|مختلف، متنوع
+adj::unterschiedlich|differing, unequal|différent (inégal)|differente|متفاوت|متفاوت
+adj::aufregend|exciting|passionnant|emozionante|هیجان‌انگیز|مثير
+adj::begeistert|enthusiastic|enthousiaste|entusiasta|مشتاق، پرشور|متحمس
+adj::enttäuscht|disappointed|déçu|deluso|ناامید، دلسرد|خائب الأمل
+adj::besonders|special|particulier|speciale|ویژه|خاص
+adj::einfach|simple|simple|semplice|ساده|بسيط
+adj::kompliziert|complicated|compliqué|complicato|پیچیده|معقد
+adj::kostenlos|free (of charge)|gratuit|gratuito|رایگان|مجاني
+adj::umsonst|for free; in vain|gratuitement; en vain|gratis; invano|مجانی؛ بیهوده|مجاناً؛ عبثاً
+adj::kreativ|creative|créatif|creativo|خلاق|مبدع
+adj::kritisch|critical|critique|critico|انتقادی|نقدي، حرج
+adj::ehrlich|honest|honnête|onesto|صادق|صادق
+adj::höflich|polite|poli|cortese|مؤدب|مهذب
+adj::unhöflich|rude, impolite|impoli|scortese|بی‌ادب|غير مهذب
+adj::selbstverständlich|self-evident|évident|ovvio|بدیهی|بديهي
+adj::erfolgreich|successful|réussi|di successo|موفق|ناجح
+adj::erfolglos|unsuccessful|infructueux|senza successo|ناموفق|فاشل
+adj::fest|firm, fixed|ferme, fixe|fisso, saldo|محکم، ثابت|ثابت، صلب
+adj::flexibel|flexible|flexible|flessibile|انعطاف‌پذیر|مرن
+adj::geduldig|patient|patient|paziente|صبور|صبور
+adj::ungeduldig|impatient|impatient|impaziente|بی‌صبر|نافد الصبر
+adj::gerecht|fair, just|juste|giusto|عادل|عادل
+adj::ungerecht|unfair|injuste|ingiusto|ناعادلانه|ظالم، غير عادل
+adj::gespannt|eager to see, curious|impatient de savoir|curioso (in attesa)|کنجکاو، مشتاق منتظر|مترقّب
+adj::gewohnt|used to, usual|habitué, habituel|abituato, abituale|عادت‌کرده، معمول|معتاد
+adj::ungewohnt|unfamiliar|inhabituel|insolito|ناآشنا، غیرعادی|غير مألوف
+adj::neugierig|curious|curieux|curioso|کنجکاو|فضولي
+adj::offen|open|ouvert|aperto|باز|مفتوح
+adj::schüchtern|shy|timide|timido|خجالتی|خجول
+adj::pessimistisch|pessimistic|pessimiste|pessimista|بدبین|متشائم
+adj::optimistisch|optimistic|optimiste|ottimista|خوش‌بین|متفائل
+adj::privat|private|privé|privato|خصوصی|خاص، شخصي
+adj::öffentlich|public|public|pubblico|عمومی|عام، عمومي
+adj::selbstständig|independent, self-employed|autonome|autonomo|مستقل، خوداشتغال|مستقل، يعمل لحسابه
+adj::sinnvoll|sensible, meaningful|sensé, utile|sensato|معقول، هدفمند|معقول، مجدٍ
+adj::sinnlos|pointless|absurde, inutile|insensato|بی‌معنا|عديم الجدوى
+adj::sympathisch|likeable|sympathique|simpatico (di carattere)|دوست‌داشتنی|لطيف، محبوب
+adj::unsympathisch|unpleasant (person)|antipathique|antipatico|ناخوشایند (شخص)|غير محبوب
+adj::verantwortlich|responsible|responsable|responsabile|مسئول|مسؤول
+adj::verrückt|crazy|fou|pazzo|دیوانه|مجنون
+adj::zufrieden|satisfied|satisfait|soddisfatto|راضی|راضٍ
+adj::unzufrieden|dissatisfied|insatisfait|insoddisfatto|ناراضی|غير راضٍ
+adj::zwingend|compulsory, imperative|impératif, obligatoire|imprescindibile|الزامی، ضروری|إلزامي
+adj::abscheulich|abominable|abominable|abominevole|نفرت‌انگیز|بغيض
+adj::ambitioniert|ambitious|ambitieux|ambizioso|جاه‌طلب|طموح
+adj::angeboren|innate|inné|innato|مادرزادی|فطري
+adj::angebracht|appropriate|approprié|opportuno|بجا، مناسب|ملائم
+adj::anspruchsvoll|demanding|exigeant|impegnativo, esigente|پرتوقع، سطح بالا|متطلب
+adj::aufwendig|elaborate, costly (time, effort)|coûteux (en temps, effort)|dispendioso, laborioso|پرزحمت، پرهزینه|مكلف، يتطلب جهداً
+adj::ausgezeichnet|excellent|excellent|eccellente|عالی|ممتاز
+adj::bedeutend|significant, eminent|important, éminent|importante, notevole|مهم، برجسته|هام، بارز
+adj::beachtlich|considerable|considérable|considerevole|قابل‌توجه|ملحوظ
+adj::bedrückt|depressed, downcast|abattu|abbattuto|افسرده، دلگیر|مكتئب
+adj::beiläufig|casual, in passing|en passant, accessoire|casuale, di sfuggita|گذرا|عابر، عَرَضي
+adj::beklemmend|oppressive, unsettling|oppressant|opprimente|خفقان‌آور، نگران‌کننده|خانق، مقلق
+adj::berechtigt|justified|justifié|giustificato|موجه، ذی‌حق|مبرر
+adj::beruhigend|reassuring|rassurant|rassicurante|آرام‌بخش|مطمئن، مهدئ
+adj::bevorzugt|preferred|préféré|preferito|ترجیحی|مفضّل
+adj::bizarr|bizarre|bizarre|bizzarro|عجیب|غريب
+adj::chronisch|chronic|chronique|cronico|مزمن|مزمن
+adj::dringend|urgent|urgent|urgente|فوری|عاجل
+adj::effektiv|effective|efficace (résultat)|efficace|مؤثر|فعّال (مؤثر)
+adj::effizient|efficient|efficient|efficiente|کارآمد|كفء
+adj::eindringlich|insistent, urgent (appeal)|insistant, pressant|insistente, incisivo|مؤکد، تأثیرگذار|مُلحّ
+adj::einfühlsam|empathetic|empathique|empatico|همدل|متعاطف
+adj::entscheidend|decisive|décisif|decisivo|تعیین‌کننده|حاسم
+adj::entsprechend|corresponding|correspondant|corrispondente|متناسب، مربوط|مماثل، مناسب
+adj::erheblich|considerable (in size)|considérable (en taille)|notevole (in misura)|قابل‌ملاحظه (از نظر اندازه)|كبير (من حيث الحجم)
+adj::erschöpfend|exhausting; exhaustive|épuisant; exhaustif|estenuante; esauriente|طاقت‌فرسا؛ جامع|مُنهِك؛ شامل
+adj::exzessiv|excessive|excessif|eccessivo|افراطی|مفرط
+adj::faszinierend|fascinating|fascinant|affascinante|جذاب، شگفت‌انگیز|ساحر، رائع
+adj::fristlos|without notice (dismissal)|sans préavis|senza preavviso|بدون اخطار قبلی|دون إنذار مسبق
+adj::geboten|necessary, advisable|nécessaire, de rigueur|opportuno, doveroso|لازم، بایسته|لازم، واجب
+adj::gediegen|solid, high-quality|soigné, de qualité|solido, di qualità|محکم، باکیفیت|متين، جيد الصنع
+adj::gelassen|calm, composed|serein|sereno, calmo|خونسرد|رابط الجأش
+adj::gelegentlich|occasional|occasionnel|occasionale|گاه‌به‌گاه|عَرَضي، من حين لآخر
+adj::gemeingefährlich|dangerous to the public|dangereux pour la collectivité|socialmente pericoloso|خطرناک برای جامعه|خطر على العامة
+adj::gescheit|smart, sensible|malin, sensé|assennato, sveglio|عاقل، باهوش|نبيه
+adj::gleichgültig|indifferent|indifférent|indifferente|بی‌تفاوت|لامبالٍ
+adj::gründlich|thorough|minutieux|accurato, approfondito|دقیق، کامل|شامل، دقيق
+adj::haftbar|liable|responsable (juridiquement)|responsabile (legalmente)|مسئول (حقوقی)|مسؤول قانونياً
+adj::hervorragend|outstanding|remarquable|eccezionale|برجسته، فوق‌العاده|متميز
+adj::hilfsbereit|helpful|serviable|disponibile, servizievole|آماده کمک|متعاون
+adj::intakt|intact|intact|intatto|سالم، دست‌نخورده|سليم
+adj::konsequent|consistent|conséquent|coerente|پیگیر، منسجم|ثابت، متسق
+adj::kontinuierlich|continuous|continu|continuo|پیوسته|مستمر
+adj::konventionell|conventional|conventionnel|convenzionale|سنتی، متعارف|تقليدي
+adj::lebendig|lively, alive|vivant|vivace, vivo|زنده، سرزنده|حيوي
+adj::massiv|massive|massif|massiccio|عظیم، گسترده|ضخم، هائل
+adj::mühelos|effortless|sans effort|senza sforzo|بی‌زحمت|بلا عناء
+adj::nachhaltig|sustainable; lasting|durable|sostenibile; duraturo|پایدار|مستدام
+adj::naheliegend|obvious|évident (qui s’impose)|evidente, scontato|بدیهی، به ذهن رسیدنی|واضح
+adj::nützlich|useful|utile|utile|مفید|مفيد
+adj::objektiv|objective|objectif|oggettivo|عینی|موضوعي
+adj::subjektiv|subjective|subjectif|soggettivo|ذهنی|ذاتي
+adj::penibel|meticulous|pointilleux|pignolo|وسواسی، دقیق|دقيق جداً
+adj::profitabel|profitable|rentable|redditizio|سودآور|مربح
+adj::qualifiziert|qualified|qualifié|qualificato|واجد شرایط|مؤهَّل
+adj::radikal|radical|radical|radicale|رادیکال|جذري
+adj::relevant|relevant|pertinent|rilevante|مرتبط|ذو صلة
+adj::solide|solid|solide|solido|محکم، باثبات|متين
+adj::spontan|spontaneous|spontané|spontaneo|خودجوش|عفوي
+adj::strikt|strict|strict|rigoroso|سخت‌گیرانه|صارم
+adj::substanziell|substantial|substantiel|sostanziale|اساسی|جوهري
+adj::überflüssig|superfluous|superflu|superfluo|زائد|زائد
+adj::überzeugend|convincing|convaincant|convincente|قانع‌کننده|مقنع
+adj::umfassend|comprehensive|complet, exhaustif|esauriente, ampio|جامع|شامل
+adj::unverzichtbar|indispensable|indispensable|indispensabile|ضروری|لا غنى عنه
+adj::verbindlich|binding|contraignant|vincolante|الزام‌آور|ملزم
+adj::vielseitig|versatile|polyvalent|versatile|همه‌کاره|متعدد المواهب
+adj::vorsätzlich|intentional|intentionnel, prémédité|premeditato|عمدی|متعمَّد
+adj::widersprüchlich|contradictory|contradictoire|contraddittorio|متناقض|متناقض
+adj::zielbewusst|purposeful|déterminé|determinato|هدفمند|هادف، مصمم
+adj::zuverlässig|reliable|fiable|affidabile|قابل‌اعتماد|موثوق
+adj::zweifelhaft|doubtful|douteux|dubbio|مشکوک|مشكوك فيه
+prep::wegen|because of|à cause de|a causa di|به‌دلیلِ|بسبب
+prep::trotz|despite|malgré|nonostante|با وجودِ|رغم
+prep::während|during|pendant|durante|در طولِ|خلال
+prep::statt|instead of|au lieu de|invece di|به‌جای|بدلاً من
+prep::anstatt|instead of (formal)|au lieu de (soutenu)|anziché|به‌جای (رسمی)|عوضاً عن
+prep::innerhalb|inside; within (time)|à l’intérieur de; dans un délai de|all’interno di; entro|داخلِ؛ ظرفِ|داخل؛ في غضون
+prep::außerhalb|outside|en dehors de|al di fuori di|خارج از|خارج
+prep::oberhalb|above|au-dessus de|al di sopra di|بالای|أعلى من
+prep::unterhalb|below|au-dessous de|al di sotto di|پایین‌تر از|أسفل من
+prep::diesseits|on this side of|de ce côté de|al di qua di|این طرفِ|على هذا الجانب من
+prep::jenseits|beyond|au-delà de|al di là di|آن طرفِ|ما وراء
+prep::aufgrund|on the basis of, due to|en raison de|in base a, a causa di|بر اساسِ|بناءً على
+prep::infolge|as a result of|par suite de|in seguito a|در نتیجهٔ|نتيجةً لـ
+prep::angesichts|in view of|compte tenu de|in considerazione di|با توجه به|نظراً لـ
+prep::anlässlich|on the occasion of|à l’occasion de|in occasione di|به مناسبتِ|بمناسبة
+prep::bezüglich|regarding|concernant|riguardo a|دربارهٔ|بخصوص
+prep::hinsichtlich|with regard to|en ce qui concerne|per quanto riguarda|از لحاظِ|فيما يتعلق بـ
+prep::mithilfe|with the help of|à l’aide de|con l’aiuto di|با کمکِ|بمساعدة
+prep::mittels|by means of|au moyen de|mediante|به‌وسیلهٔ|بواسطة
+prep::zugunsten|in favour of|en faveur de|a favore di|به نفعِ|لصالح
+prep::mangels|for lack of|faute de|in mancanza di|به‌علت نبودِ|لعدم وجود
+prep::einschließlich|including|y compris|incluso|شاملِ|بما في ذلك
+prep::ausschließlich|excluding; exclusively|exclusivement|esclusivamente|به‌جز؛ منحصراً|باستثناء؛ حصراً
+prep::zuzüglich|plus (added)|en sus de|più, oltre a|به‌اضافهٔ|مضافاً إليه
+prep::abzüglich|minus (deducted)|déduction faite de|al netto di|منهای|مخصوماً منه
+prep::inmitten|in the midst of|au milieu de|in mezzo a|در میانِ|في وسط
+prep::seitens|on the part of|de la part de|da parte di|از طرفِ|من جانب
+prep::unweit|not far from|non loin de|non lontano da|نزدیکِ|غير بعيد عن
+prep::um ... willen|for the sake of|pour l’amour de|per amore di|به‌خاطرِ|من أجل
+prep::laut|according to|selon|secondo|طبقِ، به گفتهٔ|وفقاً لـ
+prep::dank|thanks to|grâce à|grazie a|به لطفِ|بفضل
+prep::binnen|within (a period)|dans un délai de|entro|ظرفِ (مدت)|في غضون
+prep::entlang|along|le long de|lungo|در امتدادِ|على طول
+prep::entgegen|contrary to; towards|contrairement à; à la rencontre de|contrariamente a; incontro a|برخلافِ؛ به سویِ|خلافاً لـ؛ باتجاه
+prep::gemäß|in accordance with|conformément à|conformemente a|مطابقِ|وفقاً لـ (رسمي)
+prep::zufolge|according to (after the noun)|d’après (après le nom)|secondo (dopo il nome)|به گفتهٔ (بعد از اسم)|حسب (بعد الاسم)
+prep::samt|together with|avec, y compris|insieme a|همراه با|مع، بما فيه
+prep::zuliebe|for the sake of (someone)|pour faire plaisir à|per amore di (qualcuno)|به‌خاطرِ (کسی)|إرضاءً لـ
+prep::per|by, via|par|per, tramite|از طریقِ|عن طريق
+prep::pro|per, for each|par (chaque)|a, per (ciascuno)|برای هر|لكل
+prep::à|at (a price)|à (prix unitaire)|a (prezzo)|به قیمتِ|بسعر
+noun:der:Arbeitgeber|Employer|Employeur|Datore di lavoro|کارفرما|صاحب العمل
+noun:der:Arbeitnehmer|Employee|Salarié|Lavoratore dipendente|کارمند، کارگر|موظَّف، عامل
+noun:der:Arbeitsplatz|Workplace, job|Poste de travail|Posto di lavoro|محل کار|مكان العمل
+noun:der:Arbeitsablauf|Workflow|Déroulement du travail|Flusso di lavoro|روند کار|سير العمل
+noun:der:Auftrag|Order, assignment|Commande, mission|Incarico, ordine|سفارش، مأموریت|طلبية، مهمة
+noun:der:Auftraggeber|Client (who commissions)|Donneur d’ordre|Committente|سفارش‌دهنده|صاحب الطلب
+noun:der:Ansprechpartner|Contact person|Interlocuteur|Referente|فرد رابط|جهة الاتصال
+noun:der:Abteilungsleiter|Head of department|Chef de service|Capo reparto|رئیس بخش|رئيس القسم
+noun:der:Vorgesetzte|Supervisor, boss|Supérieur hiérarchique|Superiore|سرپرست، مافوق|المدير المباشر
+noun:der:Geschäftsführer|Managing director|Directeur général|Amministratore delegato|مدیرعامل|المدير العام
+noun:der:Mitarbeiter|Staff member|Collaborateur, employé|Collaboratore, dipendente|کارمند|موظف
+noun:der:Betrieb|Company, plant|Entreprise, exploitation|Azienda|کارخانه، بنگاه|منشأة
+noun:der:Betriebsrat|Works council|Comité d’entreprise|Consiglio aziendale|شورای کارکنان|مجلس العمال
+noun:der:Kunde|Customer|Client|Cliente|مشتری|زبون، عميل
+noun:der:Lieferant|Supplier|Fournisseur|Fornitore|تأمین‌کننده|مورّد
+noun:der:Dienstleister|Service provider|Prestataire de services|Fornitore di servizi|ارائه‌دهنده خدمات|مقدّم خدمات
+noun:der:Termin|Appointment|Rendez-vous|Appuntamento|وقت ملاقات، نوبت|موعد
+noun:der:Zeitplan|Schedule|Calendrier, planning|Programma, tabella di marcia|برنامه زمانی|جدول زمني
+noun:der:Liefertermin|Delivery date|Date de livraison|Data di consegna|زمان تحویل|موعد التسليم
+noun:der:Feierabend|End of the working day|Fin de journée de travail|Fine della giornata lavorativa|پایان ساعت کاری|نهاية الدوام
+noun:der:Schichtdienst|Shift work|Travail posté|Lavoro a turni|کار شیفتی|العمل بنظام الورديات
+noun:der:Überstundenausgleich|Time off in lieu (for overtime)|Récupération des heures sup.|Recupero degli straordinari|جبران اضافه‌کاری|تعويض الساعات الإضافية
+noun:der:Bewerber|Applicant|Candidat|Candidato|متقاضی|متقدم لوظيفة
+noun:der:Werdegang|Career path|Parcours|Percorso professionale|سابقه و مسیر شغلی|المسار المهني
+noun:der:Berufseinstieg|Career start|Début de carrière|Inizio della carriera|آغاز کار حرفه‌ای|بداية المسيرة المهنية
+noun:der:Aufstieg|Promotion, advancement|Ascension professionnelle|Avanzamento di carriera|پیشرفت شغلی|الترقي الوظيفي
+noun:der:Tarifvertrag|Collective agreement|Convention collective|Contratto collettivo|قرارداد جمعی کار|اتفاقية عمل جماعية
+noun:der:Mindestlohn|Minimum wage|Salaire minimum|Salario minimo|حداقل دستمزد|الحد الأدنى للأجور
+noun:der:Arbeitsschutz|Occupational safety|Sécurité au travail|Sicurezza sul lavoro|ایمنی کار|السلامة المهنية
+noun:der:Datenschutz|Data protection|Protection des données|Protezione dei dati|حفاظت از داده‌ها|حماية البيانات
+noun:der:Kostenvoranschlag|Cost estimate|Devis|Preventivo|برآورد هزینه|عرض أسعار تقديري
+noun:der:Umsatz|Turnover, sales|Chiffre d’affaires|Fatturato|گردش مالی، فروش|حجم المبيعات
+noun:der:Gewinn|Profit|Bénéfice|Utile, guadagno|سود|ربح
+noun:der:Verlust|Loss|Perte|Perdita|زیان|خسارة
+noun:der:Wettbewerb|Competition|Concurrence|Concorrenza|رقابت|منافسة
+noun:der:Konkurrent|Competitor|Concurrent|Concorrente|رقیب|منافس
+noun:der:Standort|Location (of a company)|Site, implantation|Sede|محل استقرار (شرکت)|موقع (الشركة)
+noun:der:Bericht|Report|Rapport|Relazione, rapporto|گزارش|تقرير
+noun:der:Entwurf|Draft|Brouillon, ébauche|Bozza|پیش‌نویس|مسودة
+noun:der:Anhang|Attachment (email)|Pièce jointe|Allegato|پیوست|مرفق
+noun:der:Verteiler|Mailing list|Liste de diffusion|Lista di distribuzione|فهرست گیرندگان|قائمة التوزيع
+noun:der:Beschluss|Resolution (of a meeting)|Décision (d’une assemblée)|Delibera|مصوبه|قرار (اجتماع)
+noun:der:Vorschlag|Suggestion, proposal|Proposition|Proposta|پیشنهاد (ایده)|اقتراح
+noun:der:Kompromiss|Compromise|Compromis|Compromesso|سازش، مصالحه|حل وسط
+noun:der:Einwand|Objection|Objection|Obiezione|اعتراض|اعتراض
+noun:der:Konflikt|Conflict|Conflit|Conflitto|درگیری، تعارض|نزاع
+noun:der:Rückruf|Callback|Rappel (téléphonique)|Richiamata|تماس متقابل|معاودة الاتصال
+noun:der:Rabatt|Discount|Remise|Sconto|تخفیف|خصم
+noun:der:Versand|Shipping, dispatch|Expédition|Spedizione|ارسال|شحن
+noun:der:Lieferschein|Delivery note|Bon de livraison|Bolla di consegna|برگه تحویل|إشعار تسليم
+noun:der:Mangel|Defect; shortage|Défaut; manque|Difetto; carenza|نقص، عیب|عيب؛ نقص
+noun:der:Schaden|Damage|Dommage|Danno|خسارت، آسیب|ضرر
+noun:der:Ablauf|Course of events, procedure|Déroulement, procédure|Svolgimento, procedura|روند، ترتیب انجام کار|مجرى الأحداث، الإجراء
+noun:der:Fortschritt|Progress|Progrès|Progresso|پیشرفت|تقدّم
+noun:der:Erfolg|Success|Succès|Successo|موفقیت|نجاح
+noun:der:Zuständigkeitsbereich|Area of responsibility|Domaine de compétence|Ambito di competenza|حوزه مسئولیت|مجال الاختصاص
+noun:der:Ruhestand|Retirement|Retraite|Pensionamento|بازنشستگی|التقاعد
+noun:der:Minijob|Mini-job (low-income side job)|Mini-job (petit emploi)|Minijob (lavoretto)|مینی‌جاب (کار کم‌درآمد)|وظيفة صغيرة (دخل منخفض)
+noun:der:Praktikant|Intern|Stagiaire|Tirocinante|کارآموز|متدرب
+noun:der:Auszubildende|Apprentice, trainee|Apprenti|Apprendista|کارآموز حرفه‌ای|متدرب مهني
+noun:das:Unternehmen|Company, enterprise (large)|Entreprise (grande)|Impresa (grande)|شرکت (بزرگ)|شركة (كبيرة)
+noun:das:Team|Team|Équipe|Squadra, team|تیم|فريق
+noun:das:Projekt|Project|Projet|Progetto|پروژه|مشروع
+noun:das:Meeting|Meeting (in the office)|Réunion (au bureau)|Riunione (in ufficio)|جلسه (در اداره)|اجتماع (في المكتب)
+noun:das:Protokoll|Minutes, record|Procès-verbal|Verbale|صورت‌جلسه|محضر
+noun:das:Gehaltsgespräch|Salary negotiation|Entretien salarial|Colloquio sullo stipendio|گفتگو دربارهٔ حقوق|نقاش الراتب
+noun:das:Vorstellungsgespräch|Job interview|Entretien d’embauche|Colloquio di lavoro|مصاحبه شغلی|مقابلة عمل
+noun:das:Arbeitszeugnis|Reference (from employer)|Certificat de travail|Referenza lavorativa|گواهی سابقه کار|شهادة خبرة
+noun:das:Zeugnis|Certificate, school report|Certificat, bulletin|Pagella, attestato|گواهی، کارنامه|شهادة
+noun:das:Anschreiben|Cover letter|Lettre de motivation|Lettera di presentazione|نامه همراه|رسالة تعريفية
+noun:das:Praktikum|Internship|Stage|Tirocinio|کارآموزی|تدريب عملي
+noun:das:Bruttogehalt|Gross salary|Salaire brut|Stipendio lordo|حقوق ناخالص|الراتب الإجمالي
+noun:das:Nettogehalt|Net salary|Salaire net|Stipendio netto|حقوق خالص|الراتب الصافي
+noun:das:Budget|Budget|Budget|Budget, bilancio|بودجه|ميزانية
+noun:das:Ziel|Goal|Objectif|Obiettivo|هدف|هدف
+noun:das:Ergebnis|Result|Résultat|Risultato|نتیجه|نتيجة
+noun:das:Problem|Problem|Problème|Problema|مشکل|مشكلة
+noun:das:Missverständnis|Misunderstanding|Malentendu|Malinteso|سوءتفاهم|سوء فهم
+noun:das:Feedback|Feedback|Retour, feedback|Riscontro, feedback|بازخورد|تغذية راجعة
+noun:das:Personal|Staff, personnel|Personnel|Personale|کارکنان|الموظفون
+noun:das:Lager|Warehouse|Entrepôt|Magazzino|انبار|مستودع
+noun:das:Produkt|Product|Produit|Prodotto|محصول|منتج
+noun:das:Muster|Sample; pattern|Échantillon; modèle|Campione; modello|نمونه؛ الگو|عيّنة؛ نمط
+noun:das:Werkzeug|Tool|Outil|Attrezzo, utensile|ابزار|أداة
+noun:das:Fachwissen|Expertise|Connaissances spécialisées|Competenze specialistiche|دانش تخصصی|المعرفة المتخصصة
+noun:das:Know-how|Know-how|Savoir-faire|Know-how|دانش فنی|الخبرة العملية
+noun:das:Homeoffice|Working from home|Télétravail|Lavoro da casa|دورکاری|العمل من المنزل
+noun:das:Arbeitsverhältnis|Employment relationship|Relation de travail|Rapporto di lavoro|رابطه کاری|علاقة العمل
+noun:das:Arbeitsklima|Working atmosphere|Ambiance de travail|Clima di lavoro|جو کاری|أجواء العمل
+noun:das:Betriebsklima|Company climate|Climat dans l’entreprise|Clima aziendale|فضای شرکت|المناخ داخل الشركة
+noun:das:Mitarbeitergespräch|Staff appraisal meeting|Entretien annuel|Colloquio con il dipendente|گفتگو با کارمند|مقابلة تقييم الموظف
+noun:das:Kündigungsschreiben|Letter of resignation/dismissal|Lettre de licenciement/démission|Lettera di licenziamento/dimissioni|نامه فسخ قرارداد|خطاب الاستقالة أو الفصل
+noun:das:Mobbing|Workplace bullying|Harcèlement au travail|Mobbing|آزار در محل کار|التنمر في العمل
+noun:das:Netzwerk|Network (of contacts)|Réseau|Rete (di contatti)|شبکه (ارتباطات)|شبكة علاقات
+noun:das:Anliegen|Request, concern|Requête, préoccupation|Richiesta, questione|درخواست، موضوع|طلب، شأن
+noun:das:Verfahren|Procedure, method|Procédure, méthode|Procedura, metodo|روش، رویه|إجراء، طريقة
+noun:das:Risiko|Risk|Risque|Rischio|خطر، ریسک|مخاطرة
+noun:das:Fazit|Conclusion|Bilan, conclusion|Conclusione, bilancio|نتیجه‌گیری|خلاصة
+noun:die:Firma|Firm|Firme, entreprise|Ditta|شرکت|شركة
+noun:die:Branche|Sector, industry|Secteur|Settore|صنعت، رشته|قطاع
+noun:die:Geschäftsleitung|Management (of a company)|Direction de l’entreprise|Direzione aziendale|مدیریت شرکت|إدارة الشركة
+noun:die:Führungskraft|Manager, executive|Cadre dirigeant|Dirigente|مدیر|قيادي، مدير
+noun:die:Belegschaft|Workforce|Personnel, effectif|Organico|کارکنان شرکت|القوى العاملة
+noun:die:Stellenanzeige|Job advertisement|Offre d’emploi|Annuncio di lavoro|آگهی استخدام|إعلان وظيفة
+noun:die:Stellenausschreibung|Job posting (official)|Appel à candidatures|Bando di concorso|فراخوان استخدام|إعلان مسابقة وظيفية
+noun:die:Qualifikation|Qualification|Qualification|Qualifica|صلاحیت، مدرک|مؤهل
+noun:die:Berufserfahrung|Work experience|Expérience professionnelle|Esperienza lavorativa|سابقه کار|الخبرة المهنية
+noun:die:Fähigkeit|Ability, skill|Capacité|Capacità|توانایی|قدرة، مهارة
+noun:die:Kenntnis|Knowledge|Connaissance|Conoscenza|آگاهی، دانش|معرفة
+noun:die:Weiterbildung|Further training|Formation continue|Formazione continua|آموزش تکمیلی|تعليم مستمر
+noun:die:Fortbildung|Professional development course|Perfectionnement professionnel|Aggiornamento professionale|دوره ضمن خدمت|دورة تطوير مهني
+noun:die:Umschulung|Retraining|Reconversion|Riqualificazione|بازآموزی|إعادة تأهيل مهني
+noun:die:Probezeit|Probation period|Période d’essai|Periodo di prova|دوره آزمایشی|فترة التجربة
+noun:die:Arbeitszeit|Working hours|Temps de travail|Orario di lavoro|ساعات کاری|ساعات العمل
+noun:die:Gleitzeit|Flexitime|Horaires flexibles|Orario flessibile|ساعت کاری شناور|دوام مرن
+noun:die:Teilzeit|Part-time|Temps partiel|Part-time|پاره‌وقت|دوام جزئي
+noun:die:Vollzeit|Full-time|Temps plein|Tempo pieno|تمام‌وقت|دوام كامل
+noun:die:Überstunde|Hour of overtime|Heure supplémentaire|Ora di straordinario|ساعت اضافه‌کاری|ساعة عمل إضافية
+noun:die:Schicht|Shift|Équipe (poste)|Turno|شیفت|وردية
+noun:die:Krankmeldung|Sick note (notification)|Arrêt maladie (déclaration)|Comunicazione di malattia|اعلام بیماری|إبلاغ عن المرض
+noun:die:Arbeitsunfähigkeitsbescheinigung|Doctor’s certificate of incapacity for work|Certificat d’arrêt de travail|Certificato di malattia|گواهی استعلاجی|شهادة عجز عن العمل
+noun:die:Elternzeit|Parental leave|Congé parental|Congedo parentale|مرخصی والدین|إجازة الوالدين
+noun:die:Befristung|Fixed term (of a contract)|Durée déterminée|Durata determinata|محدودیت زمانی (قرارداد)|تحديد المدة (عقد)
+noun:die:Beförderung|Promotion|Promotion|Promozione|ترفیع|ترقية
+noun:die:Gehaltserhöhung|Pay rise|Augmentation de salaire|Aumento di stipendio|افزایش حقوق|زيادة الراتب
+noun:die:Aufgabe|Task|Tâche|Compito|وظیفه، تکلیف|مهمة
+noun:die:Verantwortung|Responsibility|Responsabilité|Responsabilità|مسئولیت|مسؤولية
+noun:die:Zuständigkeit|Competence (who is in charge)|Compétence (attribution)|Competenza (chi è responsabile)|صلاحیت (چه کسی مسئول است)|الاختصاص
+noun:die:Besprechung|Meeting, discussion|Réunion, discussion|Riunione, colloquio|جلسه، گفتگو|اجتماع، مناقشة
+noun:die:Sitzung|Session, sitting|Séance|Seduta|نشست رسمی|جلسة
+noun:die:Tagesordnung|Agenda|Ordre du jour|Ordine del giorno|دستور جلسه|جدول الأعمال
+noun:die:Präsentation|Presentation|Présentation|Presentazione|ارائه|عرض تقديمي
+noun:die:Frist|Deadline, time limit|Délai|Termine, scadenza|مهلت|مهلة
+noun:die:Deadline|Deadline (business)|Date limite|Deadline|ددلاین|الموعد النهائي
+noun:die:Rücksprache|Consultation (with someone)|Concertation|Consultazione|مشورت|تشاور
+noun:die:Absprache|Arrangement, agreement|Accord, arrangement|Accordo (verbale)|توافق|اتفاق
+noun:die:Vereinbarung|Agreement (formal)|Convention|Accordo, convenzione|توافق‌نامه|اتفاقية
+noun:die:Entscheidung|Decision|Décision|Decisione|تصمیم|قرار
+noun:die:Lösung|Solution|Solution|Soluzione|راه‌حل|حل
+noun:die:Herausforderung|Challenge|Défi|Sfida|چالش|تحدٍّ
+noun:die:Beschwerde|Complaint|Plainte|Reclamo|شکایت|شكوى
+noun:die:Reklamation|Complaint (about goods)|Réclamation|Reclamo (merce)|اعتراض به کالا|مطالبة بشأن عيب
+noun:die:Lieferung|Delivery|Livraison|Consegna|تحویل کالا|تسليم، توريد
+noun:die:Bestellung|Order (purchase)|Commande|Ordinazione|سفارش|طلبية
+noun:die:Auftragsbestätigung|Order confirmation|Confirmation de commande|Conferma d’ordine|تأیید سفارش|تأكيد الطلب
+noun:die:Zahlung|Payment|Paiement|Pagamento|پرداخت|دفع
+noun:die:Mahnung|Payment reminder|Rappel de paiement|Sollecito di pagamento|یادآوری پرداخت|إنذار بالدفع
+noun:die:Kundschaft|Clientele|Clientèle|Clientela|مشتریان|الزبائن
+noun:die:Dienstleistung|Service|Service, prestation|Servizio|خدمت|خدمة
+noun:die:Qualität|Quality|Qualité|Qualità|کیفیت|جودة
+noun:die:Leistung|Performance, achievement|Performance, prestation|Prestazione, rendimento|عملکرد، دستاورد|أداء، إنجاز
+noun:die:Arbeitslosigkeit|Unemployment|Chômage|Disoccupazione|بیکاری|بطالة
+noun:die:Gewerkschaft|Trade union|Syndicat|Sindacato|اتحادیه کارگری|نقابة
+noun:die:Sozialversicherung|Social security|Sécurité sociale|Previdenza sociale|تأمین اجتماعی|الضمان الاجتماعي
+noun:die:Rente|Pension|Retraite, pension|Pensione|حقوق بازنشستگی|معاش تقاعدي
+noun:die:Dienstreise|Business trip|Voyage d’affaires|Viaggio di lavoro|سفر کاری|رحلة عمل
+noun:die:Kooperation|Cooperation (between companies)|Coopération|Cooperazione|همکاری (بین شرکت‌ها)|تعاون (بين الشركات)
+noun:die:Zusammenarbeit|Collaboration, teamwork|Collaboration|Collaborazione|همکاری، کار گروهی|عمل مشترك
+noun:die:Kommunikation|Communication|Communication|Comunicazione|ارتباط|تواصل
+noun:die:Teamfähigkeit|Ability to work in a team|Esprit d’équipe|Capacità di lavorare in team|توانایی کار گروهی|القدرة على العمل الجماعي
+noun:die:Belastbarkeit|Resilience under pressure|Résistance au stress|Resistenza allo stress|تحمل فشار کاری|القدرة على تحمل الضغط
+noun:die:Eigeninitiative|Initiative|Esprit d’initiative|Spirito d’iniziativa|ابتکار شخصی|المبادرة الذاتية
+noun:die:Digitalisierung|Digitalisation|Numérisation|Digitalizzazione|دیجیتالی‌شدن|الرقمنة
+noun:die:Arbeitsbelastung|Workload|Charge de travail|Carico di lavoro|حجم کار|عبء العمل
+noun:die:Kritik|Criticism|Critique|Critica|انتقاد|نقد
+noun:die:Rückmeldung|Reply, response|Retour, réponse|Risposta, riscontro|پاسخ|ردّ، إفادة
+noun:die:Kündigungsschutzklage|Unfair dismissal claim|Action en contestation de licenciement|Ricorso contro il licenziamento|دعوی علیه اخراج|دعوى الحماية من الفصل
+verb::leiten|to lead, to head|diriger|dirigere|رهبری کردن|يرأس
+verb::verwalten|to administer, to manage|gérer, administrer|amministrare|اداره کردن (امور)|يدير، يُشرف على
+verb::organisieren|to organise|organiser|organizzare|سازماندهی کردن|ينظّم
+verb::planen|to plan|planifier|pianificare|برنامه‌ریزی کردن|يخطط
+verb::koordinieren|to coordinate|coordonner|coordinare|هماهنگ کردن|ينسّق
+verb::delegieren|to delegate|déléguer|delegare|واگذار کردن|يفوّض
+verb::beauftragen|to commission, to instruct|charger (qn de qch)|incaricare|مأمور کردن|يكلّف بمهمة
+verb::bearbeiten|to process, to handle|traiter|elaborare, sbrigare|رسیدگی کردن، پردازش کردن|يعالج (طلباً)
+verb::abschließen|to complete; to conclude (a contract)|terminer; conclure (un contrat)|concludere; stipulare|به پایان رساندن؛ بستن (قرارداد)|يُنهي؛ يُبرم
+verb::einhalten|to meet (a deadline)|respecter (un délai)|rispettare (una scadenza)|رعایت کردن (مهلت)|يلتزم بـ (موعد)
+verb::verschieben|to postpone|reporter|rinviare|به تعویق انداختن|يؤجّل
+verb::absagen|to cancel|annuler|disdire|لغو کردن|يلغي
+verb::zusagen|to accept (an invitation), to confirm|confirmer sa venue, accepter|confermare, accettare|قبول کردن، تأیید حضور|يؤكد الحضور، يوافق
+verb::einarbeiten|to train (a new employee)|former (un nouveau)|inserire, formare (un nuovo)|آموزش دادن (کارمند جدید)|يدرّب (موظفاً جديداً)
+verb::entlassen|to dismiss|licencier|licenziare|اخراج کردن|يفصل (من العمل)
+verb::befördern|to promote|promouvoir|promuovere|ترفیع دادن|يرقّي
+verb::verhandeln|to negotiate|négocier|negoziare|مذاکره کردن|يتفاوض
+verb::überzeugen|to convince|convaincre|convincere|متقاعد کردن|يُقنع
+verb::zusammenfassen|to summarise|résumer|riassumere|خلاصه کردن|يلخّص
+verb::protokollieren|to take minutes|rédiger le procès-verbal|verbalizzare|صورت‌جلسه نوشتن|يدوّن المحضر
+verb::weiterleiten|to forward|transférer|inoltrare|فوروارد کردن|يعيد توجيه
+verb::zurückrufen|to call back|rappeler|richiamare|دوباره تماس گرفتن|يعاود الاتصال
+verb::nachfragen|to ask again, to follow up|redemander, se renseigner|chiedere di nuovo|دوباره پرسیدن|يستفسر مجدداً
+verb::klären|to clarify|clarifier|chiarire|روشن کردن|يوضّح
+verb::abstimmen|to vote; to coordinate|voter; harmoniser|votare; concordare|رأی دادن؛ هماهنگ کردن|يصوّت؛ ينسّق
+verb::sich abstimmen|to agree among each other|se concerter|accordarsi|با هم هماهنگ شدن|يتشاورون ويتفقون
+verb::beanstanden|to complain about, to object to|contester|contestare|ایراد گرفتن|يعترض على
+verb::reklamieren|to make a complaint (goods)|faire une réclamation|reclamare|شکایت کردن (از کالا)|يقدم مطالبة
+verb::berechnen|to calculate; to charge|calculer; facturer|calcolare; addebitare|محاسبه کردن؛ صورت‌حساب کردن|يحسب؛ يفوتر
+verb::mahnen|to remind (to pay)|relancer (pour un paiement)|sollecitare (un pagamento)|یادآوری کردن (پرداخت)|يطالب بالدفع
+verb::erstatten|to reimburse|rembourser|rimborsare|بازپرداخت کردن|يعوّض، يرد المبلغ
+verb::genehmigen|to approve|approuver|approvare|تصویب کردن، اجازه دادن|يوافق على
+verb::unterstützen|to support|soutenir|sostenere|حمایت کردن|يدعم
+verb::sich durchsetzen|to assert oneself|s’imposer|imporsi|حرف خود را پیش بردن|يفرض رأيه
+verb::kritisieren|to criticise|critiquer|criticare|انتقاد کردن|ينتقد
+verb::loben|to praise|louer, féliciter|lodare|تعریف کردن، ستودن|يمدح
+verb::sich weiterbilden|to do further training|se perfectionner|aggiornarsi|مهارت خود را ارتقا دادن|يطوّر مهاراته
+verb::qualifizieren|to qualify|qualifier|qualificare|واجد شرایط کردن|يؤهّل
+verb::umsetzen|to implement|mettre en œuvre|attuare|اجرا کردن|ينفّذ
+verb::optimieren|to optimise|optimiser|ottimizzare|بهینه کردن|يحسّن
+verb::überwachen|to monitor|surveiller|sorvegliare|نظارت کردن|يراقب
+verb::gewährleisten|to guarantee|garantir|garantire|تضمین کردن|يضمن
+verb::sicherstellen|to ensure|assurer, s’assurer|accertarsi, assicurarsi|اطمینان حاصل کردن|يتأكد من، يكفل
+verb::vermeiden|to avoid|éviter|evitare|اجتناب کردن|يتجنّب
+verb::berücksichtigen|to take into account|tenir compte de|tenere conto di|در نظر گرفتن|يراعي
+verb::priorisieren|to prioritise|prioriser|dare priorità|اولویت‌بندی کردن|يحدد الأولويات
+verb::in Anspruch nehmen|to make use of (a service)|avoir recours à|usufruire di|استفاده کردن (از خدمت)|يستفيد من (خدمة)
+verb::zur Verfügung stellen|to provide, to make available|mettre à disposition|mettere a disposizione|در اختیار گذاشتن|يضع تحت التصرف
+verb::zur Verfügung stehen|to be available|être à disposition|essere a disposizione|در دسترس بودن|يكون متاحاً
+verb::in Frage kommen|to come into question|entrer en ligne de compte|entrare in considerazione|مطرح بودن، مناسب بودن|يكون وارداً
+verb::in Kraft treten|to come into force|entrer en vigueur|entrare in vigore|لازم‌الاجرا شدن|يدخل حيز التنفيذ
+verb::zum Ausdruck bringen|to express|exprimer|esprimere|بیان کردن|يعبّر عن
+verb::eine Entscheidung treffen|to make a decision|prendre une décision|prendere una decisione|تصمیمی اتخاذ کردن|يتخذ قراراً
+verb::Bescheid geben|to let (someone) know, to notify|informer, prévenir|far sapere|خبر دادن|يُعلم
+verb::Bescheid sagen|to tell, to give notice|prévenir (dire)|avvisare|اطلاع دادن|يُخبر
+verb::Rücksicht nehmen|to show consideration|avoir des égards|avere riguardo|ملاحظه کردن|يراعي (الآخرين)
+verb::Stellung nehmen|to state one’s position|prendre position|prendere posizione|موضع گرفتن|يبدي رأيه
+verb::Verantwortung übernehmen|to take responsibility|assumer la responsabilité|assumersi la responsabilità|مسئولیت پذیرفتن|يتحمل المسؤولية
+verb::einen Antrag stellen|to submit an application|déposer une demande|presentare una domanda|درخواست دادن|يقدم طلباً
+verb::eine Frage stellen|to ask a question|poser une question|fare una domanda|سؤال پرسیدن|يطرح سؤالاً
+verb::Kritik üben|to voice criticism|émettre des critiques|muovere critiche|انتقاد مطرح کردن|يوجّه نقداً
+verb::in Verbindung stehen|to be in contact|être en contact|essere in contatto|در ارتباط بودن|يكون على تواصل
+verb::zur Sprache bringen|to bring up (a topic)|aborder (un sujet)|sollevare (un tema)|مطرح کردن (موضوع)|يطرح (موضوعاً)
+verb::in Rente gehen|to retire|partir à la retraite|andare in pensione|بازنشسته شدن|يتقاعد
+verb::Einfluss nehmen|to exert influence|exercer une influence|esercitare un’influenza|تأثیر گذاشتن|يؤثر
+verb::einen Termin vereinbaren|to arrange an appointment|prendre rendez-vous|fissare un appuntamento|وقت گرفتن|يحدد موعداً
+verb::Überstunden machen|to work overtime|faire des heures sup.|fare gli straordinari|اضافه‌کاری کردن|يعمل ساعات إضافية
+verb::krankgeschrieben sein|to be on sick leave|être en arrêt maladie|essere in malattia|در مرخصی استعلاجی بودن|يكون في إجازة مرضية
+adj::befristet|fixed-term|à durée déterminée|a tempo determinato|موقت (قرارداد)|محدد المدة
+adj::unbefristet|permanent|à durée indéterminée|a tempo indeterminato|دائمی (قرارداد)|غير محدد المدة
+adj::berufstätig|employed, working|actif (qui travaille)|occupato, lavoratore|شاغل|عامل، موظَّف
+adj::arbeitslos|unemployed|au chômage|disoccupato|بیکار|عاطل عن العمل
+adj::zuständig|responsible, in charge|compétent (responsable)|competente (responsabile)|مسئول، ذی‌صلاح|مختص، مسؤول
+adj::belastbar|resilient (under pressure)|résistant au stress|resistente allo stress|مقاوم در برابر فشار|قادر على تحمل الضغط
+adj::teamfähig|good at teamwork|ayant l’esprit d’équipe|capace di lavorare in team|اهل کار گروهی|قادر على العمل الجماعي
+adj::kompetent|competent|compétent|competente|شایسته|مقتدر
+adj::engagiert|committed|engagé|impegnato|متعهد، فعال|ملتزم، نشيط
+adj::motiviert|motivated|motivé|motivato|باانگیزه|متحمس، لديه دافع
+adj::lösungsorientiert|solution-oriented|orienté solutions|orientato alle soluzioni|راه‌حل‌محور|موجه نحو الحلول
+adj::kundenorientiert|customer-oriented|orienté client|orientato al cliente|مشتری‌مدار|موجه نحو العملاء
+adj::sorgfältig|careful, meticulous|soigneux|accurato, diligente|دقیق، باحوصله|دقيق، متأنٍّ
+adj::gewissenhaft|conscientious|consciencieux|coscienzioso|وظیفه‌شناس|ضميري، حريص
+adj::termingerecht|on schedule|dans les délais (prévus)|puntuale (nei tempi)|سر وقت|في الموعد
+adj::fristgerecht|within the deadline|dans le délai imparti|entro il termine|در مهلت مقرر|ضمن المهلة المحددة
+adj::vertraulich|confidential|confidentiel|riservato|محرمانه|سري
+adj::dienstlich|official, business-related|professionnel (de service)|di servizio|اداری، کاری|رسمي، متعلق بالعمل
+adj::beruflich|professional, occupational|professionnel|professionale|شغلی، حرفه‌ای|مهني
+adj::kaufmännisch|commercial|commercial|commerciale|بازرگانی|تجاري
+adj::fachlich|technical, specialist|technique, spécialisé|tecnico, specialistico|تخصصی|تخصصي
+adj::tariflich|collectively agreed|conventionnel (tarif)|contrattuale (collettivo)|طبق قرارداد جمعی|وفق الاتفاقية الجماعية
+adj::brutto|gross|brut|lordo|ناخالص|إجمالي
+adj::netto|net|net|netto|خالص|صافٍ
+adj::wirtschaftlich|economic; economical|économique|economico (redditizio)|اقتصادی|اقتصادي
+adj::überfordert|overwhelmed, overloaded|débordé|sovraccarico|تحت فشار، بیش از توان|مُثقَل
+adj::unterfordert|underchallenged|sous-employé|sottoutilizzato|کم‌کار، بدون چالش|غير مستغَل
+adj::ausgebucht|fully booked|complet|tutto esaurito|پر، رزروشده|محجوز بالكامل
+adj::vorläufig|provisional|provisoire|provvisorio|موقت|مؤقت
+adj::ausführlich|detailed|détaillé|dettagliato|مفصل|مفصّل
+adj::schriftlich|written|écrit|scritto|کتبی|كتابي
+adj::mündlich|oral|oral|orale|شفاهی|شفهي
+adj::zeitnah|prompt, timely|rapide, dans les meilleurs délais|tempestivo|به‌موقع، به‌زودی|في أقرب وقت
+adj::reibungslos|smooth|sans accroc|senza intoppi|بی‌دردسر|سلس
+adj::zielorientiert|goal-oriented|axé sur les objectifs|orientato agli obiettivi|هدف‌گرا|موجه نحو الأهداف
+adj::international|international|international|internazionale|بین‌المللی|دولي
+adj::mehrsprachig|multilingual|multilingue|multilingue|چندزبانه|متعدد اللغات
+other::allerdings|however, though|toutefois|tuttavia, però|البته، با این حال|على أن
+other::dennoch|nevertheless|néanmoins|ciononostante|با وجود این|ومع ذلك
+other::trotzdem|anyway, despite this|quand même|comunque|با این همه|رغم ذلك
+other::außerdem|besides, moreover|en outre|inoltre|علاوه بر این|بالإضافة إلى ذلك
+other::darüber hinaus|furthermore, beyond that|par ailleurs|oltre a ciò|افزون بر این|علاوة على ذلك
+other::zudem|in addition|de plus|per di più|به‌علاوه|فضلاً عن ذلك
+other::folglich|consequently|par conséquent|di conseguenza|در نتیجه|بالتالي
+other::somit|thus|ainsi|pertanto|بدین ترتیب|وهكذا
+other::deshalb|therefore|c’est pourquoi|perciò|بنابراین|لذلك
+other::deswegen|for that reason|pour cette raison|per questo motivo|به این دلیل|لهذا السبب
+other::daher|hence|donc, de là|quindi, da ciò|از این رو|من ثَمّ
+other::nämlich|namely; you see|à savoir; en effet|cioè; infatti|یعنی؛ آخر|أي؛ إذ
+other::sowohl ... als auch|both ... and|aussi bien ... que|sia ... sia|هم ... و هم|كلٌّ من ... و
+other::weder ... noch|neither ... nor|ni ... ni|né ... né|نه ... و نه|لا ... ولا
+other::entweder ... oder|either ... or|soit ... soit|o ... o|یا ... یا|إما ... أو
+other::zwar ... aber|admittedly ... but|certes ... mais|è vero che ... ma|درست است که ... اما|صحيح أن ... لكن
+other::je ... desto|the more ... the more|plus ... plus|più ... più|هر چه ... بیشتر|كلما ... كلما
+other::nicht nur ... sondern auch|not only ... but also|non seulement ... mais aussi|non solo ... ma anche|نه تنها ... بلکه|ليس فقط ... بل أيضاً
+other::obwohl|although|bien que|sebbene|اگرچه|مع أنّ
+other::falls|in case, if|au cas où|nel caso in cui|در صورتی که|في حال
+other::sofern|provided that|pour autant que|purché|به شرطی که|شريطة أن
+other::indem|by (doing)|en (faisant)|facendo (mediante)|با (انجام دادن)|عن طريق
+other::sodass|so that (result)|si bien que|cosicché|طوری که|بحيث
+other::anstatt dass|instead of (doing)|au lieu que|invece di (fare)|به جای اینکه|بدلاً من أن
+other::ohne dass|without (it happening)|sans que|senza che|بدون اینکه|دون أن
+other::nachdem|after (conjunction)|après que|dopo che|پس از آنکه|بعد أن
+other::sobald|as soon as|dès que|non appena|به محض اینکه|بمجرد أن
+other::solange|as long as|tant que|finché|تا زمانی که|طالما
+other::seitdem|since (then)|depuis que|da quando|از وقتی که|منذ أن
+other::inzwischen|meanwhile; by now|entre-temps|nel frattempo|در این میان|في هذه الأثناء
+other::mittlerweile|by now, in the meantime|désormais, entre-temps|ormai|تا حالا، اکنون دیگر|حتى الآن، بات
+other::bisher|so far, until now|jusqu’à présent|finora|تاکنون|حتى الآن
+other::demnächst|shortly, soon|prochainement|prossimamente|به‌زودی (در آینده نزدیک)|قريباً (في المستقبل القريب)
+other::umgehend|immediately (formal)|sans délai|immediatamente (formale)|بی‌درنگ|على الفور
+other::voraussichtlich|probably, expected|probablement, prévu|presumibilmente|احتمالاً|من المتوقع
+other::gegebenenfalls (ggf.)|if necessary|le cas échéant|eventualmente|در صورت لزوم|عند الاقتضاء
+other::beziehungsweise (bzw.)|or; respectively|ou; respectivement|ovvero; rispettivamente|یا؛ به ترتیب|أو؛ على التوالي
+other::im Voraus|in advance|à l’avance|in anticipo|از قبل|مسبقاً
+other::im Anhang|attached (in the email)|en pièce jointe|in allegato|در پیوست|في المرفق
+other::in Bezug auf|with regard to|en ce qui concerne|in riferimento a|در رابطه با|بالنسبة إلى
+other::im Hinblick auf|in view of, with a view to|en vue de|in vista di|با در نظر گرفتنِ|بالنظر إلى
+other::im Auftrag (i. A.)|on behalf of|par ordre de|per incarico di|از طرفِ|بالنيابة عن
+other::Mit freundlichen Grüßen|Kind regards|Cordialement|Cordiali saluti|با احترام|مع أطيب التحيات
+other::Sehr geehrte Damen und Herren|Dear Sir or Madam|Madame, Monsieur|Gentili signore e signori|خانم‌ها و آقایان محترم|السيدات والسادة المحترمون
+other::Vielen Dank im Voraus|Many thanks in advance|Merci d’avance|Grazie in anticipo|پیشاپیش سپاسگزارم|شكراً مقدماً
+other::Ich beziehe mich auf|I am referring to|Je me réfère à|Mi riferisco a|اشاره می‌کنم به|أشير إلى
+other::Ich würde vorschlagen, dass|I would suggest that|Je proposerais que|Proporrei che|پیشنهاد می‌کنم که|أقترح أن
+other::Meiner Meinung nach|In my opinion|À mon avis|Secondo me|به نظر من|في رأيي
+other::Ich bin der Ansicht, dass|I am of the opinion that|Je suis d’avis que|Sono dell’opinione che|بر این عقیده‌ام که|أرى أنّ
+other::Da stimme ich Ihnen zu|I agree with you there|Là, je suis d’accord avec vous|Qui sono d’accordo con Lei|در این مورد با شما موافقم|أوافقك في هذا
+other::Da bin ich anderer Meinung|I see it differently|Là, je ne suis pas d’accord|Qui la penso diversamente|در این مورد نظر دیگری دارم|لي رأي آخر في هذا
+other::Könnten Sie mir bitte mitteilen|Could you please tell me|Pourriez-vous me communiquer|Potrebbe comunicarmi|ممکن است لطفاً به من اطلاع دهید|هل يمكنك إبلاغي
+other::Ich möchte mich beschweren über|I would like to complain about|Je voudrais me plaindre de|Vorrei lamentarmi di|می‌خواهم شکایت کنم از|أود أن أشتكي من
+phrase::einen Termin vereinbaren|to make an appointment|prendre rendez-vous (chez qn)|prendere un appuntamento|وقت ملاقات گرفتن|يأخذ موعداً
+phrase::einen Termin absagen|to cancel an appointment|annuler un rendez-vous|disdire un appuntamento|لغو کردن قرار ملاقات|يلغي موعداً
+phrase::einen Termin verschieben|to postpone an appointment|reporter un rendez-vous|rinviare un appuntamento|عقب انداختن قرار ملاقات|يؤجل موعداً
+phrase::einen Antrag stellen|to submit an application (form)|faire une demande|presentare domanda|درخواست ثبت کردن|يقدّم طلباً (رسمياً)
+phrase::ein Formular ausfüllen|to fill in a form|remplir un formulaire|compilare un modulo|فرم پر کردن|يملأ استمارة
+phrase::eine Frage stellen|to ask a question (phrase)|poser une question (expression)|porre una domanda|سؤالی مطرح کردن|يسأل سؤالاً
+phrase::eine Entscheidung treffen|to take a decision|trancher, prendre une décision|prendere una decisione (frase)|تصمیمی گرفتن|يتخذ قراراً (عبارة)
+phrase::Bescheid wissen|to be informed, to know about it|être au courant|essere al corrente|در جریان بودن|يكون على علم
+phrase::eine Rolle spielen|to play a role|jouer un rôle|avere un ruolo|نقش داشتن|يلعب دوراً
+phrase::Platz nehmen|to take a seat|prendre place|accomodarsi|نشستن، بفرمایید بنشینید|يجلس، تفضل بالجلوس
+phrase::Spaß machen|to be fun|être amusant|divertire|لذت‌بخش بودن|يكون ممتعاً
+phrase::Sport treiben|to do sport|faire du sport|fare sport|ورزش کردن|يمارس الرياضة
+phrase::Hausaufgaben machen|to do homework|faire ses devoirs|fare i compiti|تکلیف انجام دادن|يحل الواجب المنزلي
+phrase::eine Prüfung ablegen|to take an exam|passer un examen|sostenere un esame|امتحان دادن|يؤدي امتحاناً
+phrase::eine Prüfung bestehen|to pass an exam|réussir un examen|superare un esame|در امتحان قبول شدن|ينجح في الامتحان
+phrase::durch die Prüfung fallen|to fail an exam|échouer à un examen|essere bocciato all’esame|در امتحان رد شدن|يرسب في الامتحان
+phrase::den Bus verpassen|to miss the bus|rater le bus|perdere l’autobus|از اتوبوس جا ماندن|تفوته الحافلة
+phrase::eine Fahrkarte lösen|to buy a ticket (from a machine)|acheter un billet (au distributeur)|fare il biglietto (al distributore)|بلیت خریدن (از دستگاه)|يشتري تذكرة (من الآلة)
+phrase::Geld abheben|to withdraw money|retirer de l’argent|prelevare soldi|پول برداشتن|يسحب نقوداً
+phrase::Geld überweisen|to transfer money|virer de l’argent|fare un bonifico|پول انتقال دادن|يحوّل نقوداً
+phrase::ein Konto eröffnen|to open an account|ouvrir un compte|aprire un conto|حساب باز کردن|يفتح حساباً
+phrase::ein Konto kündigen|to close an account|clôturer un compte|chiudere un conto|حساب بستن|يغلق حساباً
+phrase::die Miete zahlen|to pay the rent|payer le loyer|pagare l’affitto|اجاره پرداختن|يدفع الإيجار
+phrase::eine Wohnung besichtigen|to view a flat|visiter un appartement|visitare un appartamento|آپارتمان دیدن|يعاين شقة
+phrase::einen Vertrag unterschreiben|to sign a contract|signer un contrat|firmare un contratto|قرارداد امضا کردن|يوقّع عقداً
+phrase::einen Vertrag kündigen|to terminate a contract|résilier un contrat|disdire un contratto|قرارداد را فسخ کردن|يفسخ عقداً
+phrase::den Müll trennen|to separate the rubbish|trier les déchets|fare la raccolta differenziata|زباله تفکیک کردن|يفرز القمامة
+phrase::den Müll rausbringen|to take out the rubbish|sortir les poubelles|portare fuori la spazzatura|زباله بیرون بردن|يُخرج القمامة
+phrase::sich krankmelden|to call in sick|se déclarer malade|darsi malato|اعلام بیماری کردن|يبلغ عن مرضه
+phrase::zum Arzt gehen|to go to the doctor|aller chez le médecin|andare dal medico|پیش دکتر رفتن|يذهب إلى الطبيب
+phrase::ein Rezept bekommen|to get a prescription|obtenir une ordonnance|ricevere una ricetta|نسخه گرفتن|يحصل على وصفة طبية
+phrase::Medikamente einnehmen|to take medication|prendre des médicaments|prendere farmaci|دارو مصرف کردن|يتناول الأدوية
+phrase::eine Überweisung zum Facharzt|a referral to a specialist|une lettre d’orientation vers un spécialiste|un’impegnativa per lo specialista|ارجاع به پزشک متخصص|إحالة إلى طبيب مختص
+phrase::im Wartezimmer warten|to wait in the waiting room|attendre dans la salle d’attente|aspettare in sala d’attesa|در اتاق انتظار منتظر ماندن|ينتظر في غرفة الانتظار
+phrase::gute Besserung|get well soon|bon rétablissement|guarisci presto|بهبودی سریع آرزو می‌کنم|شفاك الله
+phrase::in Ordnung|all right, OK|d’accord, en ordre|va bene, a posto|باشه، مرتب|حسناً، على ما يرام
+phrase::auf jeden Fall|in any case, definitely|en tout cas|in ogni caso|در هر صورت|على أي حال
+phrase::auf keinen Fall|under no circumstances|en aucun cas|in nessun caso|به هیچ وجه|بأي حال من الأحوال لا
+phrase::zum Beispiel (z. B.)|for example|par exemple|per esempio|مثلاً|على سبيل المثال
+phrase::das heißt (d. h.)|that is (i.e.)|c’est-à-dire|cioè|یعنی|أي
+phrase::nach Hause|(going) home|à la maison (direction)|a casa (moto)|به خانه|إلى البيت
+phrase::zu Hause|at home|à la maison|a casa (stato)|در خانه|في البيت
+phrase::ab und zu|now and then|de temps en temps|ogni tanto|گاه‌گاهی|بين حين وآخر
+phrase::vor Kurzem|recently|récemment|di recente|اخیراً|مؤخراً
+phrase::in letzter Zeit|lately|ces derniers temps|ultimamente|در این اواخر|في الآونة الأخيرة
+phrase::so schnell wie möglich|as fast as possible|le plus vite possible|il più presto possibile|هر چه سریع‌تر|بأسرع ما يمكن
+phrase::im Moment|at the moment|en ce moment|al momento|در حال حاضر|في الوقت الحالي
+phrase::in der Regel|as a rule|en règle générale|di regola|معمولاً|عادةً
+phrase::von Zeit zu Zeit|from time to time|de temps à autre|di tanto in tanto|هر از گاهی|من وقت لآخر
+phrase::Es kommt darauf an.|It depends.|Ça dépend.|Dipende.|بستگی دارد.|هذا يعتمد.
+phrase::Das macht nichts.|Never mind.|Ce n’est pas grave.|Non fa niente.|اشکالی ندارد.|لا بأس.
+phrase::Es tut mir leid.|I’m sorry.|Je suis désolé(e).|Mi dispiace.|متأسفم.|أنا آسف.
+phrase::Keine Ahnung.|No idea.|Aucune idée.|Non ne ho idea.|هیچ نظری ندارم.|لا أدري.
+phrase::Wie bitte?|Pardon? (asking again)|Pardon ? (faire répéter)|Come, scusi?|ببخشید؟ (دوباره بگویید)|عفواً؟ (طلب الإعادة)
+phrase::Könnten Sie das bitte wiederholen?|Could you repeat that, please?|Pourriez-vous répéter, s’il vous plaît ?|Potrebbe ripetere, per favore?|ممکن است لطفاً تکرار کنید؟|هل يمكنك أن تكرر ذلك من فضلك؟
+phrase::Ich hätte gern …|I’d like …|J’aimerais …|Vorrei …|من … می‌خواهم|أودّ …
+phrase::Was kostet das?|How much is it?|Combien ça coûte ?|Quanto costa?|قیمتش چند است؟|كم ثمنه؟
+phrase::Darf ich Sie etwas fragen?|May I ask you something?|Puis-je vous demander quelque chose ?|Posso chiederLe una cosa?|می‌توانم چیزی از شما بپرسم؟|هل لي أن أسألك شيئاً؟
+phrase::Ich bin damit einverstanden.|I agree with that.|Je suis d’accord avec ça.|Sono d’accordo.|با این موافقم.|أنا موافق على ذلك.
+phrase::Das finde ich gut.|I think that’s good.|Je trouve ça bien.|Lo trovo buono.|به نظرم خوب است.|أجد ذلك جيداً.
+phrase::Ich bin dagegen.|I’m against it.|Je suis contre.|Sono contrario.|من مخالفم.|أنا ضد ذلك.
+phrase::Was halten Sie davon?|What do you think of it?|Qu’en pensez-vous ?|Che ne pensa?|نظرتان دربارهٔ آن چیست؟|ما رأيك في ذلك؟
+phrase::Ich schlage vor, dass …|I suggest that …|Je propose que …|Propongo che …|پیشنهاد می‌کنم که …|أقترح أن …
+phrase::Wie wäre es mit …?|How about …?|Que diriez-vous de … ?|Che ne dice di …?|نظرتان دربارهٔ … چیست؟|ما رأيك بـ …؟
+phrase::Hätten Sie Zeit am Montag?|Would you have time on Monday?|Auriez-vous le temps lundi ?|Avrebbe tempo lunedì?|دوشنبه وقت دارید؟|هل لديك وقت يوم الاثنين؟
+phrase::Leider kann ich nicht.|Unfortunately I can’t.|Malheureusement, je ne peux pas.|Purtroppo non posso.|متأسفانه نمی‌توانم.|للأسف لا أستطيع.
+phrase::Ich melde mich später.|I’ll get back to you later.|Je vous recontacte plus tard.|Mi faccio sentire più tardi.|بعداً تماس می‌گیرم.|سأتواصل لاحقاً.
+phrase::Vielen Dank für Ihre Hilfe.|Thank you very much for your help.|Merci beaucoup pour votre aide.|Grazie mille per il Suo aiuto.|از کمکتان بسیار سپاسگزارم.|شكراً جزيلاً على مساعدتك.
+phrase::Ich freue mich auf Ihre Antwort.|I look forward to your reply.|Dans l’attente de votre réponse.|Attendo con piacere la Sua risposta.|منتظر پاسخ شما هستم.|أتطلع إلى ردك.
+phrase::Mit freundlichen Grüßen|Yours sincerely (in a letter)|Veuillez agréer mes salutations (lettre)|Distinti saluti (lettera)|با احترام (در نامه)|مع خالص التحيات (في رسالة)
+phrase::Liebe Grüße|Best wishes (informal)|Bises, amitiés (informel)|Un caro saluto (informale)|با بهترین آرزوها (غیررسمی)|مع أطيب التمنيات (غير رسمي)
+phrase::im Anhang finden Sie|please find attached|vous trouverez ci-joint|in allegato trova|در پیوست می‌یابید|ستجد في المرفق
+phrase::in Vollzeit arbeiten|to work full-time|travailler à temps plein|lavorare a tempo pieno|تمام‌وقت کار کردن|يعمل بدوام كامل
+phrase::in Teilzeit arbeiten|to work part-time|travailler à temps partiel|lavorare part-time|پاره‌وقت کار کردن|يعمل بدوام جزئي
+phrase::Überstunden machen|to do overtime|faire des heures supplémentaires|fare straordinari|اضافه‌کار ماندن|يعمل وقتاً إضافياً
+phrase::Urlaub nehmen|to take holiday|prendre des congés|prendere ferie|مرخصی گرفتن|يأخذ إجازة
+phrase::eine Stelle suchen|to look for a job|chercher un emploi|cercare lavoro|دنبال کار گشتن|يبحث عن عمل
+phrase::sich um eine Stelle bewerben|to apply for a job|postuler à un poste|candidarsi per un posto|برای یک شغل درخواست دادن|يتقدم لوظيفة
+phrase::ein Vorstellungsgespräch haben|to have a job interview|passer un entretien d’embauche|fare un colloquio di lavoro|مصاحبه کاری داشتن|يجري مقابلة عمل
+phrase::eine Gehaltserhöhung bekommen|to get a pay rise|obtenir une augmentation|ottenere un aumento|افزایش حقوق گرفتن|يحصل على زيادة في الراتب
+phrase::Erfahrung sammeln|to gain experience|acquérir de l’expérience|fare esperienza|تجربه کسب کردن|يكتسب خبرة
+phrase::Kontakt aufnehmen|to get in touch|prendre contact|mettersi in contatto|تماس برقرار کردن|يتواصل
+phrase::eine Lösung finden|to find a solution|trouver une solution|trovare una soluzione|راه‌حل پیدا کردن|يجد حلاً
+phrase::ein Problem lösen|to solve a problem|résoudre un problème|risolvere un problema|مشکلی را حل کردن|يحل مشكلة
+phrase::Verantwortung tragen|to bear responsibility|porter la responsabilité|avere la responsabilità|مسئولیت به عهده داشتن|يتحمل المسؤولية (عبارة)
+phrase::die Frist einhalten|to meet the deadline|respecter le délai|rispettare la scadenza|مهلت را رعایت کردن|يلتزم بالمهلة
+phrase::eine Beschwerde einreichen|to file a complaint|déposer une plainte|presentare un reclamo|شکایت ثبت کردن|يقدم شكوى
+phrase::das Geld zurückbekommen|to get the money back|récupérer l’argent|riavere i soldi|پول را پس گرفتن|يسترد المال
+phrase::den Kundenservice anrufen|to call customer service|appeler le service client|chiamare il servizio clienti|با خدمات مشتریان تماس گرفتن|يتصل بخدمة العملاء
+noun:der:See|Lake|Lac|Lago|دریاچه|بحيرة
+noun:der:Leiter|Head, manager|Directeur, responsable|Direttore, responsabile|سرپرست، مدیر|رئيس، مدير
+noun:der:Teil|Part (of a whole)|Partie (d’un tout)|Parte (di un tutto)|بخش (از کل)|جزء (من الكل)
+noun:der:Band|Volume (of a book)|Tome, volume|Volume, tomo|جلد (کتاب)|مجلّد
+noun:der:Schild|Shield|Bouclier|Scudo|سپر|درع
+noun:der:Gehalt|Content (proportion of a substance)|Teneur|Contenuto (percentuale)|میزان (مقدار ماده)|نسبة (محتوى مادة)
+noun:der:Kiefer|Jaw|Mâchoire|Mascella|فک|فكّ
+noun:der:Tor|Fool (literary)|Fou, sot (litt.)|Stolto (lett.)|نادان (ادبی)|أحمق (أدبي)
+noun:der:Erbe|Heir|Héritier|Erede|وارث|وريث
+noun:der:Moment|Moment, instant|Moment, instant|Momento, attimo|لحظه، آن|لحظة
+noun:der:Verdienst|Earnings|Gain, revenu|Guadagno|درآمد|كسب، دخل
+noun:der:Junge|Boy|Garçon|Ragazzo|پسر|صبي
+noun:der:Pony|Fringe (of hair)|Frange|Frangia|چتری (مو)|غُرّة
+noun:der:Flur|Corridor, hallway|Couloir, entrée|Corridoio, ingresso|راهرو|ممر، رواق
+noun:das:Steuer|Steering wheel|Volant|Volante|فرمان (خودرو)|مقود
+noun:das:Teil|Part, component|Pièce (détachée)|Pezzo, componente|قطعه|قطعة غيار
+noun:das:Band|Ribbon, tape|Ruban|Nastro|نوار، روبان|شريط
+noun:das:Schild|Sign, plate|Panneau, plaque|Cartello, targa|تابلو|لافتة
+noun:das:Tor|Gate|Portail|Portone|دروازه|بوابة
+noun:das:Erbe|Inheritance|Héritage|Eredità|ارث|إرث
+noun:das:Moment|Factor (literary)|Facteur (soutenu)|Fattore (lett.)|عامل (ادبی)|عامل (أدبي)
+noun:das:Verdienst|Merit|Mérite|Merito|شایستگی، خدمت|فضل، استحقاق
+noun:das:Junge|Young (of an animal)|Petit (d’un animal)|Cucciolo|بچهٔ حیوان|صغير الحيوان
+noun:das:Pony|Pony|Poney|Pony|اسب کوچک، پونی|مهر صغير
+noun:das:Mark|Bone marrow|Moelle|Midollo|مغز استخوان|نخاع العظم
+noun:die:See|Sea (by the coast, literary)|Mer (littoral, litt.)|Mare (costa, lett.)|دریا (ساحل، ادبی)|بحر (الساحل، أدبي)
+noun:die:Leiter|Ladder|Échelle|Scala (a pioli)|نردبان|سلّم
+noun:die:Band|Band (music)|Groupe (de musique)|Band, gruppo musicale|گروه موسیقی|فرقة موسيقية
+noun:die:Kiefer|Pine (tree)|Pin|Pino|درخت کاج|صنوبر
+noun:die:Mark|Mark (former currency)|Mark (ancienne monnaie)|Marco (vecchia valuta)|مارک (واحد پول سابق)|مارك (عملة سابقة)
+noun:die:Flur|Field (literary)|Champ (litt.)|Campo (lett.)|کشتزار (ادبی)|حقل (أدبي)
+noun:der:Mann|Man; husband|Homme; mari|Uomo; marito|مرد؛ شوهر|رجل؛ زوج
+noun:der:Kaffee|Coffee|Café|Caffè|قهوه|قهوة
+noun:der:Tee|Tea|Thé|Tè|چای|شاي
+noun:der:Apfel|Apple|Pomme|Mela|سیب|تفاحة
+noun:der:Beruf|Profession|Profession, métier|Professione|حرفه|مهنة
+noun:der:Wald|Forest|Forêt|Bosco|جنگل|غابة
+noun:der:Fluss|River|Fleuve, rivière|Fiume|رودخانه|نهر
+noun:der:Berg|Mountain|Montagne|Montagna|کوه|جبل
+noun:der:Schuh|Shoe|Chaussure|Scarpa|کفش|حذاء
+noun:der:Einfluss|Influence|Influence|Influenza|نفوذ، تأثیر|تأثير
+noun:der:Vorteil|Advantage|Avantage|Vantaggio|مزیت|ميزة
+noun:der:Nachteil|Disadvantage|Inconvénient|Svantaggio|عیب، نقطه ضعف|عيب، سلبية
+noun:der:Klimawandel|Climate change|Changement climatique|Cambiamento climatico|تغییرات اقلیمی|تغير المناخ
+noun:der:Verbrauch|Consumption|Consommation|Consumo|مصرف|استهلاك
+noun:der:Misserfolg|Failure|Échec|Insuccesso|ناکامی|إخفاق
+noun:der:Verbraucher|Consumer|Consommateur|Consumatore|مصرف‌کننده|مستهلك
+noun:der:Zusammenhang|Connection, context|Rapport, contexte|Nesso, contesto|ارتباط، زمینه|سياق، ارتباط
+noun:der:Ressourcenverbrauch|Resource consumption|Consommation de ressources|Consumo di risorse|مصرف منابع|استهلاك الموارد
+noun:der:Fachkräftemangel|Shortage of skilled workers|Pénurie de main-d’œuvre qualifiée|Carenza di personale qualificato|کمبود نیروی متخصص|نقص العمالة الماهرة
+noun:der:Alltag|Everyday life|Quotidien|Vita quotidiana|زندگی روزمره|الحياة اليومية
+noun:der:Angestellte|Employee (salaried)|Employé|Impiegato|کارمند (حقوق‌بگیر)|موظف (بأجر)
+noun:der:Anreiz|Incentive|Incitation|Incentivo|انگیزه، مشوق|حافز
+noun:der:Anspruch|Claim, entitlement|Droit, prétention|Diritto, pretesa|حق، ادعا|حق، مطالبة
+noun:der:Anstieg|Rise, increase|Hausse, augmentation|Aumento, crescita|افزایش|ارتفاع، زيادة
+noun:der:Anteil|Share, proportion|Part|Quota|سهم|حصة
+noun:der:Arbeitsmarkt|Labour market|Marché du travail|Mercato del lavoro|بازار کار|سوق العمل
+noun:der:Aspekt|Aspect|Aspect|Aspetto|جنبه|جانب
+noun:der:Aufbau|Structure; construction|Structure; construction|Struttura; costruzione|ساختار؛ ساخت|بنية؛ إنشاء
+noun:der:Aufenthalt|Stay|Séjour|Soggiorno|اقامت|إقامة
+noun:der:Aufwand|Effort, expense|Effort, dépense|Impegno, dispendio|زحمت، هزینه|جهد، تكلفة
+noun:der:Ausgangspunkt|Starting point|Point de départ|Punto di partenza|نقطهٔ شروع|نقطة الانطلاق
+noun:der:Austausch|Exchange|Échange|Scambio|تبادل|تبادل
+noun:der:Bedarf|Need, demand|Besoin|Fabbisogno|نیاز|حاجة
+noun:der:Begriff|Concept, term|Notion, terme|Concetto, termine|مفهوم، اصطلاح|مفهوم، مصطلح
+noun:der:Beitrag|Contribution; fee; article|Contribution; cotisation; article|Contributo; quota; articolo|سهم؛ حق عضویت؛ مقاله|مساهمة؛ اشتراك؛ مقال
+noun:der:Beleg|Receipt; proof|Justificatif; preuve|Ricevuta; prova|رسید؛ مدرک|إيصال؛ دليل
+noun:der:Bereich|Area, field|Domaine|Settore, ambito|حوزه|مجال
+noun:der:Bescheid|Notification, official decision|Avis, décision officielle|Comunicazione, provvedimento|ابلاغیه، تصمیم رسمی|إشعار، قرار رسمي
+noun:der:Besitz|Possession, property|Possession, propriété|Possesso, proprietà|مالکیت، دارایی|ملكية، ممتلكات
+noun:der:Bestandteil|Component|Composant|Componente|جزء تشکیل‌دهنده|مكوّن
+noun:der:Betrag|Amount (of money)|Montant|Importo|مبلغ|مبلغ
+noun:der:Betrug|Fraud|Escroquerie|Truffa|کلاهبرداری|احتيال
+noun:der:Beweis|Proof, evidence|Preuve|Prova|اثبات، دلیل|برهان
+noun:der:Bewohner|Inhabitant, resident|Habitant|Abitante|ساکن|ساكن
+noun:der:Bezug|Reference, relation|Rapport, référence|Riferimento, relazione|ارتباط، نسبت|صلة، علاقة
+noun:der:Blickwinkel|Angle, point of view|Angle de vue|Punto di vista|زاویهٔ دید|زاوية النظر
+noun:der:Bruch|Break; fracture|Rupture; fracture|Rottura; frattura|شکست، گسست؛ شکستگی|انقطاع؛ كسر
+noun:der:Bürger|Citizen|Citoyen|Cittadino|شهروند|مواطن
+noun:der:Charakter|Character|Caractère|Carattere|شخصیت، منش|طبع، شخصية
+noun:der:Dialekt|Dialect|Dialecte|Dialetto|گویش|لهجة
+noun:der:Dialog|Dialogue|Dialogue|Dialogo|گفت‌وگو|حوار
+noun:der:Druck|Pressure; print|Pression; impression|Pressione; stampa|فشار؛ چاپ|ضغط؛ طباعة
+noun:der:Durchschnitt|Average|Moyenne|Media|میانگین|المتوسط
+noun:der:Löffel|Spoon|Cuillère|Cucchiaio|قاشق|ملعقة
+noun:das:Land|Country; countryside|Pays; campagne|Paese; campagna|کشور؛ روستا|بلد؛ ريف
+noun:das:Fahrrad|Bicycle|Vélo|Bicicletta|دوچرخه|دراجة
+noun:das:Essen|Food; meal|Nourriture; repas|Cibo; pasto|غذا|طعام؛ وجبة
+noun:das:Brot|Bread|Pain|Pane|نان|خبز
+noun:das:Fleisch|Meat|Viande|Carne|گوشت|لحم
+noun:das:Buch|Book|Livre|Libro|کتاب|كتاب
+noun:das:Wetter|Weather|Temps (météo)|Tempo (meteo)|آب‌وهوا|طقس
+noun:das:Meer|Sea|Mer|Mare|دریا|بحر
+noun:das:Geschenk|Present, gift|Cadeau|Regalo|هدیه|هدية
+noun:das:Argument|Argument|Argument|Argomento|استدلال|حجة
+noun:das:Bewusstsein|Consciousness, awareness|Conscience|Coscienza, consapevolezza|آگاهی|وعي
+noun:das:Defizit|Deficit|Déficit|Deficit|کسری|عجز
+noun:das:Detail|Detail|Détail|Dettaglio|جزئیات|تفصيل
+noun:die:Stadt|Town, city|Ville|Città|شهر|مدينة
+noun:die:Woche|Week|Semaine|Settimana|هفته|أسبوع
+noun:die:Schule|School|École|Scuola|مدرسه|مدرسة
+noun:die:Sprache|Language|Langue|Lingua|زبان|لغة
+noun:die:Gesundheit|Health|Santé|Salute|سلامتی|صحة
+noun:die:Krankheit|Illness|Maladie|Malattia|بیماری|مرض
+noun:die:Umgebung|Surroundings|Environs|Dintorni|اطراف، محیط|محيط
+noun:die:Natur|Nature|Nature|Natura|طبیعت|طبيعة
+noun:die:Umwelt|Environment|Environnement|Ambiente|محیط زیست|البيئة
+noun:die:Kleidung|Clothes|Vêtements|Vestiti|لباس|ملابس
+noun:die:Erfahrung|Experience|Expérience|Esperienza|تجربه|خبرة
+noun:die:Idee|Idea|Idée|Idea|ایده|فكرة
+noun:die:Einladung|Invitation|Invitation|Invito|دعوت|دعوة
+noun:die:Prüfung|Exam; check|Examen; contrôle|Esame; controllo|امتحان؛ بازرسی|امتحان؛ فحص
+noun:die:Zukunft|Future|Avenir|Futuro|آینده|المستقبل
+noun:die:Vergangenheit|Past|Passé|Passato|گذشته|الماضي
+noun:die:Nachricht|News; message|Nouvelle; message|Notizia; messaggio|خبر؛ پیام|خبر؛ رسالة
+noun:die:Meinung|Opinion|Opinion|Opinione|نظر|رأي
+noun:die:Diskussion|Discussion|Discussion|Discussione|بحث|نقاش
+noun:die:Möglichkeit|Possibility|Possibilité|Possibilità|امکان|إمكانية
+noun:die:Bedingung|Condition|Condition|Condizione|شرط|شرط
+noun:die:Voraussetzung|Prerequisite|Condition préalable|Presupposto|پیش‌شرط|شرط مسبق
+noun:die:Entwicklung|Development|Développement|Sviluppo|توسعه، پیشرفت|تطوّر
+noun:die:Beziehung|Relationship|Relation|Rapporto, relazione|رابطه|علاقة
+noun:die:Wirtschaft|Economy|Économie|Economia|اقتصاد|اقتصاد
+noun:die:Politik|Politics|Politique|Politica|سیاست|سياسة
+noun:die:Regierung|Government|Gouvernement|Governo|دولت، حکومت|حكومة
+noun:die:Sicherheit|Safety, security|Sécurité|Sicurezza|امنیت|أمان
+noun:die:Gewohnheit|Habit|Habitude|Abitudine|عادت|عادة
+noun:die:Hoffnung|Hope|Espoir|Speranza|امید|أمل
+noun:die:Angst|Fear|Peur|Paura|ترس|خوف
+noun:die:Forschung|Research|Recherche|Ricerca|پژوهش|بحث علمي
+noun:die:Wissenschaft|Science|Science|Scienza|علم|علم
+noun:die:Teilnahme|Participation|Participation|Partecipazione|شرکت، حضور|مشاركة
+noun:die:Auswirkung|Effect, impact|Répercussion|Ripercussione|پیامد، تأثیر|أثر
+noun:die:Ursache|Cause|Cause|Causa|علت|سبب
+noun:die:Maßnahme|Measure (action)|Mesure|Misura (provvedimento)|اقدام|إجراء
+noun:die:Umsetzung|Implementation|Mise en œuvre|Attuazione|اجرا|تنفيذ
+noun:die:Benachteiligung|Discrimination, disadvantage|Discrimination|Svantaggio, discriminazione|تبعیض|تمييز، إجحاف
+noun:die:Gleichberechtigung|Equal rights|Égalité des droits|Parità di diritti|برابری حقوق|المساواة في الحقوق
+noun:die:Nachhaltigkeit|Sustainability|Durabilité|Sostenibilità|پایداری|الاستدامة
+noun:die:Wettbewerbsfähigkeit|Competitiveness|Compétitivité|Competitività|رقابت‌پذیری|القدرة التنافسية
+noun:die:Stellungnahme|Statement, position|Prise de position|Presa di posizione|اظهار نظر رسمی|موقف، بيان
+noun:die:Auseinandersetzung|Dispute; engagement (with a topic)|Débat, conflit; réflexion|Confronto, disputa|مجادله؛ پرداختن به موضوع|نقاش، خلاف؛ تأمّل
+noun:die:Bereitschaft|Willingness|Disposition, volonté|Disponibilità|آمادگی|استعداد، جاهزية
+noun:die:Zuverlässigkeit|Reliability|Fiabilité|Affidabilità|قابلیت اعتماد|الموثوقية
+noun:die:Glaubwürdigkeit|Credibility|Crédibilité|Credibilità|اعتبار، باورپذیری|المصداقية
+noun:die:Öffentlichkeit|The public|Public, opinion publique|Pubblico, opinione pubblica|افکار عمومی|الرأي العام
+noun:die:Gesetzgebung|Legislation|Législation|Legislazione|قانون‌گذاری|التشريع
+noun:die:Verordnung|Regulation, ordinance|Ordonnance, règlement|Regolamento, ordinanza|آیین‌نامه|لائحة، مرسوم
+noun:die:Genehmigung|Permit, approval|Autorisation|Autorizzazione|مجوز|ترخيص
+noun:die:Bewältigung|Coping with, overcoming|Maîtrise, surmonter|Superamento|غلبه، کنار آمدن|التغلب على
+noun:die:Beeinträchtigung|Impairment|Atteinte, gêne|Compromissione, limitazione|اختلال، محدودیت|ضرر، إعاقة
+noun:die:Verpflichtung|Obligation|Obligation|Obbligo|تعهد|التزام
+noun:die:Zustimmung|Approval, consent|Approbation, consentement|Consenso, approvazione|موافقت|موافقة
+noun:die:Ablehnung|Rejection|Refus, rejet|Rifiuto|رد، مخالفت|رفض
+noun:die:Annahme|Acceptance; assumption|Acceptation; hypothèse|Accettazione; supposizione|پذیرش؛ فرض|قبول؛ افتراض
+noun:die:Einschätzung|Assessment|Évaluation, appréciation|Valutazione, stima|ارزیابی، برآورد|تقدير، تقييم
+noun:die:Vorahnung|Premonition|Pressentiment|Presentimento|دلشوره، پیش‌آگاهی|هاجس، حدس مسبق
+noun:die:Selbstständigkeit|Independence, self-reliance|Autonomie|Autonomia|استقلال|الاستقلالية
+noun:die:Abgabe|Submission; levy (tax)|Remise, dépôt; taxe|Consegna; tributo|تحویل؛ عوارض|تسليم؛ رسم (ضريبة)
+noun:die:Abhängigkeit|Dependence|Dépendance|Dipendenza|وابستگی|التبعية، الإدمان
+noun:die:Ablenkung|Distraction|Distraction|Distrazione|حواس‌پرتی|إلهاء
+noun:die:Absicht|Intention|Intention|Intenzione|قصد|نيّة
+noun:die:Abstimmung|Vote; coordination|Vote; concertation|Votazione; coordinamento|رأی‌گیری؛ هماهنگی|تصويت؛ تنسيق
+noun:die:Abwechslung|Variety, change|Diversité, changement|Varietà, cambiamento|تنوع|تنويع
+noun:die:Abweichung|Deviation|Écart|Deviazione, scostamento|انحراف، اختلاف|انحراف، تباين
+noun:die:Achtung|Respect; attention|Respect; attention|Rispetto; attenzione|احترام؛ توجه|احترام؛ انتباه
+noun:die:Aktualität|Topicality|Actualité|Attualità|به‌روز بودن|راهنية
+noun:die:Akzeptanz|Acceptance (by society)|Acceptation (sociale)|Accettazione (sociale)|پذیرش (اجتماعی)|القبول (اجتماعياً)
+noun:die:Alternative|Alternative|Alternative|Alternativa|جایگزین|بديل
+noun:die:Anerkennung|Recognition|Reconnaissance|Riconoscimento|به رسمیت شناختن، قدردانی|اعتراف، تقدير
+noun:die:Anforderung|Requirement|Exigence|Requisito|الزام، خواسته|متطلّب
+noun:die:Angelegenheit|Matter, affair|Affaire|Faccenda, questione|مسئله، کار|شأن، مسألة
+noun:die:Angleichung|Alignment, harmonisation|Harmonisation|Allineamento|یکسان‌سازی|مواءمة
+noun:die:Anregung|Suggestion, stimulus (idea)|Suggestion|Spunto, suggerimento|ایده، تلنگر|اقتراح، فكرة ملهمة
+noun:die:Anschaffung|Purchase, acquisition|Acquisition, achat|Acquisto|خرید (کالای بادوام)|اقتناء، شراء
+noun:die:Anwendung|Application, use|Application, utilisation|Applicazione, uso|کاربرد|تطبيق
+noun:die:Anzahl|Number, quantity|Nombre, quantité|Numero, quantità|تعداد|عدد
+noun:die:Arbeitsweise|Way of working|Méthode de travail|Modo di lavorare|شیوه کار|أسلوب العمل
+noun:die:Armut|Poverty|Pauvreté|Povertà|فقر|فقر
+noun:die:Atmosphäre|Atmosphere|Atmosphère|Atmosfera|جو، فضا|جوّ
+noun:die:Auffassung|View, opinion|Conception, point de vue|Opinione, concezione|دیدگاه|وجهة نظر
+noun:die:Aufforderung|Request, demand|Invitation, sommation|Invito, richiesta|درخواست، فراخوان|مطالبة، دعوة
+noun:die:Ausgabe|Expense; edition, issue|Dépense; édition, numéro|Spesa; edizione|هزینه؛ نسخه، شماره|نفقة؛ إصدار، طبعة
+noun:die:Ausgrenzung|Exclusion (from society)|Exclusion (sociale)|Emarginazione|طرد اجتماعی|إقصاء
+noun:die:Ausnahme|Exception (to a rule)|Exception|Eccezione|استثنا|استثناء
+noun:die:Aussage|Statement; testimony|Déclaration; témoignage|Dichiarazione; testimonianza|اظهار؛ شهادت|تصريح؛ شهادة (أمام القضاء)
+noun:die:Ausstattung|Equipment, furnishings|Équipement|Dotazione, attrezzatura|تجهیزات|تجهيزات
+noun:die:Auswahl|Choice, selection|Choix, sélection|Scelta, assortimento|انتخاب، مجموعه|اختيار، تشكيلة
+noun:die:Auswertung|Evaluation, analysis (of data)|Exploitation, analyse (de données)|Analisi (dei dati)|تحلیل (داده‌ها)|تحليل (البيانات)
+noun:die:Auszeichnung|Award|Distinction, prix|Riconoscimento, premio|جایزه، نشان|جائزة، وسام
+noun:die:Beachtung|Observance; attention|Respect (des règles); attention|Osservanza; attenzione|رعایت؛ توجه|مراعاة؛ اهتمام
+noun:die:Bedeutung|Meaning, significance|Signification, importance|Significato, importanza|معنا، اهمیت|معنى، أهمية
+noun:die:Bedienung|Service; operation (of a device)|Service; utilisation (d’un appareil)|Servizio; uso (di un apparecchio)|سرویس، پذیرایی؛ کار با دستگاه|خدمة؛ تشغيل (جهاز)
+noun:die:Befragung|Survey|Enquête, sondage|Sondaggio|نظرسنجی|استطلاع
+noun:die:Befürchtung|Fear, concern|Crainte|Timore|بیم، نگرانی|خشية
+noun:die:Begegnung|Encounter|Rencontre|Incontro|برخورد، دیدار|لقاء
+noun:die:Begeisterung|Enthusiasm|Enthousiasme|Entusiasmo|شور و شوق|حماس
+noun:die:Begründung|Justification|Justification|Motivazione|توجیه، دلیل|تبرير
+noun:die:Behandlung|Treatment|Traitement|Trattamento, cura|درمان؛ رفتار|علاج؛ معاملة
+noun:die:Behauptung|Claim, assertion|Affirmation|Affermazione|ادعا|ادّعاء
+noun:die:Bekämpfung|Fight (against something)|Lutte (contre)|Lotta (contro)|مبارزه (با چیزی)|مكافحة
+noun:die:Belastung|Burden, strain|Charge, fardeau|Carico, peso|فشار، بار|عبء
+noun:die:Beliebtheit|Popularity|Popularité|Popolarità|محبوبیت|شعبية
+noun:die:Bemerkung|Remark|Remarque|Osservazione|نکته، تذکر|ملاحظة
+noun:die:Bemühung|Effort|Effort|Sforzo|تلاش|جهد
+noun:die:Beobachtung|Observation|Observation|Osservazione (attenta)|مشاهده|ملاحظة، مراقبة
+noun:die:Beratung|Advice, counselling|Conseil, consultation|Consulenza|مشاوره|استشارة
+noun:die:Bereicherung|Enrichment|Enrichissement|Arricchimento|غنا بخشیدن|إثراء
+noun:die:Berücksichtigung|Consideration (taking into account)|Prise en compte|Considerazione|در نظر گرفتن|مراعاة، أخذ بالاعتبار
+noun:die:Beschäftigung|Employment; occupation|Emploi; occupation|Occupazione; attività|اشتغال؛ سرگرمی|توظيف؛ انشغال
+noun:die:Beseitigung|Removal, elimination|Élimination|Eliminazione|رفع، حذف|إزالة
+noun:die:Besonderheit|Peculiarity|Particularité|Particolarità|ویژگی خاص|خصوصية
+noun:die:Besserung|Improvement, recovery|Amélioration, rétablissement|Miglioramento, guarigione|بهبود|تحسّن، شفاء
+noun:die:Bestätigung|Confirmation|Confirmation|Conferma|تأیید|تأكيد
+noun:die:Bestimmung|Regulation; purpose|Disposition; destination|Disposizione; destinazione|مقررات؛ مقصد، هدف|حكم، نص؛ غاية
+noun:die:Beteiligung|Participation, stake|Implication, participation (financière)|Partecipazione (quota)|مشارکت، سهم|مشاركة، حصة
+noun:die:Betreuung|Care, supervision|Prise en charge, garde|Assistenza|مراقبت، سرپرستی|رعاية
+noun:die:Bevölkerung|Population|Population|Popolazione|جمعیت|السكان
+noun:die:Bevorzugung|Preferential treatment|Traitement de faveur|Trattamento preferenziale|ترجیح، امتیاز ویژه|محاباة، تفضيل
+noun:die:Bewegung|Movement|Mouvement|Movimento|حرکت|حركة
+noun:die:Bewertung|Rating, evaluation|Évaluation, note|Valutazione, recensione|ارزیابی، امتیاز|تقييم
+noun:die:Bildung|Education|Éducation, formation|Istruzione|تحصیلات، آموزش|تعليم، ثقافة
+noun:die:Bindung|Bond, attachment|Lien, attachement|Legame|پیوند، دلبستگی|ارتباط عاطفي
+noun:die:Bundesregierung|Federal government|Gouvernement fédéral|Governo federale|دولت فدرال|الحكومة الاتحادية
+noun:die:Chance|Chance|Chance|Occasione, possibilità|شانس|فرصة
+noun:die:Darstellung|Presentation, account|Présentation, description|Rappresentazione, esposizione|ارائه، توصیف|عرض، وصف
+noun:die:Datei|File (computer)|Fichier|File|فایل|ملف
+noun:die:Dauer|Duration|Durée|Durata|مدت|مدة
+noun:die:Debatte|Debate|Débat|Dibattito|مناظره|مناظرة
+noun:die:Definition|Definition|Définition|Definizione|تعریف|تعريف
+noun:die:Demonstration|Demonstration (protest)|Manifestation|Manifestazione|تظاهرات|مظاهرة
+noun:die:Diagnose|Diagnosis|Diagnostic|Diagnosi|تشخیص (پزشکی)|تشخيص
+noun:die:Differenz|Difference|Différence|Differenza|تفاوت|فرق
+noun:die:Dimension|Dimension|Dimension|Dimensione|بُعد|بُعد
+noun:die:Distanz|Distance|Distance|Distanza|فاصله|مسافة
+noun:die:Disziplin|Discipline|Discipline|Disciplina|انضباط|انضباط
+noun:die:Dokumentation|Documentation|Documentation|Documentazione|مستندسازی|توثيق
+vp:warten:auf:Akk.|to wait for|attendre|aspettare|منتظرِ ... بودن|ينتظر
+vp:sich freuen:auf:Akk.|to look forward to|se réjouir de (à venir)|non vedere l’ora di|مشتاقِ ... بودن|يتطلع إلى
+vp:sich freuen:über:Akk.|to be glad about|se réjouir de (passé)|rallegrarsi di|خوشحال بودن از|يفرح بـ
+vp:denken:an:Akk.|to think of|penser à|pensare a|فکر کردن به|يفكر في
+vp:sich erinnern:an:Akk.|to remember|se souvenir de|ricordarsi di|به یاد آوردن|يتذكر
+vp:sich interessieren:für:Akk.|to be interested in|s’intéresser à|interessarsi di|علاقه داشتن به|يهتم بـ
+vp:sich bedanken:für:Akk.|to thank for|remercier pour|ringraziare per|تشکر کردن برای|يشكر على
+vp:sich entschuldigen:für:Akk.|to apologise for|s’excuser de|scusarsi per|عذرخواهی کردن برای|يعتذر عن
+vp:sich bewerben:um:Akk.|to apply for|postuler à|candidarsi per|درخواست دادن برای|يتقدم بطلب لـ
+vp:bitten:um:Akk.|to ask for|demander (qch)|chiedere (qualcosa)|درخواست کردن|يطلب
+vp:sich kümmern:um:Akk.|to take care of|s’occuper de|prendersi cura di|مراقبت کردن از|يعتني بـ
+vp:teilnehmen:an:Dat.|to take part in|participer à|partecipare a|شرکت کردن در|يشارك في
+vp:helfen:bei:Dat.|to help with|aider à|aiutare con|کمک کردن در|يساعد في
+vp:sich fürchten:vor:Dat.|to be afraid of|avoir peur de|avere paura di|ترسیدن از|يخاف من
+vp:abhängen:von:Dat.|to depend on|dépendre de|dipendere da|بستگی داشتن به|يعتمد على
+vp:träumen:von:Dat.|to dream of|rêver de|sognare di|رؤیای ... داشتن|يحلم بـ
+vp:erzählen:von:Dat.|to tell about|raconter (à propos de)|raccontare di|تعریف کردن از|يحكي عن
+vp:gehören:zu:Dat.|to belong to, to be part of|faire partie de|fare parte di|جزوِ ... بودن|ينتمي إلى
+vp:einladen:zu:Dat.|to invite to|inviter à|invitare a|دعوت کردن به|يدعو إلى
+vp:gratulieren:zu:Dat.|to congratulate on|féliciter pour|congratularsi per|تبریک گفتن برای|يهنئ بـ
+vp:bestehen:aus:Dat.|to consist of|se composer de|consistere in|تشکیل شدن از|يتكون من
+vp:bestehen:auf:Dat.|to insist on|insister sur|insistere su|اصرار کردن بر|يصرّ على
+vp:sich verlassen:auf:Akk.|to rely on|compter sur|contare su|تکیه کردن به|يعتمد على (يثق)
+vp:achten:auf:Akk.|to pay attention to|faire attention à|fare attenzione a|توجه کردن به|ينتبه إلى
+vp:diskutieren:über:Akk.|to discuss|discuter de|discutere di|بحث کردن دربارهٔ|يناقش
+vp:nachdenken:über:Akk.|to think about, to reflect on|réfléchir à|riflettere su|فکر کردن دربارهٔ|يتأمل في
+vp:sich beschäftigen:mit:Dat.|to deal with, to be busy with|s’occuper de (activité)|occuparsi di|مشغول بودن با|ينشغل بـ
+vp:rechnen:mit:Dat.|to expect, to reckon with|s’attendre à|fare i conti con|حساب کردن روی|يتوقع
+vp:sich verabreden:mit:Dat.|to arrange to meet|prendre rendez-vous avec|darsi appuntamento con|قرار گذاشتن با|يتواعد مع
+vp:leiden:an:Dat.|to suffer from (an illness)|souffrir de (maladie)|soffrire di (malattia)|مبتلا بودن به|يعاني من (مرض)
+vp:ankommen:auf:Akk.|to depend on (impersonal)|dépendre de (impersonnel)|dipendere da (impersonale)|بستگی داشتن به (غیرشخصی)|يتوقف على
+vp:anpassen:an:Akk.|to adapt to|adapter à|adattare a|وفق دادن با|يكيّف مع
+vp:antworten:auf:Akk.|to reply to|répondre à|rispondere a|پاسخ دادن به|يجيب على
+vp:sich ärgern:über:Akk.|to be annoyed about|s’énerver contre|arrabbiarsi per|عصبانی شدن از|ينزعج من
+vp:aufpassen:auf:Akk.|to look after, to watch|surveiller|badare a|مراقبِ ... بودن|يراقب
+vp:ausgeben:für:Akk.|to spend on|dépenser pour|spendere per|خرج کردن برای|ينفق على
+vp:sich begeistern:für:Akk.|to be enthusiastic about|s’enthousiasmer pour|appassionarsi a|شیفتهٔ ... شدن|يتحمس لـ
+vp:sich beklagen:über:Akk.|to complain about (moan)|se plaindre de|lamentarsi di|گله کردن از|يتذمر من
+vp:berichten:über:Akk.|to report on|rendre compte de|riferire su|گزارش دادن دربارهٔ|يقدّم تقريراً عن
+vp:sich beschweren:über:Akk.|to complain about (formally)|se plaindre de (réclamer)|reclamare per|شکایت کردن از|يشتكي من
+vp:sich bewerben:auf:Akk.|to apply for (a job ad)|postuler à (une annonce)|rispondere a (un annuncio)|برای آگهی درخواست دادن|يتقدم لإعلان وظيفة
+vp:sich beziehen:auf:Akk.|to refer to|se référer à|riferirsi a|ارجاع دادن به|يشير إلى
+vp:danken:für:Akk.|to thank for (formal)|remercier de|ringraziare di|سپاسگزاری کردن برای|يشكر لأجل
+vp:eingehen:auf:Akk.|to respond to, to go into|répondre à, entrer dans|rispondere a, entrare nel merito di|پرداختن به|يتطرق إلى
+vp:sich einigen:auf:Akk.|to agree on|se mettre d’accord sur|accordarsi su|به توافق رسیدن بر سر|يتفق على
+vp:sich einsetzen:für:Akk.|to stand up for|s’engager pour|impegnarsi per|حمایت کردن از|يدافع عن
+vp:sich engagieren:für:Akk.|to campaign for|s’engager en faveur de|impegnarsi a favore di|فعالیت کردن برای|ينشط لصالح
+vp:sich engagieren:gegen:Akk.|to campaign against|s’engager contre|impegnarsi contro|فعالیت کردن علیه|ينشط ضد
+vp:sich entscheiden:für:Akk.|to decide on, to choose|se décider pour|decidere per|انتخاب کردن|يقرر اختيار
+vp:sich entscheiden:gegen:Akk.|to decide against|se décider contre|decidere contro|تصمیم گرفتن علیه|يقرر رفض
+vp:erzählen:über:Akk.|to talk about (a topic)|raconter (sur un sujet)|raccontare su|صحبت کردن دربارهٔ|يتحدث عن (موضوع)
+vp:sich gewöhnen:an:Akk.|to get used to|s’habituer à|abituarsi a|عادت کردن به|يعتاد على
+vp:glauben:an:Akk.|to believe in|croire en|credere in|ایمان داشتن به|يؤمن بـ
+vp:halten:für:Akk.|to consider (as)|prendre pour, considérer comme|ritenere, considerare|دانستن، پنداشتن|يعتبر
+vp:sich halten:an:Akk.|to stick to|s’en tenir à|attenersi a|پایبند بودن به|يلتزم بـ
+vp:sich handeln:um:Akk.|to be about (it is about)|s’agir de|trattarsi di|مربوط بودن به، صحبت از|يتعلق الأمر بـ
+vp:hinweisen:auf:Akk.|to point out|signaler|segnalare|اشاره کردن به|ينبّه إلى
+vp:hoffen:auf:Akk.|to hope for|espérer|sperare in|امید داشتن به|يأمل في
+vp:sich informieren:über:Akk.|to find out about|s’informer sur|informarsi su|اطلاعات کسب کردن دربارهٔ|يستعلم عن
+vp:investieren:in:Akk.|to invest in|investir dans|investire in|سرمایه‌گذاری کردن در|يستثمر في
+vp:kämpfen:für:Akk.|to fight for|se battre pour|lottare per|مبارزه کردن برای|يناضل من أجل
+vp:kämpfen:gegen:Akk.|to fight against|lutter contre|lottare contro|مبارزه کردن با|يكافح ضد
+vp:sich konzentrieren:auf:Akk.|to concentrate on|se concentrer sur|concentrarsi su|تمرکز کردن روی|يركز على
+vp:lachen:über:Akk.|to laugh at|rire de|ridere di|خندیدن به|يضحك على
+vp:reagieren:auf:Akk.|to react to|réagir à|reagire a|واکنش نشان دادن به|يتفاعل مع
+vp:reden:über:Akk.|to talk about|parler de|parlare di|حرف زدن دربارهٔ|يتكلم عن
+vp:schimpfen:über:Akk.|to grumble about|râler contre|lamentarsi di (brontolare)|غر زدن دربارهٔ|يتذمر بشأن
+vp:sorgen:für:Akk.|to provide for, to take care of|veiller à, s’occuper de|provvedere a|تأمین کردن، رسیدگی کردن|يتكفل بـ
+vp:sich sorgen:um:Akk.|to worry about|s’inquiéter pour|preoccuparsi per|نگران بودن برای|يقلق على
+vp:sich spezialisieren:auf:Akk.|to specialise in|se spécialiser dans|specializzarsi in|تخصص یافتن در|يتخصص في
+vp:sprechen:über:Akk.|to speak about|parler de (un sujet)|parlare su|صحبت کردن دربارهٔ (موضوع)|يتحدث حول
+vp:sich streiten:über:Akk.|to argue about|se disputer sur|litigare su|بحث کردن سرِ|يتجادل حول
+vp:sich streiten:um:Akk.|to fight over|se disputer pour|litigare per|دعوا کردن سرِ|يتشاجر على
+vp:sich unterhalten:über:Akk.|to chat about|s’entretenir de|conversare su|گپ زدن دربارهٔ|يتحادث حول
+vp:sich verlieben:in:Akk.|to fall in love with|tomber amoureux de|innamorarsi di|عاشقِ ... شدن|يقع في حب
+vp:verzichten:auf:Akk.|to do without|renoncer à|rinunciare a|صرف‌نظر کردن از|يتخلى عن
+vp:sich vorbereiten:auf:Akk.|to prepare for|se préparer à|prepararsi a|آماده شدن برای|يستعد لـ
+vp:sich wenden:an:Akk.|to turn to (for help)|s’adresser à|rivolgersi a|مراجعه کردن به|يلجأ إلى
+vp:werben:für:Akk.|to advertise|faire de la publicité pour|fare pubblicità a|تبلیغ کردن برای|يروّج لـ
+vp:sich wundern:über:Akk.|to be surprised at|s’étonner de|meravigliarsi di|تعجب کردن از|يتعجب من
+vp:abhalten:von:Dat.|to keep from|empêcher de|trattenere da|بازداشتن از|يمنع من
+vp:abmelden:von:Dat.|to deregister from|désinscrire de|cancellare da|لغو ثبت کردن از|يلغي تسجيل من
+vp:abraten:von:Dat.|to advise against (doing)|déconseiller de|sconsigliare di|منع کردن از (نصیحت)|ينصح بالامتناع عن
+vp:ändern:an:Dat.|to change (something about)|modifier (qch à)|cambiare (qualcosa in)|تغییر دادن (در چیزی)|يغيّر (شيئاً في)
+vp:anfangen:mit:Dat.|to start with|commencer par|cominciare con|شروع کردن با|يبدأ بـ
+vp:anrufen:bei:Dat.|to call (an office)|appeler (chez)|telefonare a (un ufficio)|تماس گرفتن با (اداره)|يتصل بـ (مكتب)
+vp:arbeiten:an:Dat.|to work on|travailler sur|lavorare a|کار کردن روی|يعمل على
+vp:arbeiten:bei:Dat.|to work at (a company)|travailler chez|lavorare presso|کار کردن در (شرکت)|يعمل لدى (شركة)
+vp:arbeiten:in:Dat.|to work in (a place)|travailler dans|lavorare in|کار کردن در (محل)|يعمل في (مكان)
+vp:aufhören:mit:Dat.|to stop (doing)|arrêter de|smettere di|دست کشیدن از|يتوقف عن
+vp:ausgehen:von:Dat.|to assume|partir de (l’hypothèse)|partire da (presupposto)|فرض کردن|ينطلق من (افتراض)
+vp:sich auskennen:mit:Dat.|to know a lot about|s’y connaître en|intendersi di|سررشته داشتن در|يفهم في
+vp:sich austauschen:mit:Dat.|to exchange views with|échanger avec|scambiare opinioni con|تبادل نظر کردن با|يتبادل الآراء مع
+vp:sich bedanken:bei:Dat.|to thank (someone)|remercier (qn)|ringraziare (qualcuno)|تشکر کردن از (کسی)|يشكر (شخصاً)
+vp:sich befassen:mit:Dat.|to deal with (an issue)|traiter de|occuparsi di (questione)|پرداختن به (موضوع)|يتناول (مسألة)
+vp:sich befinden:in:Dat.|to be located in|se trouver dans|trovarsi in|قرار داشتن در|يوجد في
+vp:beginnen:mit:Dat.|to begin with|débuter par|iniziare con|آغاز کردن با|يستهلّ بـ
+vp:beitragen:zu:Dat.|to contribute to|contribuer à|contribuire a|کمک کردن به، سهم داشتن در|يساهم في
+vp:sich beklagen:bei:Dat.|to complain to (moan)|se plaindre auprès de|lamentarsi con|گله کردن پیشِ|يتذمر لدى
+vp:berichten:von:Dat.|to report about|relater|riferire di|خبر دادن از|يخبر عن
+vp:sich beschweren:bei:Dat.|to complain to (formally)|réclamer auprès de|reclamare presso|شکایت کردن نزدِ|يشتكي لدى
+vp:bestellen:bei:Dat.|to order from|commander chez|ordinare presso|سفارش دادن به|يطلب من (متجر)
+vp:sich beteiligen:an:Dat.|to participate in|prendre part à|prendere parte a|مشارکت کردن در|يساهم في (المشاركة)
+vp:sich bewerben:bei:Dat.|to apply to (a company)|postuler chez|candidarsi presso|درخواست دادن به (شرکت)|يتقدم لدى (شركة)
+vp:bringen:zu:Dat.|to lead to (bring about)|amener à|portare a|منجر کردن به|يؤدي إلى (يدفع)
+vp:diskutieren:mit:Dat.|to debate with|débattre avec|discutere con|بحث کردن با|يتناقش مع
+vp:sich entschließen:zu:Dat.|to decide (to do)|se résoudre à|decidersi a|تصمیم گرفتن به|يعزم على
+vp:sich entschuldigen:bei:Dat.|to apologise to|s’excuser auprès de|scusarsi con|عذرخواهی کردن از (کسی)|يعتذر لـ
+vp:erhalten:von:Dat.|to receive from|recevoir de|ricevere da|دریافت کردن از|يتلقى من
+vp:sich erholen:von:Dat.|to recover from|se remettre de|riprendersi da|بهبود یافتن از|يتعافى من
+vp:erkennen:an:Dat.|to recognise by|reconnaître à|riconoscere da|شناختن از روی|يتعرف عليه من
+vp:sich erkundigen:bei:Dat.|to enquire with (someone)|se renseigner auprès de|informarsi presso|پرس‌وجو کردن از|يستفسر لدى
+vp:sich erkundigen:nach:Dat.|to ask about|se renseigner sur|chiedere notizie di|جویا شدن دربارهٔ|يستفسر عن
+vp:erwarten:von:Dat.|to expect from|attendre de|aspettarsi da|انتظار داشتن از|يتوقع من
+vp:erziehen:zu:Dat.|to bring up (to be)|éduquer à|educare a|تربیت کردن به|يربّي على
+vp:experimentieren:mit:Dat.|to experiment with|expérimenter avec|sperimentare con|آزمایش کردن با|يجرّب بـ
+vp:fragen:nach:Dat.|to ask about, to ask for|demander (des nouvelles de)|chiedere di|پرسیدن دربارهٔ|يسأل عن
+vp:führen:zu:Dat.|to lead to (result in)|mener à|condurre a|منجر شدن به|يؤدي إلى
+vp:handeln:mit:Dat.|to trade in|faire le commerce de|commerciare in|تجارت کردن با|يتاجر بـ
+vp:handeln:von:Dat.|to be about (book, film)|parler de (livre, film)|trattare di|دربارهٔ ... بودن (کتاب، فیلم)|يتناول (كتاب، فيلم)
+vp:halten:von:Dat.|to think of (opinion)|penser de|pensare di (opinione)|نظر داشتن دربارهٔ|يرى في (رأي)
+vp:hören:von:Dat.|to hear about|entendre parler de|sentire di|خبر داشتن از|يسمع عن
+vp:klarkommen:mit:Dat.|to get on with, to cope with|s’en sortir avec|cavarsela con|کنار آمدن با|يتدبر أمره مع
+vp:klingen:nach:Dat.|to sound like|ressembler à (son)|suonare come|به نظر رسیدن مثلِ|يبدو مثل (صوتاً)
+vp:leiden:unter:Dat.|to suffer from (conditions)|souffrir de (situation)|soffrire per|رنج بردن از|يعاني من (ظروف)
+vp:liegen:an:Dat.|to be due to|tenir à, être dû à|dipendere da (essere dovuto a)|ناشی شدن از|يرجع إلى
+vp:sich melden:bei:Dat.|to get in touch with|contacter|farsi sentire con|تماس گرفتن با|يتواصل مع
+vp:motivieren:zu:Dat.|to motivate to|motiver à|motivare a|انگیزه دادن برای|يحفّز على
+vp:nachfragen:bei:Dat.|to enquire again with|redemander auprès de|richiedere informazioni a|دوباره پرسیدن از|يستفسر ثانيةً لدى
+vp:sich orientieren:an:Dat.|to orient oneself by|s’orienter sur|orientarsi su|الگو گرفتن از|يسترشد بـ
+vp:passen:zu:Dat.|to go with, to match|aller avec|stare bene con|جور بودن با|يتناسب مع
+vp:raten:zu:Dat.|to advise (to do)|conseiller de|consigliare di|توصیه کردن به|ينصح بـ
+vp:retten:vor:Dat.|to save from|sauver de|salvare da|نجات دادن از|ينقذ من
+vp:sich richten:nach:Dat.|to go by, to follow|se conformer à|attenersi a (regolarsi)|پیروی کردن از|يتبع، يلتزم بـ
+vp:schimpfen:mit:Dat.|to scold|gronder|sgridare|دعوا کردن با (کسی)|يوبّخ
+vp:schmecken:nach:Dat.|to taste of|avoir un goût de|sapere di|مزهٔ ... دادن|طعمه مثل
+vp:speichern:in:Dat.|to save in|enregistrer dans|salvare in|ذخیره کردن در|يحفظ في
+vp:speichern:auf:Dat.|to save on|enregistrer sur|salvare su|ذخیره کردن روی|يحفظ على
+vp:sprechen:mit:Dat.|to speak with|parler avec|parlare con|صحبت کردن با|يتحدث مع
+vp:sprechen:von:Dat.|to speak of|parler de (mentionner)|parlare di (menzionare)|سخن گفتن از|يتحدث عن (يذكر)
+vp:sterben:an:Dat.|to die of|mourir de|morire di|مردن از|يموت من
+vp:sich streiten:mit:Dat.|to quarrel with|se disputer avec|litigare con|دعوا کردن با|يتشاجر مع
+vp:telefonieren:mit:Dat.|to talk on the phone with|téléphoner avec|telefonare con|تلفنی صحبت کردن با|يتحدث هاتفياً مع
+vp:sich treffen:mit:Dat.|to meet with|se retrouver avec|incontrarsi con|ملاقات کردن با|يلتقي بـ
+vp:sich trennen:von:Dat.|to separate from|se séparer de|separarsi da|جدا شدن از|ينفصل عن
+vp:überreden:zu:Dat.|to talk into|persuader de|convincere a|راضی کردن به|يقنعه بـ (فعل)
+vp:überzeugen:von:Dat.|to convince of|convaincre de|convincere di|متقاعد کردن دربارهٔ|يقنع بـ
+vp:umgehen:mit:Dat.|to handle, to deal with|gérer, se comporter avec|gestire, trattare con|برخورد کردن با|يتعامل مع
+vp:unterbrechen:bei:Dat.|to interrupt (during)|interrompre (pendant)|interrompere (durante)|حرف کسی را قطع کردن هنگام|يقاطع (أثناء)
+vp:sich unterhalten:mit:Dat.|to talk with|s’entretenir avec|conversare con|گفتگو کردن با|يتحادث مع
+vp:sich unterscheiden:von:Dat.|to differ from|se distinguer de|distinguersi da|تفاوت داشتن با|يختلف عن
+vp:unterstützen:bei:Dat.|to support with|soutenir dans|sostenere in|پشتیبانی کردن در|يدعم في
+vp:sich verabschieden:von:Dat.|to say goodbye to|prendre congé de|congedarsi da|خداحافظی کردن با|يودّع
+vp:verbinden:mit:Dat.|to connect with|relier à|collegare a|وصل کردن به|يربط بـ
+vp:vergleichen:mit:Dat.|to compare with|comparer avec|confrontare con|مقایسه کردن با|يقارن بـ
+vp:verlangen:von:Dat.|to demand from|exiger de|pretendere da|مطالبه کردن از|يطالب من
+vp:sich verstecken:vor:Dat.|to hide from|se cacher de|nascondersi da|پنهان شدن از|يختبئ من
+vp:sich verstehen:mit:Dat.|to get on with|bien s’entendre avec|andare d’accordo con|کنار آمدن با (کسی)|يتفاهم مع
+vp:vorbeikommen:bei:Dat.|to drop in on|passer chez|passare da|سر زدن به|يمرّ على
+vp:vorkommen:bei:Dat.|to occur with|arriver chez|capitare presso|رخ دادن در (نزد)|يحدث لدى
+vp:vortragen:vor:Dat.|to give a talk to|faire un exposé devant|tenere una relazione davanti a|سخنرانی کردن برای|يلقي كلمة أمام
+vp:weglaufen:vor:Dat.|to run away from|s’enfuir de|scappare da|فرار کردن از|يهرب من
+vp:sich wünschen:von:Dat.|to wish for (from someone)|souhaiter de la part de|desiderare da|آرزو داشتن (از کسی)|يتمنى من
+vp:zurückkommen:von:Dat.|to come back from|revenir de|tornare da|برگشتن از|يعود من
+vp:zählen:zu:Dat.|to be one of|compter parmi|essere tra|جزوِ ... به شمار آمدن|يُعدّ من
+vp:zweifeln:an:Dat.|to doubt|douter de|dubitare di|شک داشتن به|يشك في
+vp:zwingen:zu:Dat.|to force to|forcer à|costringere a|مجبور کردن به|يجبر على
+vp:sich bemühen:um:Akk.|to try hard to get|s’efforcer d’obtenir|darsi da fare per|تلاش کردن برای|يسعى إلى
+vp:gehen:um:Akk.|to be about (it’s about)|il s’agit de|si tratta di|موضوع ... است|الأمر يتعلق بـ
+vp:sich anmelden:für:Akk.|to sign up for|s’inscrire pour|iscriversi per|ثبت‌نام کردن برای|يسجّل لـ
+vp:sich anmelden:zu:Dat.|to enrol in (a course)|s’inscrire à (un cours)|iscriversi a (un corso)|ثبت‌نام کردن در (دوره)|يسجّل في (دورة)
+vp:sich schämen:für:Akk.|to be ashamed of|avoir honte de|vergognarsi di|خجالت کشیدن از|يخجل من
+vp:schützen:vor:Dat.|to protect from|protéger de|proteggere da|محافظت کردن از|يحمي من
+vp:warnen:vor:Dat.|to warn about|mettre en garde contre|mettere in guardia da|هشدار دادن دربارهٔ|يحذّر من
+vp:Angst haben:vor:Dat.|to be afraid of (phrase)|avoir peur de (expression)|avere paura di (frase)|ترس داشتن از|يخشى
+vp:suchen:nach:Dat.|to search for|chercher|cercare|جستجو کردن|يبحث عن
+vp:riechen:nach:Dat.|to smell of|sentir (odeur)|odorare di|بوی ... دادن|رائحته مثل
+vp:sich sehnen:nach:Dat.|to long for|languir de|avere nostalgia di|دلتنگِ ... بودن|يشتاق إلى
+vp:streben:nach:Dat.|to strive for|aspirer à|aspirare a|تلاش کردن برای رسیدن به|يسعى إلى (هدف)
+vp:stolz sein:auf:Akk.|to be proud of|être fier de|essere orgoglioso di|افتخار کردن به|يفتخر بـ
+vp:gespannt sein:auf:Akk.|to be eager for|être impatient de|essere curioso di|بی‌صبرانه منتظرِ ... بودن|يترقب بفارغ الصبر
+vp:neidisch sein:auf:Akk.|to be envious of|être jaloux de|essere invidioso di|حسادت کردن به|يحسد
+vp:böse sein:auf:Akk.|to be angry with|être fâché contre|essere arrabbiato con|از کسی دلخور بودن|يغضب من
+vp:wütend sein:auf:Akk.|to be furious with|être furieux contre|essere furioso con|از کسی خشمگین بودن|يستشيط غضباً من
+vp:froh sein:über:Akk.|to be glad about (adj.)|être content de|essere contento di|خوشحال بودن بابت|يكون مسروراً بـ
+vp:traurig sein:über:Akk.|to be sad about|être triste de|essere triste per|غمگین بودن بابت|يحزن بسبب
+vp:verantwortlich sein:für:Akk.|to be responsible for|être responsable de|essere responsabile di|مسئولِ ... بودن|يكون مسؤولاً عن
+vp:bekannt sein:für:Akk.|to be known for|être connu pour|essere noto per|معروف بودن به|يشتهر بـ
+vp:zuständig sein:für:Akk.|to be in charge of|être chargé de|essere competente per|متصدیِ ... بودن|يكون مختصاً بـ
+vp:zufrieden sein:mit:Dat.|to be satisfied with|être satisfait de|essere soddisfatto di|راضی بودن از|يكون راضياً عن
+vp:einverstanden sein:mit:Dat.|to agree with|être d’accord avec|essere d’accordo con|موافق بودن با|يكون موافقاً على
+vp:verheiratet sein:mit:Dat.|to be married to|être marié avec|essere sposato con|ازدواج کرده بودن با|يكون متزوجاً من
+vp:fertig sein:mit:Dat.|to be finished with|avoir fini avec|aver finito con|کارِ ... را تمام کرده بودن|ينتهي من
+vp:interessiert sein:an:Dat.|to be interested in (adj.)|être intéressé par|essere interessato a|علاقه‌مند بودن به|يكون مهتماً بـ
+vp:abhängig sein:von:Dat.|to be dependent on|être dépendant de|essere dipendente da|وابسته بودن به|يكون معتمداً على
+vp:begeistert sein:von:Dat.|to be thrilled with|être enthousiasmé par|essere entusiasta di|شیفتهٔ ... بودن|يكون مبهوراً بـ
+vp:enttäuscht sein:von:Dat.|to be disappointed in|être déçu par|essere deluso da|ناامید بودن از|يكون خائب الأمل من
+vp:überzeugt sein:von:Dat.|to be convinced of|être convaincu de|essere convinto di|متقاعد بودن از|يكون مقتنعاً بـ
+vp:bereit sein:zu:Dat.|to be ready for|être prêt à|essere pronto a|آماده بودن برای|يكون مستعداً لـ
+vp:Lust haben:auf:Akk.|to feel like (having)|avoir envie de|avere voglia di|هوسِ ... داشتن|يرغب في
+vp:Zeit haben:für:Akk.|to have time for|avoir du temps pour|avere tempo per|وقت داشتن برای|لديه وقت لـ
+vp:sich bewerben:als:Nom.|to apply as (position)|postuler en tant que|candidarsi come|برای سِمَت ... درخواست دادن|يتقدم كـ (منصب)
+vp:sich einarbeiten:in:Akk.|to familiarise oneself with|se familiariser avec|impratichirsi di|آشنا شدن با (کار جدید)|يتأقلم مع (عمل جديد)
+vp:Rücksicht nehmen:auf:Akk.|to be considerate of|tenir compte de (égards)|avere riguardo per|ملاحظهٔ ... را کردن|يراعي (شخصاً)
+vp:Bezug nehmen:auf:Akk.|to refer to (formal)|faire référence à|fare riferimento a|اشاره کردن به (رسمی)|يرجع إلى (رسمي)
+vp:Einfluss haben:auf:Akk.|to have an influence on|avoir une influence sur|avere influenza su|تأثیر داشتن بر|يؤثر على
+vp:Wert legen:auf:Akk.|to attach importance to|attacher de l’importance à|tenere a|اهمیت دادن به|يولي أهمية لـ
+vp:Anspruch haben:auf:Akk.|to be entitled to|avoir droit à|avere diritto a|حق داشتن به|يحق له
+vp:verfügen:über:Akk.|to have at one’s disposal|disposer de|disporre di|در اختیار داشتن|يمتلك، يتوفر لديه
+vp:haften:für:Akk.|to be liable for|répondre de|rispondere di|مسئول بودن (حقوقی) برای|يتحمل المسؤولية عن
+vp:sich durchsetzen:gegen:Akk.|to prevail against|s’imposer contre|imporsi su|پیروز شدن بر|يتغلب على
+vp:Kontakt aufnehmen:mit:Dat.|to contact|prendre contact avec|prendere contatto con|تماس برقرار کردن با|يتواصل مع (رسمياً)
+vp:in Kontakt stehen:mit:Dat.|to be in contact with|être en contact avec|essere in contatto con|در تماس بودن با|يكون على اتصال بـ
+vp:zusammenarbeiten:mit:Dat.|to collaborate with|collaborer avec|collaborare con|همکاری کردن با|يتعاون مع
+vp:sich abstimmen:mit:Dat.|to coordinate with|se concerter avec|coordinarsi con|هماهنگ کردن با|ينسق مع
+vp:Rücksprache halten:mit:Dat.|to consult with|consulter (qn)|consultarsi con|مشورت کردن با|يتشاور مع
+vp:beauftragen:mit:Dat.|to entrust with|charger de|incaricare di|سپردن (کار) به|يكلّف بـ
+vp:sich zurechtfinden:in:Dat.|to find one’s way in|s’y retrouver dans|orientarsi in|راه خود را پیدا کردن در|يهتدي في
+vp:Erfahrung haben:in:Dat.|to have experience in|avoir de l’expérience dans|avere esperienza in|تجربه داشتن در|لديه خبرة في
+vp:mitwirken:an:Dat.|to contribute to, to be involved in|collaborer à|collaborare a|مشارکت داشتن در|يساهم في (عمل)
+vp:fehlen:an:Dat.|to be lacking (in)|manquer de|mancare di|کمبودِ ... وجود داشتن|ينقصه
+vp:profitieren:von:Dat.|to benefit from|profiter de|trarre vantaggio da|بهره بردن از|يستفيد من
+vp:zurücktreten:von:Dat.|to step down from|se retirer de|dimettersi da|کناره‌گیری کردن از|يتنحى عن
+vp:abweichen:von:Dat.|to deviate from|s’écarter de|discostarsi da|منحرف شدن از|ينحرف عن
+vp:neigen:zu:Dat.|to tend to|avoir tendance à|tendere a|گرایش داشتن به|يميل إلى
+vp:befähigen:zu:Dat.|to qualify for, to enable|rendre capable de|abilitare a|توانمند ساختن برای|يؤهّل لـ
+order:Ich fahre jeden Tag mit dem Bus zur Arbeit .|I take the bus to work every day.|Je vais au travail en bus tous les jours.|Vado al lavoro in autobus ogni giorno.|من هر روز با اتوبوس سر کار می‌روم.|أذهب إلى العمل بالحافلة كل يوم.
+order:Er kauft im Supermarkt frisches Gemüse .|He buys fresh vegetables at the supermarket.|Il achète des légumes frais au supermarché.|Compra verdure fresche al supermercato.|او از سوپرمارکت سبزیجات تازه می‌خرد.|يشتري خضاراً طازجة من السوبرماركت.
+order:Meine Schwester wohnt seit zwei Jahren in dieser Stadt .|My sister has lived in this city for two years.|Ma sœur habite dans cette ville depuis deux ans.|Mia sorella abita in questa città da due anni.|خواهرم دو سال است که در این شهر زندگی می‌کند.|تسكن أختي في هذه المدينة منذ سنتين.
+order:Heute fahre ich mit dem Auto zur Arbeit .|Today I’m driving to work.|Aujourd’hui, je vais au travail en voiture.|Oggi vado al lavoro in macchina.|امروز با ماشین سر کار می‌روم.|اليوم أذهب إلى العمل بالسيارة.
+order:Weil es heute regnet , bleibe ich zu Hause .|Because it’s raining today, I’m staying at home.|Comme il pleut aujourd’hui, je reste à la maison.|Poiché oggi piove, resto a casa.|چون امروز باران می‌بارد، در خانه می‌مانم.|لأن المطر يهطل اليوم، أبقى في البيت.
+order:Wann fährt der nächste Zug nach Berlin ?|When does the next train to Berlin leave?|Quand part le prochain train pour Berlin ?|Quando parte il prossimo treno per Berlino?|قطار بعدی به برلین کی حرکت می‌کند؟|متى يغادر القطار التالي إلى برلين؟
+order:Kommst du heute Abend mit uns ins Kino ?|Are you coming to the cinema with us tonight?|Tu viens au cinéma avec nous ce soir ?|Vieni al cinema con noi stasera?|امشب با ما به سینما می‌آیی؟|هل تأتي معنا إلى السينما الليلة؟
+order:Ich habe gestern einen langen Brief geschrieben .|Yesterday I wrote a long letter.|Hier, j’ai écrit une longue lettre.|Ieri ho scritto una lunga lettera.|دیروز یک نامهٔ طولانی نوشتم.|كتبت أمس رسالة طويلة.
+order:Wir sind letztes Jahr nach Italien gefahren .|Last year we went to Italy.|L’année dernière, nous sommes allés en Italie.|L’anno scorso siamo andati in Italia.|پارسال به ایتالیا رفتیم.|ذهبنا العام الماضي إلى إيطاليا.
+order:Meine Eltern haben das neue Auto schon verkauft .|My parents have already sold the new car.|Mes parents ont déjà vendu la nouvelle voiture.|I miei genitori hanno già venduto la macchina nuova.|پدر و مادرم ماشین نو را فروخته‌اند.|باع والداي السيارة الجديدة بالفعل.
+order:Letzte Woche habe ich meinen Chef getroffen .|Last week I met my boss.|La semaine dernière, j’ai rencontré mon chef.|La settimana scorsa ho incontrato il mio capo.|هفتهٔ گذشته رئیسم را دیدم.|التقيت مديري الأسبوع الماضي.
+order:Hast du den Termin beim Arzt schon vereinbart ?|Have you already made the doctor’s appointment?|As-tu déjà pris rendez-vous chez le médecin ?|Hai già preso l’appuntamento dal medico?|آیا وقت دکتر را گرفته‌ای؟|هل حجزت موعداً عند الطبيب؟
+order:Wann bist du nach Deutschland gekommen ?|When did you come to Germany?|Quand es-tu venu(e) en Allemagne ?|Quando sei venuto/a in Germania?|کی به آلمان آمدی؟|متى أتيت إلى ألمانيا؟
+order:Weil ich die Prüfung bestanden habe , bin ich sehr glücklich .|Because I passed the exam, I’m very happy.|Comme j’ai réussi l’examen, je suis très heureux/se.|Poiché ho superato l’esame, sono molto felice.|چون در امتحان قبول شدم، خیلی خوشحالم.|لأنني نجحت في الامتحان، أنا سعيد جداً.
+order:Könnten Sie mir bitte die Unterlagen bis Freitag schicken ?|Could you please send me the documents by Friday?|Pourriez-vous m’envoyer les documents d’ici vendredi ?|Potrebbe inviarmi i documenti entro venerdì?|ممکن است لطفاً مدارک را تا جمعه برایم بفرستید؟|هل يمكنك إرسال المستندات إليّ قبل يوم الجمعة؟
+order:Wir müssen den Termin leider auf nächste Woche verschieben .|Unfortunately we have to postpone the meeting to next week.|Malheureusement, nous devons reporter le rendez-vous à la semaine prochaine.|Purtroppo dobbiamo rinviare l’appuntamento alla prossima settimana.|متأسفانه باید جلسه را به هفتهٔ آینده موکول کنیم.|للأسف علينا تأجيل الموعد إلى الأسبوع القادم.
+order:Ich bin für die Planung des Projekts zuständig .|I am responsible for planning the project.|Je suis responsable de la planification du projet.|Sono responsabile della pianificazione del progetto.|من مسئول برنامه‌ریزی پروژه هستم.|أنا مسؤول عن تخطيط المشروع.
+order:Obwohl ich viel Erfahrung habe , muss ich mich noch einarbeiten .|Although I have a lot of experience, I still have to settle in.|Bien que j’aie beaucoup d’expérience, je dois encore me familiariser.|Anche se ho molta esperienza, devo ancora ambientarmi.|با اینکه تجربهٔ زیادی دارم، هنوز باید با کار آشنا شوم.|رغم أن لدي خبرة كبيرة، ما زال عليّ التأقلم.
+order:Der Kunde hat sich über die verspätete Lieferung beschwert .|The customer complained about the late delivery.|Le client s’est plaint de la livraison en retard.|Il cliente si è lamentato della consegna in ritardo.|مشتری از تأخیر در تحویل شکایت کرد.|اشتكى الزبون من تأخر التسليم.
+order:Wir haben uns mit der Geschäftsleitung auf einen Kompromiss geeinigt .|We agreed on a compromise with the management.|Nous nous sommes mis d’accord sur un compromis avec la direction.|Ci siamo accordati con la direzione su un compromesso.|با مدیریت بر سر یک مصالحه به توافق رسیدیم.|اتفقنا مع الإدارة على حل وسط.
+order:Haben Sie den Bericht schon an alle Kollegen weitergeleitet ?|Have you already forwarded the report to all colleagues?|Avez-vous déjà transmis le rapport à tous les collègues ?|Ha già inoltrato la relazione a tutti i colleghi?|آیا گزارش را برای همهٔ همکاران فرستاده‌اید؟|هل أرسلت التقرير إلى جميع الزملاء؟
+order:Falls Sie Fragen haben , stehe ich Ihnen gern zur Verfügung .|If you have any questions, I’m happy to help.|Si vous avez des questions, je reste à votre disposition.|Se ha domande, sono a Sua disposizione.|اگر سؤالی دارید، در خدمتتان هستم.|إذا كانت لديك أسئلة، فأنا في خدمتك.`;
+  const TR = {};
+  RAW_I18N.split("\n").forEach(line=>{
+    if(!line) return;
+    const parts = line.split("|");
+    const vals = parts.slice(-5), key = parts.slice(0, parts.length-5).join("|");
+    TR[key] = {}; TR_LANGS.forEach((l,i)=>{ TR[key][l] = vals[i]; });
+  });
+  // Translation shown to the learner, in the interface language when available.
+  function trOf(w){
+    if(!w) return "";
+    const m = w.tk && TR[w.tk];
+    return (m && m[uiLang]) || w.ru || "";
+  }
+
   // ---------------- parsing helpers ----------------
   function parseBlock(raw, article, cat){
     return raw.split("\n").map(l=>l.trim()).filter(Boolean).map(line=>{
       const [word, ru, caseTag] = line.split("|");
-      const obj = { article, word, ru, cat };
+      const obj = { article, word, ru, cat, tk: cat + ":" + article + ":" + word };
       if(caseTag) obj.caseTag = caseTag;
       return obj;
     });
@@ -2798,7 +4558,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
   const caseWords = baseWords
     .filter(w=>w.cat==="noun")
     .map(w=>({
-      id: "case-" + w.id, word: w.word, ru: w.ru, article: "", cat: "case",
+      id: "case-" + w.id, word: w.word, ru: w.ru, tk: w.tk, article: "", cat: "case",
       gender: GENDER_MAP[w.article],
     }));
 
@@ -2807,14 +4567,14 @@ befähigen|zu|Dat.|давать возможность, квалифициров
       const [tokensStr, decoysStr, ru, tense, type] = line.split("|");
       const tokens = tokensStr.trim().split(/\s+/).filter(Boolean);
       const decoys = (decoysStr && decoysStr !== "-") ? decoysStr.split(",").map(s=>s.trim()).filter(Boolean) : [];
-      return { id:"order"+i, tokens, decoys, ru, tense, type, cat:"order" };
+      return { id:"order"+i, tokens, decoys, ru, tense, type, cat:"order", tk:"order:" + tokens.join(" ") };
     });
   }
 
   function parseVerbPrepBlock(raw){
     return raw.split("\n").map(l=>l.trim()).filter(Boolean).map((line,i)=>{
       const [verb, prep, caseTag, ru] = line.split("|");
-      return { id:"vp"+i, verb, word: prep, prep, caseTag, ru, article:"", cat:"verbprep" };
+      return { id:"vp"+i, verb, word: prep, prep, caseTag, ru, article:"", cat:"verbprep", tk:"vp:"+verb+":"+prep+":"+caseTag };
     });
   }
 
@@ -3265,7 +5025,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
   // vocabulary (so tiny custom decks still get 5 options). Words with the same
   // translation as the question are never offered — they would be indistinguishable.
   function distractorPool(question){
-    const ok = w => w.id !== question.id && w.cat !== "case" && w.cat !== "order" && normRu(w.ru) !== normRu(question.ru) && (w.cat !== "verbprep" || question.cat === "verbprep");
+    const ok = w => w.id !== question.id && w.cat !== "case" && w.cat !== "order" && normRu(trOf(w)) !== normRu(trOf(question)) && (w.cat !== "verbprep" || question.cat === "verbprep");
     const tiers = [
       ALL.filter(w=>ok(w) && question.cat==="noun" && w.cat==="noun" && w.word===question.word),
       ALL.filter(w=>ok(w) && w.cat===question.cat),
@@ -3291,17 +5051,17 @@ befähigen|zu|Dat.|давать возможность, квалифициров
   }
   // German word shown, pick the translation.
   function buildTranslationOptions(question){
-    const candidates = distractorPool(question).filter(w=>w.ru);
-    const used = new Set([(question.ru||"").trim().toLowerCase()]);
+    const candidates = distractorPool(question).filter(w=>trOf(w));
+    const used = new Set([normRu(trOf(question))]);
     const distractors = [];
     for(const w of candidates){
       if(distractors.length >= 4) break;
-      const k = w.ru.trim().toLowerCase();
+      const k = normRu(trOf(w));
       if(used.has(k)) continue;
       used.add(k); distractors.push(w);
     }
     return shuffle([question, ...distractors].map(w=>({
-      id: w.id, label: escHtml(w.ru), plain: w.ru, isCorrect: w.id === question.id,
+      id: w.id, label: escHtml(trOf(w)), plain: trOf(w), isCorrect: w.id === question.id,
     })));
   }
 
@@ -3468,7 +5228,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
     if(question.cat === "case"){
       els.genderLabel.textContent = question.caseName.toUpperCase();
       els.ruWord.textContent = question.word;
-      els.flapSub.textContent = t("translationPrefix") + question.ru;
+      els.flapSub.textContent = t("translationPrefix") + trOf(question);
     } else if(question.dir === "de-ru"){
       els.genderLabel.textContent = "DE → " + t("dirTargetShort");
       els.ruWord.textContent = germanLabelOf(question);
@@ -3477,10 +5237,10 @@ befähigen|zu|Dat.|давать возможность, квалифициров
     } else if(question.cat === "verbprep"){
       els.genderLabel.textContent = t("typeVerbprep").toUpperCase();
       els.ruWord.textContent = question.verb + " ... ?";
-      els.flapSub.textContent = t("translationPrefix") + question.ru;
+      els.flapSub.textContent = t("translationPrefix") + trOf(question);
     } else {
       els.genderLabel.textContent = t("dirTargetShort") + " → DE";
-      els.ruWord.textContent = question.ru;
+      els.ruWord.textContent = trOf(question);
       els.flapSub.textContent = "";
     }
     // Options are German unless we're asking for the translation.
@@ -3561,10 +5321,10 @@ befähigen|zu|Dat.|давать возможность, квалифициров
       streaks[question.id] = 0;
       if(question.cat === "case"){
         els.feedback.textContent = t("wrongPrefix") + (correctOpt ? correctOpt.plain : "") +
-          " " + question.word + " (" + question.caseName + ") — " + question.ru;
+          " " + question.word + " (" + question.caseName + ") — " + trOf(question);
       } else if(question.cat === "verbprep"){
         els.feedback.textContent = t("wrongPrefix") + question.verb + " " +
-          (correctOpt ? correctOpt.plain : "") + " — " + question.ru;
+          (correctOpt ? correctOpt.plain : "") + " — " + trOf(question);
       } else {
         els.feedback.textContent = t("wrongPrefix") + (correctOpt ? correctOpt.plain : "");
       }
@@ -3600,7 +5360,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
     const tag = [question.tense, question.type].filter(Boolean);
     els.genderLabel.textContent = tag.join(" · ").toUpperCase();
     els.ruWord.textContent = t("composePrompt");
-    els.ruHint.textContent = t("translationPrefix") + question.ru;
+    els.ruHint.textContent = t("translationPrefix") + trOf(question);
 
     const pool = shuffle([...question.tokens, ...question.decoys].map((tok,i)=>({tok, uid:i})));
     orderState = { question, pool, built: [] };
@@ -3723,6 +5483,14 @@ befähigen|zu|Dat.|давать возможность, квалифициров
     setText('btnExportLabel','exportBtn');
     setText('btnImportLabel','importBtn');
     setText('btnSettingsLabel','settingsBtnLabel');
+    setText('orderNextBtn','next');
+    setText('addWordHint','addWordHint');
+    setText('exportHint','exportHint');
+    setText('importHint','importHint');
+    setText('settingsHint','settingsHint');
+    setText('resetHint','resetHint');
+    if(els.newTrInput) els.newTrInput.placeholder = t('phTranslation');
+    { const dn = document.getElementById('deckNameInput'); if(dn) dn.placeholder = t('phDeckName'); }
     setText('btnSpeechLabel','speechLabel');
     setText('btnDirLabel','dirLabel');
     setText('obDirTitle','dirTitle');
@@ -3749,8 +5517,10 @@ befähigen|zu|Dat.|давать возможность, квалифициров
     setText('confirmResetDesc','confirmResetDesc');
     setText('confirmResetCancelBtn','cancel');
     setText('confirmResetOkBtn','reset');
-    els.undoBtn.textContent = "← " + (uiLang==='en'?'Erase':uiLang==='uk'?'Стерти':'Стереть');
-    els.checkBtn.textContent = uiLang==='en'?'Check':uiLang==='uk'?'Перевірити':'Проверить';
+    els.undoBtn.textContent = "← " + t('erase');
+    els.checkBtn.textContent = t('check');
+    document.documentElement.setAttribute('lang', uiLang);
+    document.documentElement.setAttribute('dir', RTL_LANGS.includes(uiLang) ? 'rtl' : 'ltr');
     setText('manageTitle','manageTitle');
     if(els.searchInput) els.searchInput.placeholder = t('search');
     setText('addWordTitle','addWordTitle');
@@ -3892,7 +5662,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
   function matchesSearch(w, q){
     if(!q) return true;
     q = q.toLowerCase();
-    const hay = [w.word, w.ru, w.verb||""].join(" ").toLowerCase();
+    const hay = [w.word, w.ru, trOf(w), w.verb||""].join(" ").toLowerCase();
     return hay.includes(q);
   }
 
@@ -3961,7 +5731,7 @@ befähigen|zu|Dat.|давать возможность, квалифициров
       de.textContent = wordDisplayLabel(w);
       const ru = document.createElement('div');
       ru.className = 'word-ru';
-      ru.textContent = w.ru || "";
+      ru.textContent = trOf(w);
       const tag = document.createElement('div');
       tag.className = 'word-tag';
       const src = currentDeckId===BASIC_DECK_ID ? BASIC_CATEGORIES : CUSTOM_TYPES;
@@ -4302,21 +6072,25 @@ befähigen|zu|Dat.|давать возможность, квалифициров
 
   // ---------------- onboarding ----------------
   const LANG_OPTIONS = [
-    {key:'uk', flag:'🇺🇦', name:'Українська'},
     {key:'ru', flag:'🇷🇺', name:'Русский'},
+    {key:'uk', flag:'🇺🇦', name:'Українська'},
     {key:'en', flag:'🇬🇧', name:'English'},
+    {key:'fr', flag:'🇫🇷', name:'Français'},
+    {key:'it', flag:'🇮🇹', name:'Italiano'},
+    {key:'fa', flag:'ف', name:'فارسی'},
+    {key:'ar', flag:'ع', name:'العربية'},
   ];
   const sw2 = (a,b)=>`linear-gradient(135deg, ${a} 0 62%, ${b} 62% 100%)`;
   const THEME_OPTIONS = [
-    {key:'dark', name:{ru:'Обычная',uk:'Звичайна',en:'Classic'}, sw:sw2('#0b0e14','#f2b846')},
-    {key:'navy', name:{ru:'Ночная',uk:'Нічна',en:'Midnight'}, sw:sw2('#0b1328','#7cc4ff')},
-    {key:'oled', name:{ru:'Чёрная (OLED)',uk:'Чорна (OLED)',en:'Black (OLED)'}, sw:sw2('#000000','#ffffff')},
-    {key:'forest', name:{ru:'Лесная',uk:'Лісова',en:'Forest'}, sw:sw2('#0d1712','#8fd16a')},
-    {key:'light', name:{ru:'Светлая',uk:'Світла',en:'Light'}, sw:sw2('#eef1f6','#b8721a')},
-    {key:'sakura', name:{ru:'Сакура',uk:'Сакура',en:'Sakura'}, sw:sw2('#fbeef2','#c2416b')},
-    {key:'lavender', name:{ru:'Лаванда',uk:'Лаванда',en:'Lavender'}, sw:sw2('#efedfb','#6a4fd1')},
-    {key:'beige', name:{ru:'Бежевая',uk:'Бежева',en:'Beige'}, sw:sw2('#ece0c9','#9d5a16')},
-    {key:'gray', name:{ru:'Серая',uk:'Сіра',en:'Gray'}, sw:sw2('#dfe2e7','#4a5568')},
+    {key:'dark', name:{ru:'Обычная',uk:'Звичайна',en:'Classic',fr:'Classique',it:'Classico',fa:'معمولی',ar:'عادي'}, sw:sw2('#0b0e14','#f2b846')},
+    {key:'navy', name:{ru:'Ночная',uk:'Нічна',en:'Midnight',fr:'Nuit',it:'Notte',fa:'شب',ar:'ليلي'}, sw:sw2('#0b1328','#7cc4ff')},
+    {key:'oled', name:{ru:'Чёрная (OLED)',uk:'Чорна (OLED)',en:'Black (OLED)',fr:'Noir (OLED)',it:'Nero (OLED)',fa:'مشکی (OLED)',ar:'أسود (OLED)'}, sw:sw2('#000000','#ffffff')},
+    {key:'forest', name:{ru:'Лесная',uk:'Лісова',en:'Forest',fr:'Forêt',it:'Foresta',fa:'جنگلی',ar:'غابة'}, sw:sw2('#0d1712','#8fd16a')},
+    {key:'light', name:{ru:'Светлая',uk:'Світла',en:'Light',fr:'Clair',it:'Chiaro',fa:'روشن',ar:'فاتح'}, sw:sw2('#eef1f6','#b8721a')},
+    {key:'sakura', name:{ru:'Сакура',uk:'Сакура',en:'Sakura',fr:'Sakura',it:'Sakura',fa:'ساکورا',ar:'ساكورا'}, sw:sw2('#fbeef2','#c2416b')},
+    {key:'lavender', name:{ru:'Лаванда',uk:'Лаванда',en:'Lavender',fr:'Lavande',it:'Lavanda',fa:'اسطوخودوس',ar:'لافندر'}, sw:sw2('#efedfb','#6a4fd1')},
+    {key:'beige', name:{ru:'Бежевая',uk:'Бежева',en:'Beige',fr:'Beige',it:'Beige',fa:'کرم',ar:'بيج'}, sw:sw2('#ece0c9','#9d5a16')},
+    {key:'gray', name:{ru:'Серая',uk:'Сіра',en:'Gray',fr:'Gris',it:'Grigio',fa:'خاکستری',ar:'رمادي'}, sw:sw2('#dfe2e7','#4a5568')},
   ];
   let obLang = 'ru', obTheme = 'dark', cameFromSettings = false;
 
@@ -4427,12 +6201,34 @@ befähigen|zu|Dat.|давать возможность, квалифициров
     openModal('onboardLangModal');
   });
 
-  els.langNextBtn.addEventListener('click', async ()=>{
+  // Ask "are you sure?" in the chosen language (and in the current one) so nobody switches by accident.
+  function langName(code){ const o = LANG_OPTIONS.find(x=>x.key===code); return o ? o.name : code; }
+  els.langNextBtn.addEventListener('click', ()=>{
+    const fill = (id, lang, key) => {
+      const el = document.getElementById(id);
+      el.textContent = tl(lang, key).replace('{lang}', langName(obLang));
+      el.setAttribute('dir', RTL_LANGS.includes(lang) ? 'rtl' : 'ltr');
+    };
+    fill('langConfirmTitle', obLang, 'langConfirmTitle');
+    fill('langConfirmText', obLang, 'langConfirmText');
+    fill('langConfirmYes', obLang, 'langConfirmYes');
+    fill('langConfirmNo', obLang, 'langConfirmNo');
+    const alt = document.getElementById('langConfirmAlt');
+    if(obLang !== uiLang){ fill('langConfirmAlt', uiLang, 'langConfirmText'); alt.style.display = ''; }
+    else { alt.textContent = ''; alt.style.display = 'none'; }
+    openModal('langConfirmModal');
+  });
+  document.getElementById('langConfirmNo').addEventListener('click', ()=> closeModal('langConfirmModal'));
+  document.getElementById('langConfirmYes').addEventListener('click', async ()=>{
+    closeModal('langConfirmModal');
     uiLang = obLang;
     applyTheme(obTheme);
     applyI18nToStaticEls();
     renderDeckRow(); renderChips();
     themeAsked = true;
+    if(!locked) renderQuestion();
+    if(document.getElementById('pageWords').classList.contains('active')){ renderManageFilters(); renderManageList(); }
+    if(typeof renderDirHint === 'function') renderDirHint();
     await saveProgress();
     if(cameFromSettings || !obActive){ cameFromSettings = false; closeModal('onboardLangModal'); }
     else { advanceOnboarding(); }
