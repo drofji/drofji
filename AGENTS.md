@@ -67,24 +67,24 @@ ID слов вычисляются по позиции: `"w"+индекс` по 
 
 ---
 
-# Правила для агентов (moqup/)
+# Regeln für Agenten (moqup/)
 
-`moqup/` — генератор кликабельных прототипов админок из JSON (для презентаций: логистика, WWS/WMS, CRM, ERP, маркетинг, продажи, бухгалтерия). Без сборки и зависимостей.
+`moqup/` — Generator für klickbare Admin-Prototypen aus JSON (für Präsentationen: Logistik, WWS/WMS, CRM, ERP, Marketing, Vertrieb, Buchhaltung). Ohne Build und Abhängigkeiten. Sprache der Dokumentation, Beispiele und Standardoberfläche: **Deutsch** (`app.lang` Standard `de`; `en` und `ru` optional).
 
-| Файл | Что там |
+| Datei | Inhalt |
 |---|---|
-| `moqup/dashboard.html` | разметка + **все стили** (палитра — CSS-переменные в `:root` и `[data-mode=light]`) |
-| `moqup/helper.js` | движок: чтение параметров `map`/`colors`/`demo`/`logo`/`page` (из `?` и `#`), декодирование (`z:` deflate-raw, `pako:` zlib, `b64:`, JSON), проверка с понятными ошибками, экран документации и конструктор ссылки, загрузчик со счётчиком, каркас, виджеты (`WIDGETS.<type>`), действия (`runAction`), AI-чат, демо-курсор, финал |
-| `moqup/examples.js` | `window.MOQUP_EXAMPLES` — эталонные конфигурации (`map` + `colors` + `demo` + `logo`) |
-| `moqup/DOCS.md` | **единственный источник правды по формату JSON** + промпт для ИИ |
+| `moqup/dashboard.html` | Markup + **alle Styles** (Palette — CSS-Variablen in `:root` und `[data-mode=light]`) |
+| `moqup/helper.js` | Engine: Lesen der Parameter `map`/`colors`/`demo`/`logo`/`page` (aus `?` und `#`), Dekodierung (`z:` deflate-raw, `pako:` zlib, `b64:`, JSON), Prüfung mit verständlichen Fehlern, Dokumentationsseite und Link-Generator, Ladebildschirm mit Zähler, Grundgerüst, Widgets (`WIDGETS.<type>`), Aktionen (`runAction`), KI-Chat, Demo-Cursor, Finale |
+| `moqup/examples.js` | `window.MOQUP_EXAMPLES` — Referenzkonfigurationen (`map` + `colors` + `demo` + `logo`) |
+| `moqup/DOCS.md` | **einzige verbindliche Quelle für das JSON-Format** + KI-Prompt |
 
-Правила:
+Regeln:
 
-- Новый тип виджета: функция `WIDGETS.<type> = w => element`, ширина по умолчанию в `DEFAULT_W`, синонимы в `ALIASES`, вложенные виджеты — в `CONTAINERS`; интерактивным элементам давать `ref` (`data-ref`) для целей демо; описать в `DOCS.md` (каталог виджетов и таблица целей).
-- Новое действие — в `runAction` и таблицу действий в `DOCS.md`; новый шаг демо — в `doStep` и раздел «Демо».
-- Пользовательский текст выводить только через `textContent` (`h(..., {text})`) или `md()` (экранирует); `innerHTML` — только для своей разметки. Цвета из JSON — только через `cssColor()`/`validColor()`, URL — через `safeUrl()`, логотип SVG — только как `<img>`.
-- Тексты интерфейса — в `I18N` для `ru`, `en`, `de`.
-- Ошибка в одном виджете не должна ронять страницу: предупреждение через `warn()` (значок ⚠ в топбаре).
-- Изменили формат — обновить `DOCS.md`, при необходимости `examples.js` и краткое описание в `README.md`.
+- Neuer Widget-Typ: Funktion `WIDGETS.<type> = w => element`, Standardbreite in `DEFAULT_W`, Synonyme in `ALIASES`, verschachtelte Widgets in `CONTAINERS`; interaktiven Elementen ein `ref` (`data-ref`) für Demo-Ziele geben; in `DOCS.md` beschreiben (Widget-Katalog und Zieltabelle).
+- Neue Aktion — in `runAction` und in die Aktionstabelle von `DOCS.md`; neuer Demo-Schritt — in `doStep` und den Abschnitt „Demo-Modus“.
+- Benutzertexte nur über `textContent` (`h(..., {text})`) oder `md()` (escaped) ausgeben; `innerHTML` nur für eigenes Markup. Farben aus JSON nur über `cssColor()`/`validColor()`, URLs über `safeUrl()`, SVG-Logos nur als `<img>`.
+- Oberflächentexte in `I18N` für `de`, `en`, `ru`; Meldungen, Dokumentationsseite und Kommentare auf Deutsch.
+- Ein Fehler in einem Widget darf die Seite nicht abbrechen: Hinweis über `warn()` (Symbol ⚠ in der Topbar).
+- Format geändert → `DOCS.md`, ggf. `examples.js` und die Kurzbeschreibung in `README.md` aktualisieren.
 
-Проверка перед коммитом: `node --check moqup/helper.js moqup/examples.js`; открыть `moqup/dashboard.html` через http-сервер в Playwright: без параметров (документация), со сломанным JSON (ошибка), оба примера (нет ошибок в консоли, все разделы открываются), прогнать демо до финала, проверить ширину телефона (iPhone 13).
+Prüfung vor dem Commit: `node --check moqup/helper.js moqup/examples.js`; `moqup/dashboard.html` über einen HTTP-Server in Playwright öffnen: ohne Parameter (Dokumentation), mit fehlerhaftem JSON (Fehler), beide Beispiele (keine Konsolenfehler, alle Bereiche öffnen sich), Demo bis zum Finale durchlaufen lassen, Smartphone-Breite prüfen (iPhone 13).

@@ -1,15 +1,15 @@
 /*!
- * Moqup helper.js — JSON → кликабельный прототип дашборда (админки).
- * Параметры ссылки: map (обязательный), colors, demo, logo, page (необязательные).
- * Полная документация: DOCS.md (лежит рядом).
- * Без зависимостей и сборки. Все пользовательские строки выводятся через textContent
- * или через экранирующий мини-markdown, поэтому JSON из ссылки не может внедрить скрипт.
+ * Moqup helper.js — JSON → klickbarer Dashboard-/Admin-Prototyp.
+ * Link-Parameter: map (Pflicht), colors, demo, logo, page (optional).
+ * Vollständige Dokumentation: DOCS.md (liegt daneben).
+ * Ohne Abhängigkeiten und Build. Alle Benutzertexte werden per textContent oder über
+ * escapendes Mini-Markdown ausgegeben – JSON aus dem Link kann kein Skript einschleusen.
  */
 (function () {
   'use strict';
 
   /* =====================================================================
-   * 0. Константы и состояние
+   * 0. Konstanten und Zustand
    * ===================================================================== */
   const VERSION = '1.0.0';
   const KEYS = ['map', 'colors', 'demo', 'logo', 'page'];
@@ -18,14 +18,14 @@
     cfg: null, colorsParam: null, demo: null, logo: null,
     pages: {}, pageList: [], current: null, widgets: {}, warnings: [], notifs: [],
     stats: { pages: 0, widgets: 0, automations: 0, integrations: 0, tables: 0, charts: 0 },
-    lang: 'ru', locale: 'ru-RU', mode: 'dark', loading: null, raw: {}, chat: null, search: [],
+    lang: 'de', locale: 'de-DE', mode: 'dark', loading: null, raw: {}, chat: null, search: [],
   };
   const BUS = {};
   const on = (ev, fn) => (BUS[ev] = BUS[ev] || []).push(fn);
   const emit = (ev, d) => (BUS[ev] || []).forEach(fn => { try { fn(d); } catch (e) { console.error(e); } });
 
   /* =====================================================================
-   * 1. Тексты интерфейса (ru / en / de) — app.lang
+   * 1. Oberflächentexte (de / en / ru) — app.lang
    * ===================================================================== */
   const I18N = {
     ru: {
@@ -92,13 +92,13 @@
     },
   };
   const t = (k, vars) => {
-    let s = (I18N[S.lang] && I18N[S.lang][k]) || I18N.ru[k] || k;
+    let s = (I18N[S.lang] && I18N[S.lang][k]) || I18N.de[k] || k;
     if (vars) for (const v in vars) s = s.replace('{' + v + '}', vars[v]);
     return s;
   };
 
   /* =====================================================================
-   * 2. Утилиты
+   * 2. Hilfsfunktionen
    * ===================================================================== */
   const isObj = v => v && typeof v === 'object' && !Array.isArray(v);
   const arr = v => (Array.isArray(v) ? v : v == null ? [] : [v]);
@@ -126,7 +126,7 @@
         if (typeof v === 'string') el.style.cssText = v;
         else for (const p in v) { if (v[p] == null) continue; if (p.startsWith('--')) el.style.setProperty(p, v[p]); else el.style[p] = v[p]; }
       } else if (k === 'text') el.textContent = v;
-      else if (k === 'html') el.innerHTML = v; // только для нашей разметки / экранированного markdown
+      else if (k === 'html') el.innerHTML = v; // nur für eigenes Markup / escaptes Markdown
       else if (k === 'ref') el.setAttribute('data-ref', v);
       else if (k.startsWith('on') && typeof v === 'function') el.addEventListener(k.slice(2), v);
       else el.setAttribute(k, v === true ? '' : v);
@@ -166,7 +166,7 @@
     return /^(https?:\/\/|mailto:|tel:|#|\.{0,2}\/)/i.test(v) || /^[\w.-]+\.(md|html|json|pdf)(#.*)?$/i.test(v) ? v : null;
   }
 
-  // мини-markdown для строк: **жирный**, *курсив*, `код`, [ссылка](url), переводы строк
+  // Mini-Markdown für Zeilen: **fett**, *kursiv*, `Code`, [Link](url), Zeilenumbrüche
   function md(text) {
     const codes = [];
     let x = esc(String(text == null ? '' : text)).replace(/`([^`]+)`/g, (m, c) => { codes.push(c); return '\u0000' + (codes.length - 1) + '\u0000'; });
@@ -184,7 +184,7 @@
   }
   const mdEl = (tag, text, cls) => h(tag, { class: cls, html: md(text) });
 
-  // блочный markdown — для DOCS.md на экране документации
+  // Block-Markdown — für DOCS.md auf der Dokumentationsseite
   function renderMarkdown(src) {
     const lines = String(src).replace(/\r/g, '').split('\n');
     let out = '', i = 0;
@@ -234,7 +234,7 @@
     return out;
   }
 
-  // цвета: имена тонов → CSS-переменные, сырые цвета — только безопасного вида
+  // Farben: Tonnamen → CSS-Variablen, Rohfarben nur in sicherer Form
   const TONES = { primary: 'primary', accent: 'accent', success: 'success', warning: 'warning', danger: 'danger', info: 'info', muted: 'muted',
     secondary: 'muted', green: 'success', red: 'danger', error: 'danger', orange: 'warning', yellow: 'warning', blue: 'info', purple: 'primary-2', violet: 'primary-2', cyan: 'accent', gray: 'muted', grey: 'muted' };
   function cssColor(c) {
@@ -326,7 +326,7 @@
   function warn(msg) { if (!S.warnings.includes(msg)) S.warnings.push(msg); console.warn('[moqup]', msg); }
 
   /* =====================================================================
-   * 3. Чтение и декодирование параметров
+   * 3. Parameter lesen und dekodieren
    * ===================================================================== */
   function extractParams(str) {
     const res = {};
@@ -349,7 +349,7 @@
   function readRawParams() {
     const q = extractParams(location.search.replace(/^\?/, ''));
     const hs = extractParams(location.hash.replace(/^#/, ''));
-    return Object.assign({}, q, hs); // hash важнее query
+    return Object.assign({}, q, hs); // Hash hat Vorrang vor Query
   }
   function b64ToBytes(str) {
     let b = String(str).replace(/\s+/g, '').replace(/-/g, '+').replace(/_/g, '/');
@@ -365,7 +365,7 @@
   }
   const bytesToText = b => new TextDecoder('utf-8', { fatal: true }).decode(b);
   async function inflate(bytes, fmt) {
-    if (typeof DecompressionStream === 'undefined') throw new Error('браузер не поддерживает DecompressionStream — используйте b64: или обычный JSON');
+    if (typeof DecompressionStream === 'undefined') throw new Error('Der Browser unterstützt DecompressionStream nicht — verwenden Sie b64: oder normales JSON');
     const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream(fmt));
     return await new Response(stream).text();
   }
@@ -396,13 +396,13 @@
         if (bytes[0] === 0x78) text = await inflate(bytes, 'deflate');
         else {
           let tx = null;
-          try { tx = bytesToText(bytes); } catch (e) { /* не текст */ }
+          try { tx = bytesToText(bytes); } catch (e) { /* kein Text */ }
           text = tx && /^\s*[\[{]/.test(tx) ? tx : await inflate(bytes, 'deflate-raw');
         }
       }
     } catch (e) {
-      throw { param: name, title: 'Не удалось декодировать параметр', message: (e && e.message) || String(e),
-        hints: ['Префиксы: `z:` — deflate-raw + base64url, `pako:` — zlib + base64url (как в mermaid.live), `b64:` — base64url, без префикса — обычный JSON.', 'Ссылка могла обрезаться при копировании — сгенерируйте её заново в конструкторе.'] };
+      throw { param: name, title: 'Parameter konnte nicht dekodiert werden', message: (e && e.message) || String(e),
+        hints: ['Präfixe: `z:` — deflate-raw + base64url, `pako:` — zlib + base64url (wie bei mermaid.live), `b64:` — base64url, ohne Präfix — normales JSON.', 'Der Link wurde beim Kopieren evtl. abgeschnitten — im Link-Generator neu erzeugen.'] };
     }
     S.raw[name] = text;
     try { return JSON.parse(text); } catch (e) { throw jsonError(name, text, e); }
@@ -420,7 +420,7 @@
     if (pos != null) {
       const before = text.slice(0, pos);
       const line = before.split('\n').length, col = pos - before.lastIndexOf('\n');
-      where = ` — строка ${line}, столбец ${col}`;
+      where = ` — Zeile ${line}, Spalte ${col}`;
       const ls = text.split('\n');
       if (ls[line - 1] && ls[line - 1].length <= 160) {
         const from = Math.max(0, line - 3);
@@ -431,19 +431,19 @@
       }
     }
     const hints = [];
-    if (/,\s*[}\]]/.test(text)) hints.push('Лишняя запятая перед `}` или `]` — в JSON её быть не должно.');
-    if (/[{,]\s*'[^']*'\s*:/.test(text) || /:\s*'[^']*'/.test(text)) hints.push('Одинарные кавычки: в JSON ключи и строки только в двойных кавычках `"…"`.');
-    if (/[{,]\s*[A-Za-z_$][\w$]*\s*:/.test(text)) hints.push('Ключи без кавычек: `{title: "…"}` → `{"title": "…"}`.');
-    if (/(^|[^:"])\/\/|\/\*/.test(text)) hints.push('Комментарии `//` и `/* */` в JSON запрещены.');
-    if (/[“”„«»]/.test(text)) hints.push('Типографские кавычки `“ ” „ « »` вместо прямых `"`.');
+    if (/,\s*[}\]]/.test(text)) hints.push('Überflüssiges Komma vor `}` oder `]` — in JSON nicht erlaubt.');
+    if (/[{,]\s*'[^']*'\s*:/.test(text) || /:\s*'[^']*'/.test(text)) hints.push('Einfache Anführungszeichen: In JSON stehen Schlüssel und Strings nur in doppelten Anführungszeichen `"…"`.');
+    if (/[{,]\s*[A-Za-z_$][\w$]*\s*:/.test(text)) hints.push('Schlüssel ohne Anführungszeichen: `{title: "…"}` → `{"title": "…"}`.');
+    if (/(^|[^:"])\/\/|\/\*/.test(text)) hints.push('Kommentare `//` und `/* */` sind in JSON nicht erlaubt.');
+    if (/[“”„«»]/.test(text)) hints.push('Typografische Anführungszeichen `“ ” „ « »` statt gerader `"`.');
     const opens = (text.match(/[{[]/g) || []).length, closes = (text.match(/[}\]]/g) || []).length;
-    if (opens !== closes) hints.push(`Скобки не сбалансированы: открывающих ${opens}, закрывающих ${closes}. Возможно, ссылка обрезалась.`);
-    if (/^%7B/i.test(text)) hints.push('JSON закодирован в URL дважды — декодируйте один раз.');
-    return { param: name, title: `Неправильный формат JSON в параметре «${name}»`, message: msg + where, snippet, hints };
+    if (opens !== closes) hints.push(`Klammern nicht ausgeglichen: ${opens} öffnende, ${closes} schließende. Vermutlich wurde der Link abgeschnitten.`);
+    if (/^%7B/i.test(text)) hints.push('JSON wurde doppelt URL-kodiert — einmal dekodieren.');
+    return { param: name, title: `Ungültiges JSON im Parameter „${name}“`, message: msg + where, snippet, hints };
   }
 
   /* =====================================================================
-   * 4. Нормализация конфигурации
+   * 4. Konfiguration normalisieren
    * ===================================================================== */
   const CONTAINERS = { tabs: w => arr(w.tabs).flatMap(x => arr(x && x.widgets)), accordion: w => arr(w.items).flatMap(x => arr(x && x.widgets)), group: w => arr(w.widgets) };
   const ALIASES = { kpi: 'stat', box: 'stat', infobox: 'stat', pipeline: 'process', steps: 'process', map: 'routes', permissions: 'matrix', access: 'matrix',
@@ -453,29 +453,29 @@
   const nested = w => (CONTAINERS[typeOf(w)] ? CONTAINERS[typeOf(w)](w) : []);
 
   function normalize(cfg) {
-    if (!isObj(cfg)) throw { param: 'map', title: 'Неверная структура конфигурации', message: 'Корень должен быть объектом: { "app": {…}, "menu": […] }. Сейчас: ' + (Array.isArray(cfg) ? 'массив' : typeof cfg) + '.' };
+    if (!isObj(cfg)) throw { param: 'map', title: 'Ungültige Konfigurationsstruktur', message: 'Die Wurzel muss ein Objekt sein: { "app": {…}, "menu": […] }. Aktuell: ' + (Array.isArray(cfg) ? 'Array' : typeof cfg) + '.' };
     const known = ['app', 'menu', 'pages', 'chat', 'layout', 'colors', 'demo', 'logo', '$schema', 'version', 'meta'];
-    Object.keys(cfg).forEach(k => { if (!known.includes(k)) warn(`Неизвестный ключ верхнего уровня «${k}» — проигнорирован.`); });
+    Object.keys(cfg).forEach(k => { if (!known.includes(k)) warn(`Unbekannter Schlüssel der obersten Ebene „${k}“ — ignoriert.`); });
     cfg.app = Object.assign({ title: 'Moqup', search: true }, isObj(cfg.app) ? cfg.app : {});
     const dict = isObj(cfg.pages) ? cfg.pages : {};
     let menu = Array.isArray(cfg.menu) ? cfg.menu : [];
     if (!menu.length && Object.keys(dict).length) menu = Object.keys(dict).map(k => ({ page: k }));
-    if (!menu.length) throw { param: 'map', title: 'В конфигурации нет разделов', message: 'Заполните "menu" — массив пунктов меню. Каждый пункт без "children" — это страница с "widgets".', hints: ['Минимум: `{"menu":[{"title":"Обзор","widgets":[{"type":"stat","label":"Заказы","value":120}]}]}`'] };
+    if (!menu.length) throw { param: 'map', title: 'Die Konfiguration enthält keine Bereiche', message: 'Füllen Sie "menu" aus — ein Array von Menüpunkten. Jeder Punkt ohne "children" ist eine Seite mit "widgets".', hints: ['Minimum: `{"menu":[{"title":"Übersicht","widgets":[{"type":"stat","label":"Aufträge","value":120}]}]}`'] };
 
     const used = new Set(), refPages = new Set();
-    const uniq = id => { let x = id || 'page', k = 2; if (used.has(x)) { warn(`Повторяющийся id раздела «${x}».`); while (used.has(x + '-' + k)) k++; x = x + '-' + k; } used.add(x); return x; };
+    const uniq = id => { let x = id || 'page', k = 2; if (used.has(x)) { warn(`Doppelte Bereichs-ID „${x}“.`); while (used.has(x + '-' + k)) k++; x = x + '-' + k; } used.add(x); return x; };
     const register = node => { node.isPage = true; node.widgets = Array.isArray(node.widgets) ? node.widgets : []; S.pages[node.id] = node; S.pageList.push(node); };
     const walk = (items, parent) => items.map((it, i) => {
       if (typeof it === 'string') it = { title: it };
-      if (!isObj(it)) { warn('Пункт меню должен быть объектом.'); return null; }
+      if (!isObj(it)) { warn('Ein Menüpunkt muss ein Objekt sein.'); return null; }
       if (it.section && !it.title && !it.page) return { section: String(it.section) };
       let node = Object.assign({}, it);
       if (typeof node.page === 'string') {
         refPages.add(node.page);
         if (isObj(dict[node.page])) node = Object.assign({}, dict[node.page], node, { id: node.id || node.page });
-        else warn(`Пункт меню ссылается на несуществующую страницу «${node.page}» (pages.${node.page}).`);
+        else warn(`Menüpunkt verweist auf nicht vorhandene Seite „${node.page}“ (pages.${node.page}).`);
       } else if (isObj(node.page)) node = Object.assign({}, node.page, node);
-      node.title = String(node.title || node.label || node.id || `Раздел ${i + 1}`);
+      node.title = String(node.title || node.label || node.id || `Bereich ${i + 1}`);
       node.id = uniq(String(node.id || slug(node.title)));
       node.parent = parent || null;
       node.children = Array.isArray(node.children) && node.children.length ? walk(node.children, node).filter(Boolean) : null;
@@ -484,15 +484,15 @@
     }).filter(Boolean);
     cfg.menu = walk(menu, null);
     Object.keys(dict).forEach(k => { if (!refPages.has(k) && !S.pages[k] && isObj(dict[k])) { const n = Object.assign({ title: k }, dict[k], { id: uniq(k), hidden: true, parent: null }); register(n); } });
-    if (!S.pageList.length) throw { param: 'map', title: 'Нет ни одной страницы', message: 'У всех пунктов меню есть "children", но нет конечных пунктов со "widgets".' };
+    if (!S.pageList.length) throw { param: 'map', title: 'Keine einzige Seite vorhanden', message: 'Alle Menüpunkte haben "children", aber es gibt keine Endpunkte mit "widgets".' };
 
     const wids = new Set();
     let n = 0;
     const walkW = list => arr(list).forEach(w => {
       if (!isObj(w)) return;
-      if (!w.type) warn(`Виджет без "type"${w.title ? ' («' + w.title + '»)' : ''} — будет показан как текст.`);
+      if (!w.type) warn(`Widget ohne "type"${w.title ? ' („' + w.title + '“)' : ''} — wird als Text angezeigt.`);
       w.id = String(w.id || 'w' + (++n));
-      if (wids.has(w.id)) { warn(`Повторяющийся id виджета «${w.id}».`); w.id += '-' + (++n); }
+      if (wids.has(w.id)) { warn(`Doppelte Widget-ID „${w.id}“.`); w.id += '-' + (++n); }
       wids.add(w.id);
       walkW(nested(w));
     });
@@ -502,7 +502,7 @@
   }
 
   /* =====================================================================
-   * 5. Цвета, макет, логотип
+   * 5. Farben, Layout, Logo
    * ===================================================================== */
   const COLOR_KEYS = { primary: '--primary', primary2: '--primary-2', secondary: '--primary-2', accent: '--accent', bg: '--bg', background: '--bg',
     bg2: '--bg-2', surface: '--surface', card: '--surface', surface2: '--surface-2', text: '--text', muted: '--muted', border: '--border',
@@ -520,8 +520,8 @@
         if (k === 'chart') { arr(v).slice(0, 8).forEach((c, i) => validColor(c) && root.style.setProperty('--c' + (i + 1), c)); continue; }
         if (k === 'radius') { if (isFinite(v)) root.style.setProperty('--radius', v + 'px'); continue; }
         if (k === 'font') { if (/^[\w\s,"'-]+$/.test(v)) root.style.setProperty('--font', v); continue; }
-        if (!COLOR_KEYS[k]) { warn(`colors: неизвестный ключ «${k}».`); continue; }
-        if (!validColor(v)) { warn(`colors.${k}: некорректный цвет «${v}».`); continue; }
+        if (!COLOR_KEYS[k]) { warn(`colors: unbekannter Schlüssel „${k}“.`); continue; }
+        if (!validColor(v)) { warn(`colors.${k}: ungültige Farbe „${v}“.`); continue; }
         root.style.setProperty(COLOR_KEYS[k], v);
       }
     };
@@ -543,13 +543,13 @@
     const wrap = h('div', { class: 'brand-logo' + (big ? ' big' : '') });
     if (L) {
       let v = String(L).trim();
-      if (/^"/.test(v)) { try { v = JSON.parse(v); } catch (e) { /* как есть */ } }
-      if (/^b64:/i.test(v)) { try { v = bytesToText(b64ToBytes(v.slice(4))); } catch (e) { warn('logo: не удалось декодировать b64.'); } }
+      if (/^"/.test(v)) { try { v = JSON.parse(v); } catch (e) { /* unverändert */ } }
+      if (/^b64:/i.test(v)) { try { v = bytesToText(b64ToBytes(v.slice(4))); } catch (e) { warn('logo: b64 konnte nicht dekodiert werden.'); } }
       let src = null;
       if (/^<svg[\s>]/i.test(v)) src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(v);
       else if (/^data:image\/(png|jpe?g|gif|webp|svg\+xml)[;,]/i.test(v)) src = v;
       else if (/^https?:\/\//i.test(v) || /^[\w./-]+\.(svg|png|jpe?g|webp|gif)$/i.test(v)) src = v;
-      if (src) { wrap.classList.add('img'); wrap.appendChild(h('img', { src, alt: 'logo' })); return wrap; } // <img> не исполняет скрипты внутри SVG
+      if (src) { wrap.classList.add('img'); wrap.appendChild(h('img', { src, alt: 'logo' })); return wrap; } // <img> führt keine Skripte im SVG aus
       wrap.textContent = v.slice(0, 3);
       return wrap;
     }
@@ -558,48 +558,48 @@
   }
 
   /* =====================================================================
-   * 6. Экран документации / ошибок
+   * 6. Dokumentations- / Fehlerseite
    * ===================================================================== */
-  const EMBED_DOCS = `# Moqup — краткая справка
-Полная документация — файл **DOCS.md** рядом с dashboard.html (при открытии через http она показывается здесь целиком).
+  const EMBED_DOCS = `# Moqup — Kurzreferenz
+Die vollständige Dokumentation ist die Datei **DOCS.md** neben dashboard.html (über http geöffnet, wird sie hier komplett angezeigt).
 
-## Параметры ссылки
-| Параметр | Обязательный | Что внутри |
+## Link-Parameter
+| Parameter | Pflicht | Inhalt |
 |---|---|---|
-| \`map\` | да | JSON-конфигурация: меню, страницы, виджеты, чат |
-| \`colors\` | нет | JSON-палитра: \`{"primary":"#6c7cff","bg":"#0b1020"}\` |
-| \`demo\` | нет | JSON-сценарий демо: \`{"steps":[…]}\` |
-| \`logo\` | нет | SVG-разметка, data:image…, URL картинки или 1–3 символа |
-| \`page\` | нет | id раздела, который открыть первым |
+| \`map\` | ja | JSON-Konfiguration: Menü, Seiten, Widgets, Chat |
+| \`colors\` | nein | JSON-Palette: \`{"primary":"#6c7cff","bg":"#0b1020"}\` |
+| \`demo\` | nein | JSON-Demo-Ablauf: \`{"steps":[…]}\` |
+| \`logo\` | nein | SVG-Markup, data:image…, Bild-URL oder 1–3 Zeichen |
+| \`page\` | nein | ID des Bereichs, der zuerst geöffnet wird |
 
-Значение JSON: обычный (URL-encoded), \`b64:\` + base64url, \`z:\` + deflate-raw/base64url, \`pako:\` + zlib/base64url. Длинные конфигурации лучше передавать после \`#\`: \`dashboard.html#map=z:…\`.
+JSON-Wert: normal (URL-kodiert), \`b64:\` + base64url, \`z:\` + deflate-raw/base64url, \`pako:\` + zlib/base64url. Lange Konfigurationen besser nach \`#\` übergeben: \`dashboard.html#map=z:…\`.
 
-## Минимальный map
+## Minimales map
 \`\`\`json
 {
-  "app": {"title": "LogiFlow", "lang": "ru"},
+  "app": {"title": "LogiFlow", "lang": "de"},
   "menu": [
-    {"id": "home", "title": "Обзор", "icon": "📊", "widgets": [
-      {"type": "stat", "label": "Заказы", "value": 1284, "trend": "+12%", "w": 3},
-      {"type": "chart", "kind": "area", "title": "Отгрузки", "labels": ["Пн","Вт","Ср"], "series": [{"name": "2025", "data": [5,8,6]}], "w": 9}
+    {"id": "home", "title": "Übersicht", "icon": "📊", "widgets": [
+      {"type": "stat", "label": "Aufträge", "value": 1284, "trend": "+12%", "w": 3},
+      {"type": "chart", "kind": "area", "title": "Versand", "labels": ["Mo","Di","Mi"], "series": [{"name": "2025", "data": [5,8,6]}], "w": 9}
     ]},
-    {"title": "Склад", "icon": "🏭", "children": [
-      {"id": "stock", "title": "Остатки", "widgets": [{"type": "table", "crud": true, "columns": ["SKU","Товар"], "rows": [["A-1","Паллета"]]}]}
+    {"title": "Lager", "icon": "🏭", "children": [
+      {"id": "stock", "title": "Bestände", "widgets": [{"type": "table", "crud": true, "columns": ["SKU","Artikel"], "rows": [["A-1","Palette"]]}]}
     ]}
   ],
-  "chat": {"title": "AI-ассистент", "messages": [{"from": "bot", "text": "Привет!"}]}
+  "chat": {"title": "KI-Assistent", "messages": [{"from": "bot", "text": "Hallo!"}]}
 }
 \`\`\`
 
-## Типы виджетов
-stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs, process, flow, routes, kanban, matrix (доступы), status, integrations, automations, progress, gauge, funnel, heatmap, buttons, text, callout, heading, tabs, accordion, group, image.
+## Widget-Typen
+stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs, process, flow, routes, kanban, matrix (Berechtigungen), status, integrations, automations, progress, gauge, funnel, heatmap, buttons, text, callout, heading, tabs, accordion, group, image.
 
-Размеры: \`w\` (из 12 колонок, десктоп), \`md\` (планшет), \`sm\` (телефон), \`h\` (высота).`;
+Größen: \`w\` (von 12 Spalten, Desktop), \`md\` (Tablet), \`sm\` (Smartphone), \`h\` (Höhe).`;
 
   async function showDocs(errors, missing) {
     document.body.className = 'docs-mode';
-    document.title = errors.length ? 'Moqup — ошибка конфигурации' : 'Moqup — документация';
-    S.lang = 'ru';
+    document.title = errors.length ? 'Moqup — Konfigurationsfehler' : 'Moqup — Dokumentation';
+    S.lang = 'de';
     const app = document.getElementById('app') || document.body;
     app.innerHTML = '';
     const page = h('div', { class: 'docs' });
@@ -607,20 +607,20 @@ stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs,
     page.appendChild(h('div', { class: 'docs-hero' },
       h('div', { class: 'docs-mark', text: 'M' }),
       h('h1', { text: 'Moqup Dashboard' }),
-      h('p', { text: 'JSON → кликабельный прототип админки за минуту. Сгенерируйте конфигурацию с помощью ИИ, вставьте в ссылку — и показывайте.' })));
+      h('p', { text: 'JSON → klickbarer Admin-Prototyp in einer Minute. Konfiguration per KI erzeugen, in den Link einfügen — und präsentieren.' })));
     if (missing && !errors.length) {
       page.appendChild(h('div', { class: 'notice' },
-        h('div', { class: 'notice-title', text: '⚠ Отсутствует параметр map' }),
-        h('div', { html: md('Откройте страницу со ссылкой вида `dashboard.html#map=…` или `dashboard.html?map=…`, где `map` — JSON-конфигурация дашборда. Ниже — документация, конструктор ссылки и готовые примеры.') })));
+        h('div', { class: 'notice-title', text: '⚠ Parameter map fehlt' }),
+        h('div', { html: md('Öffnen Sie die Seite mit einem Link wie `dashboard.html#map=…` oder `dashboard.html?map=…`, wobei `map` die JSON-Konfiguration des Dashboards ist. Unten finden Sie Dokumentation, Link-Generator und fertige Beispiele.') })));
     }
     errors.forEach(er => {
       page.appendChild(h('div', { class: 'err' },
-        h('div', { class: 'err-title', text: '✖ ' + (er.title || 'Ошибка') + (er.param && !String(er.title || '').includes(er.param) ? ` (параметр «${er.param}»)` : '') }),
+        h('div', { class: 'err-title', text: '✖ ' + (er.title || 'Fehler') + (er.param && !String(er.title || '').includes(er.param) ? ` (Parameter „${er.param}“)` : '') }),
         h('div', { class: 'err-msg', text: er.message || '' }),
         er.snippet ? h('pre', { class: 'err-snippet', text: er.snippet }) : null,
         er.hints && er.hints.length ? h('ul', { class: 'err-hints' }, er.hints.map(x => h('li', { html: md(x) }))) : null));
     });
-    const tabs = [['docs', '📘 Документация'], ['build', '🔗 Конструктор ссылки'], ['ex', '✨ Примеры']];
+    const tabs = [['docs', '📘 Dokumentation'], ['build', '🔗 Link-Generator'], ['ex', '✨ Beispiele']];
     const nav = h('div', { class: 'docs-tabs' }), panes = {};
     const show = id => { nav.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.id === id)); Object.keys(panes).forEach(k => panes[k].classList.toggle('hidden', k !== id)); };
     tabs.forEach(([id, label]) => nav.appendChild(h('button', { 'data-id': id, text: label, onclick: () => show(id) })));
@@ -634,7 +634,7 @@ stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs,
     try {
       const r = await fetch('DOCS.md', { cache: 'no-cache' });
       if (r.ok) panes.docs.innerHTML = renderMarkdown(await r.text());
-    } catch (e) { /* file:// — остаётся встроенная справка */ }
+    } catch (e) { /* file:// — eingebaute Kurzreferenz bleibt */ }
   }
 
   function builderPane(errors) {
@@ -644,21 +644,21 @@ stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs,
       if (S.raw[name]) ta.value = S.raw[name];
       return { name, ta, wrap: h('label', { class: 'b-field' }, h('span', { class: 'lbl', text: label }), ta) };
     };
-    const fMap = mk('map', 'map — конфигурация (JSON, обязательно)', 14, '{ "app": {"title": "…"}, "menu": [ … ] }');
-    const fColors = mk('colors', 'colors — палитра (JSON, необязательно)', 4, '{ "primary": "#6c7cff", "accent": "#22d3ee" }');
-    const fDemo = mk('demo', 'demo — сценарий демо (JSON, необязательно)', 5, '{ "steps": [ {"do":"navigate","to":"orders","say":"…"} ] }');
-    const logo = h('input', { class: 'input mono', placeholder: '<svg …>…</svg>  или  https://…/logo.png  или  NC' });
+    const fMap = mk('map', 'map — Konfiguration (JSON, Pflicht)', 14, '{ "app": {"title": "…"}, "menu": [ … ] }');
+    const fColors = mk('colors', 'colors — Farbpalette (JSON, optional)', 4, '{ "primary": "#6c7cff", "accent": "#22d3ee" }');
+    const fDemo = mk('demo', 'demo — Demo-Ablauf (JSON, optional)', 5, '{ "steps": [ {"do":"navigate","to":"orders","say":"…"} ] }');
+    const logo = h('input', { class: 'input mono', placeholder: '<svg …>…</svg>  oder  https://…/logo.png  oder  NC' });
     if (S.raw.logo) logo.value = S.raw.logo;
     const status = h('div', { class: 'b-status' });
-    const out = h('textarea', { class: 'input mono', rows: 3, readonly: true, placeholder: 'Здесь появится ссылка' });
+    const out = h('textarea', { class: 'input mono', rows: 3, readonly: true, placeholder: 'Hier erscheint der Link' });
     const fields = [fMap, fColors, fDemo];
     const check = () => {
       status.innerHTML = '';
       let ok = true;
       fields.forEach(f => {
         const v = f.ta.value.trim();
-        if (!v) { if (f.name === 'map') { ok = false; status.appendChild(h('div', { class: 'bad', text: '✖ map пустой' })); } return; }
-        try { JSON.parse(v); status.appendChild(h('div', { class: 'good', text: `✔ ${f.name}: JSON корректный` })); }
+        if (!v) { if (f.name === 'map') { ok = false; status.appendChild(h('div', { class: 'bad', text: '✖ map ist leer' })); } return; }
+        try { JSON.parse(v); status.appendChild(h('div', { class: 'good', text: `✔ ${f.name}: JSON ist gültig` })); }
         catch (e) { ok = false; const er = jsonError(f.name, v, e); status.appendChild(h('div', { class: 'bad' }, h('div', { text: '✖ ' + er.message }), er.snippet ? h('pre', { text: er.snippet }) : null, er.hints.length ? h('div', { html: md(er.hints.join(' ')) }) : null)); }
       });
       return ok;
@@ -669,24 +669,24 @@ stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs,
       for (const f of fields) { const v = f.ta.value.trim(); if (v) parts.push(f.name + '=' + await encodeParam(v, mode)); }
       if (logo.value.trim()) parts.push('logo=' + encodeURIComponent(logo.value.trim()));
       out.value = location.href.split('#')[0].split('?')[0] + '#' + parts.join('&');
-      status.appendChild(h('div', { class: 'good', text: `Длина ссылки: ${out.value.length.toLocaleString('ru-RU')} символов` + (out.value.length > 30000 ? ' — очень длинная, используйте сжатие z:' : '') }));
+      status.appendChild(h('div', { class: 'good', text: `Linklänge: ${out.value.length.toLocaleString('de-DE')} Zeichen` + (out.value.length > 30000 ? ' — sehr lang, verwenden Sie die Komprimierung z:' : '') }));
     };
-    const pretty = () => fields.forEach(f => { try { if (f.ta.value.trim()) f.ta.value = JSON.stringify(JSON.parse(f.ta.value), null, 2); } catch (e) { /* оставить */ } });
+    const pretty = () => fields.forEach(f => { try { if (f.ta.value.trim()) f.ta.value = JSON.stringify(JSON.parse(f.ta.value), null, 2); } catch (e) { /* belassen */ } });
     add(pane, [
-      h('p', { class: 'muted', html: md('Вставьте JSON (например, сгенерированный ИИ по промпту из DOCS.md), проверьте и получите ссылку. **Сжатая ссылка** короче в 3–6 раз — её удобно отправлять клиенту.') }),
+      h('p', { class: 'muted', html: md('JSON einfügen (z. B. von einer KI mit dem Prompt aus DOCS.md erzeugt), prüfen und Link erhalten. Der **komprimierte Link** ist 3–6× kürzer — ideal zum Versenden an Kunden.') }),
       fMap.wrap,
-      h('details', { class: 'b-more', open: !!(S.raw.colors || S.raw.demo || S.raw.logo) }, h('summary', { text: 'Необязательные параметры: colors, demo, logo' }),
-        fColors.wrap, fDemo.wrap, h('label', { class: 'b-field' }, h('span', { class: 'lbl', text: 'logo — SVG / URL / data:image / текст' }), logo)),
+      h('details', { class: 'b-more', open: !!(S.raw.colors || S.raw.demo || S.raw.logo) }, h('summary', { text: 'Optionale Parameter: colors, demo, logo' }),
+        fColors.wrap, fDemo.wrap, h('label', { class: 'b-field' }, h('span', { class: 'lbl', text: 'logo — SVG / URL / data:image / Text' }), logo)),
       h('div', { class: 'b-actions' },
-        h('button', { class: 'btn', text: 'Проверить JSON', onclick: check }),
-        h('button', { class: 'btn', text: 'Отформатировать', onclick: pretty }),
-        h('button', { class: 'btn primary', text: 'Ссылка (сжатая z:)', onclick: () => build('z') }),
-        h('button', { class: 'btn', text: 'Ссылка (b64:)', onclick: () => build('b64') }),
-        h('button', { class: 'btn', text: 'Ссылка (JSON)', onclick: () => build('json') })),
+        h('button', { class: 'btn', text: 'JSON prüfen', onclick: check }),
+        h('button', { class: 'btn', text: 'Formatieren', onclick: pretty }),
+        h('button', { class: 'btn primary', text: 'Link (komprimiert z:)', onclick: () => build('z') }),
+        h('button', { class: 'btn', text: 'Link (b64:)', onclick: () => build('b64') }),
+        h('button', { class: 'btn', text: 'Link (JSON)', onclick: () => build('json') })),
       status, out,
       h('div', { class: 'b-actions' },
-        h('button', { class: 'btn', text: '📋 Копировать', onclick: () => { if (!out.value) return; out.select(); (navigator.clipboard ? navigator.clipboard.writeText(out.value) : Promise.reject()).catch(() => document.execCommand('copy')); } }),
-        h('button', { class: 'btn success', text: '▶ Открыть прототип', onclick: () => { if (out.value) location.href = out.value; } })),
+        h('button', { class: 'btn', text: '📋 Kopieren', onclick: () => { if (!out.value) return; out.select(); (navigator.clipboard ? navigator.clipboard.writeText(out.value) : Promise.reject()).catch(() => document.execCommand('copy')); } }),
+        h('button', { class: 'btn success', text: '▶ Prototyp öffnen', onclick: () => { if (out.value) location.href = out.value; } })),
     ]);
     pane._fill = ex => {
       fMap.ta.value = JSON.stringify(ex.map, null, 2);
@@ -704,27 +704,27 @@ stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs,
     const pane = h('div', { class: 'examples' });
     const ex = window.MOQUP_EXAMPLES || {};
     const keys = Object.keys(ex);
-    if (!keys.length) { pane.appendChild(h('p', { class: 'muted', html: md('Файл `examples.js` не подключён — примеры недоступны. Минимальный пример есть во вкладке «Документация».') })); return pane; }
+    if (!keys.length) { pane.appendChild(h('p', { class: 'muted', html: md('Die Datei `examples.js` ist nicht eingebunden — keine Beispiele verfügbar. Ein Minimalbeispiel steht im Tab „Dokumentation“.') })); return pane; }
     keys.forEach(k => {
       const e = ex[k];
       pane.appendChild(h('div', { class: 'ex-card' },
         h('div', { class: 'ex-ico', text: e.icon || '✨' }),
         h('div', { class: 'ex-main' }, h('div', { class: 'ex-title', text: e.title || k }), h('div', { class: 'muted', text: e.description || '' })),
         h('div', { class: 'ex-actions' },
-          h('button', { class: 'btn primary', text: '▶ Открыть', onclick: async () => {
+          h('button', { class: 'btn primary', text: '▶ Öffnen', onclick: async () => {
             const parts = ['map=' + await encodeParam(JSON.stringify(e.map), 'z')];
             if (e.colors) parts.push('colors=' + await encodeParam(JSON.stringify(e.colors), 'z'));
             if (e.demo) parts.push('demo=' + await encodeParam(JSON.stringify(e.demo), 'z'));
             if (e.logo) parts.push('logo=' + encodeURIComponent(e.logo));
             location.href = location.href.split('#')[0].split('?')[0] + '#' + parts.join('&');
           } }),
-          h('button', { class: 'btn', text: 'В конструктор', onclick: () => { builderPane.last._fill(e); goBuild(); } }))));
+          h('button', { class: 'btn', text: 'In den Generator', onclick: () => { builderPane.last._fill(e); goBuild(); } }))));
     });
     return pane;
   }
 
   /* =====================================================================
-   * 7. Загрузка (прогресс построения)
+   * 7. Ladebildschirm (Aufbaufortschritt)
    * ===================================================================== */
   function countAll() {
     let n = 1;
@@ -758,13 +758,13 @@ stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs,
   }
 
   /* =====================================================================
-   * 8. Каркас: сайдбар, топбар, страницы
+   * 8. Grundgerüst: Sidebar, Topbar, Seiten
    * ===================================================================== */
   const isMobile = () => window.innerWidth < 992;
   function buildShell() {
     const app = S.cfg.app;
     const root = h('div', { class: 'shell' + (app.sidebarCollapsed ? ' collapsed' : ''), id: 'shell' });
-    // сайдбар
+    // Sidebar
     const nav = h('nav', { class: 'side-nav' });
     S.cfg.menu.forEach(n => { if (!n.hidden) nav.appendChild(menuNode(n)); });
     const user = isObj(app.user) ? app.user : null;
@@ -773,7 +773,7 @@ stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs,
       nav,
       user ? h('div', { class: 'side-foot' }, h('div', { class: 'user-chip' }, h('div', { class: 'avatar', text: user.avatar || initials(user.name) }),
         h('div', { class: 'brand-text' }, h('div', { class: 'uc-name', text: user.name || '' }), h('div', { class: 'uc-role', text: user.role || '' })))) : null);
-    // топбар
+    // Topbar
     const crumbs = h('div', { class: 'top-crumbs' });
     const bellDot = h('span', { class: 'dot hidden' });
     const bell = h('button', { class: 'icon-btn', ref: 'notifications', title: t('notifs'), onclick: e => { e.stopPropagation(); toggleNotifs(bell); } }, '🔔', bellDot);
@@ -864,7 +864,7 @@ stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs,
   }
 
   /* =====================================================================
-   * 9. Сетка, карточки, кнопки, действия
+   * 9. Raster, Karten, Buttons, Aktionen
    * ===================================================================== */
   const DEFAULT_W = { stat: 3, gauge: 3, chart: 6, table: 12, form: 6, list: 4, timeline: 6, logs: 6, process: 12, flow: 12, routes: 8, kanban: 12,
     matrix: 6, status: 4, integrations: 12, automations: 12, buttons: 12, text: 6, callout: 12, heading: 12, tabs: 12, accordion: 6, group: 12,
@@ -894,12 +894,12 @@ stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs,
     S.stats.widgets++;
     let el;
     if (!fn) {
-      warn(`Неизвестный тип виджета «${w.type}» (id: ${w.id}).`);
-      el = card(Object.assign({}, w, { title: w.title || 'Неизвестный виджет' }), h('div', { class: 'muted', html: md(`Тип \`${esc(w.type)}\` не поддерживается. См. DOCS.md → «Виджеты».`) }));
+      warn(`Unbekannter Widget-Typ „${w.type}“ (id: ${w.id}).`);
+      el = card(Object.assign({}, w, { title: w.title || 'Unbekanntes Widget' }), h('div', { class: 'muted', html: md(`Typ \`${esc(w.type)}\` wird nicht unterstützt. Siehe DOCS.md → „Widgets“.`) }));
     } else {
       try { el = fn(w); } catch (e) {
         console.error(e);
-        warn(`Ошибка построения виджета «${w.id}»: ${e.message}`);
+        warn(`Fehler beim Aufbau des Widgets „${w.id}“: ${e.message}`);
         el = card(Object.assign({}, w, { title: w.title || type }), h('div', { class: 'muted', text: '⚠ ' + e.message }));
       }
     }
@@ -985,7 +985,7 @@ stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs,
       case 'add': { const api = S.widgets[a.target || val] && S.widgets[a.target || val].api; if (api && api.openAdd) api.openAdd(); break; }
       case 'run': { const api = S.widgets[a.target || val] && S.widgets[a.target || val].api; if (api && api.run) api.run(); break; }
       case 'none': case '': break;
-      default: warn(`Неизвестное действие «${a.type}».`);
+      default: warn(`Unbekannte Aktion „${a.type}“.`);
     }
     if (a.type !== 'toast' && a.toast) toast(a.toast, a.tone || 'success');
     if (a.type !== 'log' && a.log) emitLog(a.level || 'info', a.log, a.source);
@@ -994,7 +994,7 @@ stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs,
   }
 
   /* =====================================================================
-   * 10. Toast, модальные окна, уведомления, палитра команд
+   * 10. Toasts, Modals, Benachrichtigungen, Befehlspalette
    * ===================================================================== */
   const TONE_ICON = { success: '✓', info: 'ℹ', warning: '!', danger: '✕', primary: '•' };
   function toast(text, tone) {
@@ -1112,12 +1112,12 @@ stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs,
   function toggleMode() {
     S.mode = S.mode === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-mode', S.mode);
-    try { localStorage.setItem('moqup-mode', S.mode); } catch (e) { /* приватный режим */ }
+    try { localStorage.setItem('moqup-mode', S.mode); } catch (e) { /* privater Modus */ }
     applyColors();
   }
 
   /* =====================================================================
-   * 11. Формы
+   * 11. Formulare
    * ===================================================================== */
   function buildForm(fields, values) {
     const el = h('div', { class: 'form-grid' });
@@ -1180,7 +1180,7 @@ stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs,
   }
 
   /* =====================================================================
-   * 12. Графики (SVG без библиотек)
+   * 12. Diagramme (SVG ohne Bibliotheken)
    * ===================================================================== */
   function niceScale(min, max, count) {
     if (max === min) { max = min + 1; }
@@ -1248,7 +1248,7 @@ stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs,
         }
         const p = s('path', { d, class: 'line', stroke: sr.color });
         svg.appendChild(p);
-        if (anim) requestAnimationFrame(() => { try { const L = p.getTotalLength(); p.style.strokeDasharray = L; p.style.strokeDashoffset = L; p.classList.add('draw'); } catch (e) { /* ок */ } });
+        if (anim) requestAnimationFrame(() => { try { const L = p.getTotalLength(); p.style.strokeDasharray = L; p.style.strokeDashoffset = L; p.classList.add('draw'); } catch (e) { /* ok */ } });
         if (n <= 20) pts.forEach(pt => svg.appendChild(s('circle', { cx: pt[0], cy: pt[1], r: 3, fill: 'var(--surface)', stroke: sr.color, 'stroke-width': 2, class: anim ? 'fade' : null })));
       });
     }
@@ -1303,7 +1303,7 @@ stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs,
   }
 
   /* =====================================================================
-   * 13. Виджеты
+   * 13. Widgets
    * ===================================================================== */
   const WIDGETS = {};
 
@@ -1596,7 +1596,7 @@ stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs,
       const v = form.get();
       const target = sub.addTo && S.widgets[sub.addTo] && S.widgets[sub.addTo].api;
       if (target && target.addRow) target.addRow(v, !!sub.toast);
-      else if (sub.addTo) warn(`form.submit.addTo: виджет «${sub.addTo}» не найден или это не таблица.`);
+      else if (sub.addTo) warn(`form.submit.addTo: Widget „${sub.addTo}“ nicht gefunden oder keine Tabelle.`);
       if (sub.toast !== false && (sub.toast || !target)) toast(sub.toast || t('saved'));
       if (sub.log) emitLog('success', String(sub.log).replace(/\{(\w+)\}/g, (m, k) => v[k] != null ? v[k] : ''), w.title, true);
       if (sub.action) runAction(sub.action);
@@ -1611,7 +1611,7 @@ stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs,
     arr(w.items).forEach((it, i) => {
       if (typeof it === 'string') it = { title: it };
       const clickable = !!it.action;
-      const cb = check ? h('input', { type: 'checkbox', checked: it.done || null, onclick: e => e.stopPropagation(), onchange: e => { row.classList.toggle('done', e.target.checked); if (e.target.checked) emitLog('success', `${w.title || 'Чек-лист'}: ✓ ${it.title}`, w.title); } }) : null;
+      const cb = check ? h('input', { type: 'checkbox', checked: it.done || null, onclick: e => e.stopPropagation(), onchange: e => { row.classList.toggle('done', e.target.checked); if (e.target.checked) emitLog('success', `${w.title || 'Checkliste'}: ✓ ${it.title}`, w.title); } }) : null;
       const row = h('div', { class: 'li' + (clickable ? ' clickable' : '') + (it.done ? ' done' : ''), ref: 'item:' + i, style: toneStyle(it.tone || it.color || 'primary'), onclick: clickable ? () => runAction(it.action) : null },
         cb ? h('label', { class: 'check' }, cb) : null,
         it.avatar ? h('span', { class: 'avatar', style: { background: hashTone(it.avatar) }, text: initials(it.avatar) }) : it.icon ? ico(it.icon, 'li-ico') : null,
@@ -1643,10 +1643,10 @@ stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs,
 
   const LVL = { warning: 'warn', err: 'error', fatal: 'error', ok: 'success', done: 'success', trace: 'debug' };
   const DEFAULT_POOL = [
-    { level: 'info', source: 'api', text: 'GET /v1/orders 200 · 84 ms' }, { level: 'success', source: 'sync', text: 'Синхронизация завершена: 128 записей' },
-    { level: 'info', source: 'queue', text: 'Задача #{n} поставлена в очередь' }, { level: 'warn', source: 'api', text: 'Медленный ответ внешнего API: 1 840 ms' },
-    { level: 'success', source: 'automation', text: 'Сценарий выполнен за 2.3 c' }, { level: 'debug', source: 'worker', text: 'heartbeat ok' },
-    { level: 'error', source: 'webhook', text: 'Повторная попытка доставки (2/5): timeout' }, { level: 'info', source: 'auth', text: 'Вход пользователя, 2FA подтверждена' },
+    { level: 'info', source: 'api', text: 'GET /v1/orders 200 · 84 ms' }, { level: 'success', source: 'sync', text: 'Synchronisierung abgeschlossen: 128 Datensätze' },
+    { level: 'info', source: 'queue', text: 'Auftrag #{n} in Warteschlange' }, { level: 'warn', source: 'api', text: 'Langsame Antwort der externen API: 1.840 ms' },
+    { level: 'success', source: 'automation', text: 'Workflow in 2,3 s ausgeführt' }, { level: 'debug', source: 'worker', text: 'heartbeat ok' },
+    { level: 'error', source: 'webhook', text: 'Erneuter Zustellversuch (2/5): Timeout' }, { level: 'info', source: 'auth', text: 'Benutzeranmeldung, 2FA bestätigt' },
   ];
   WIDGETS.logs = w => {
     const levels = ['info', 'success', 'warn', 'error', 'debug'], onLv = new Set(levels);
@@ -1703,9 +1703,9 @@ stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs,
       for (let i = 0; i < steps.length; i++) {
         steps[i].status = 'active'; render();
         await sleep(num(w.stepDelay, 900));
-        if (steps[i].fail) { steps[i].status = 'error'; render(); emitLog('error', `${w.title || 'Процесс'}: ${steps[i].title} — ошибка`, w.title, true); running = false; return; }
+        if (steps[i].fail) { steps[i].status = 'error'; render(); emitLog('error', `${w.title || 'Prozess'}: ${steps[i].title} — Fehler`, w.title, true); running = false; return; }
         steps[i].status = 'done'; render();
-        emitLog('success', `${w.title || 'Процесс'}: ${steps[i].title} ✓`, w.logSource || 'process');
+        emitLog('success', `${w.title || 'Prozess'}: ${steps[i].title} ✓`, w.logSource || 'process');
       }
       toast((w.title ? '**' + esc(w.title) + '** — ' : '') + t('done'));
       running = false;
@@ -1719,7 +1719,7 @@ stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs,
     const byId = Object.fromEntries(nodes.map(n => [n.id, n]));
     let edges = arr(w.edges).map(e => (Array.isArray(e) ? { from: String(e[0]), to: String(e[1]) } : Object.assign({}, e, { from: String(e.from), to: String(e.to) }))).filter(e => byId[e.from] && byId[e.to]);
     if (!w.edges && nodes.length > 1) edges = nodes.slice(1).map((n, i) => ({ from: nodes[i].id, to: n.id }));
-    // авто-раскладка по уровням
+    // automatisches Layout nach Ebenen
     if (nodes.some(n => n.col == null)) {
       const lvl = {}; nodes.forEach(n => (lvl[n.id] = 0));
       for (let k = 0; k < nodes.length; k++) edges.forEach(e => { if (lvl[e.to] < lvl[e.from] + 1 && lvl[e.from] + 1 < nodes.length) lvl[e.to] = lvl[e.from] + 1; });
@@ -1790,13 +1790,13 @@ stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs,
     const pid = uid('dots');
     svg.appendChild(s('defs', {}, s('pattern', { id: pid, width: 28, height: 28, patternUnits: 'userSpaceOnUse' }, s('circle', { cx: 2, cy: 2, r: 1.6, fill: 'var(--border)' }))));
     svg.appendChild(s('rect', { width: VW, height: VH, fill: `url(#${pid})` }));
-    // декоративные «регионы»
+    // dekorative „Regionen“
     arr(w.regions).forEach(r => svg.appendChild(s('ellipse', { cx: num(r.x, 50) * 10, cy: num(r.y, 50) * VH / 100, rx: num(r.rx, 15) * 10, ry: num(r.ry, 10) * VH / 100, fill: cssColor(r.color) || 'var(--primary)', opacity: 0.07 })));
     arr(w.regions).forEach(r => r.label && svg.appendChild(s('text', { x: num(r.x, 50) * 10, y: num(r.y, 50) * VH / 100, 'text-anchor': 'middle', class: 'region-label' }, r.label)));
     const vehicles = s('g');
     arr(w.routes).forEach((r, i) => {
       const a = byId[String(r.from)], b = byId[String(r.to)];
-      if (!a || !b) { warn(`routes: маршрут ${i + 1} ссылается на неизвестную точку.`); return; }
+      if (!a || !b) { warn(`routes: Route ${i + 1} verweist auf einen unbekannten Punkt.`); return; }
       const mx = (a.X + b.X) / 2, my = (a.Y + b.Y) / 2, dx = b.X - a.X, dy = b.Y - a.Y, k = num(r.curve, 0.18) * (i % 2 ? -1 : 1);
       const d = `M${a.X},${a.Y} Q${mx - dy * k},${my + dx * k} ${b.X},${b.Y}`;
       const tone = cssColor(r.tone || r.color || autoTone(r.status) !== 'muted' && autoTone(r.status)) || 'var(--primary)';
@@ -1842,7 +1842,7 @@ stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs,
     const board = h('div', { class: 'kanban' });
     let drag = null;
     const cardEl = (cd, col) => {
-      const el = h('div', { class: 'kb-card', draggable: 'true', style: toneStyle(cd.tone || cd.color || 'primary'), ondragstart: e => { drag = { cd, from: col, el }; el.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', cd.title || ''); } catch (x) { /* ок */ } }, ondragend: () => el.classList.remove('dragging'), onclick: () => openCard(cd, col) },
+      const el = h('div', { class: 'kb-card', draggable: 'true', style: toneStyle(cd.tone || cd.color || 'primary'), ondragstart: e => { drag = { cd, from: col, el }; el.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', cd.title || ''); } catch (x) { /* ok */ } }, ondragend: () => el.classList.remove('dragging'), onclick: () => openCard(cd, col) },
         h('div', { class: 'kb-title', text: cd.title || '' }),
         cd.text ? h('div', { class: 'kb-text', text: cd.text }) : null,
         h('div', { class: 'kb-meta' }, arr(cd.tags).map(tg => h('span', { class: 'tag', text: tg })), h('div', { class: 'spacer' }), cd.due ? h('span', { class: 'muted small', text: '🕒 ' + fmtDate(cd.due) }) : null, cd.user ? h('span', { class: 'avatar xs', style: { background: hashTone(cd.user) }, title: cd.user, text: initials(cd.user) }) : null));
@@ -2019,7 +2019,7 @@ stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs,
   WIDGETS.image = w => {
     const src = String(w.src || '');
     const ok = /^(https?:\/\/|data:image\/(png|jpe?g|gif|webp|svg\+xml)[;,]|\.{0,2}\/|[\w-]+\.(png|jpe?g|gif|webp|svg))/i.test(src);
-    return card(w, ok ? h('img', { class: 'w-img', src, alt: w.alt || '', style: { height: px(w.h, 'auto'), objectFit: w.fit || 'cover' } }) : h('div', { class: 'muted', text: 'image: некорректный src' }), { noHeight: true });
+    return card(w, ok ? h('img', { class: 'w-img', src, alt: w.alt || '', style: { height: px(w.h, 'auto'), objectFit: w.fit || 'cover' } }) : h('div', { class: 'muted', text: 'image: ungültiger src' }), { noHeight: true });
   };
   WIDGETS.tabs = w => {
     const nav = h('div', { class: 'tabs-nav' }), panes = h('div', {});
@@ -2051,7 +2051,7 @@ stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs,
   };
 
   /* =====================================================================
-   * 14. Чат с нейросетью (прототип)
+   * 14. KI-Chat (Prototyp)
    * ===================================================================== */
   function buildChat() {
     const c = S.cfg.chat;
@@ -2064,7 +2064,7 @@ stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs,
     const sugg = h('div', { class: 'chat-sugg' }, arr(c.suggestions).map((x, i) => h('button', { class: 'chip', ref: 'chat:sugg:' + i, text: x, onclick: () => chatSend(x) })));
     const panel = h('div', { class: 'chat-panel closed' + (left ? ' left' : ''), ref: 'chat' },
       h('div', { class: 'chat-head' }, h('div', { class: 'avatar ai', text: c.avatar || '✦' }),
-        h('div', { class: 'chat-who' }, h('div', { class: 'chat-title', text: c.title || 'AI-ассистент' }), h('div', { class: 'chat-sub' }, h('span', { class: 'online-dot' }), c.subtitle || t('online'))),
+        h('div', { class: 'chat-who' }, h('div', { class: 'chat-title', text: c.title || 'KI-Assistent' }), h('div', { class: 'chat-sub' }, h('span', { class: 'online-dot' }), c.subtitle || t('online'))),
         h('button', { class: 'tool', ref: 'chat:close', text: '✕', onclick: () => openChat(false) })),
       msgs, sugg.children.length ? sugg : null,
       h('div', { class: 'chat-input' }, input, h('button', { class: 'btn primary', ref: 'chat:send', text: '➤', onclick: () => send() })));
@@ -2129,7 +2129,7 @@ stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs,
   }
 
   /* =====================================================================
-   * 15. Демо-режим: интерактивный курсор
+   * 15. Demo-Modus: interaktiver Cursor
    * ===================================================================== */
   const D = { running: false, paused: false, stop: false, skip: false, cursor: null, caption: null, x: 0, y: 0 };
   function tokenizeTarget(tg) {
@@ -2313,7 +2313,7 @@ stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs,
       case 'run': runAction(st.run || st.value); await dwait(num(st.ms, 900)); return;
       case 'theme': toggleMode(); await dwait(num(st.ms, 900)); return;
       case 'finale': D.hadFinale = true; finale(Object.assign({}, S.demo.finale || {}, st)); await dwait(400); return;
-      default: warn(`demo: неизвестный шаг «${kind}».`); await dwait(300);
+      default: warn(`demo: unbekannter Schritt „${kind}“.`); await dwait(300);
     }
   }
   async function startDemo() {
@@ -2341,7 +2341,7 @@ stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs,
   }
 
   /* =====================================================================
-   * 16. Финал «вау»: конфетти + итоги
+   * 16. „Wow“-Finale: Konfetti + Zusammenfassung
    * ===================================================================== */
   function confetti(host, ms) {
     const cv = h('canvas', { class: 'confetti' });
@@ -2395,7 +2395,7 @@ stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs,
   }
 
   /* =====================================================================
-   * 17. Запуск
+   * 17. Start
    * ===================================================================== */
   async function boot() {
     const raw = readRawParams();
@@ -2412,20 +2412,20 @@ stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs,
       try { const v = await decodeParam(k, raw[k]); if (k === 'colors') S.colorsParam = v; else S.demo = v; } catch (e) { errors.push(e); }
     }
     if (raw.logo) { S.logo = raw.logo; S.raw.logo = raw.logo; }
-    if (!errors.length) { try { S.cfg = normalize(cfg); } catch (e) { errors.push(e.param ? e : { param: 'map', title: 'Ошибка конфигурации', message: e.message || String(e) }); } }
+    if (!errors.length) { try { S.cfg = normalize(cfg); } catch (e) { errors.push(e.param ? e : { param: 'map', title: 'Konfigurationsfehler', message: e.message || String(e) }); } }
     if (errors.length) return showDocs(errors, false);
     await render(raw.page);
   }
   async function render(startPage) {
     const app = S.cfg.app;
-    S.lang = I18N[app.lang] ? app.lang : (app.lang && /^de/.test(app.lang) ? 'de' : app.lang && /^en/.test(app.lang) ? 'en' : 'ru');
+    S.lang = I18N[app.lang] ? app.lang : (app.lang && /^ru/.test(app.lang) ? 'ru' : app.lang && /^en/.test(app.lang) ? 'en' : 'de');
     S.locale = app.locale || { ru: 'ru-RU', en: 'en-US', de: 'de-DE' }[S.lang];
     document.documentElement.lang = S.lang;
     if (S.demo == null && S.cfg.demo) S.demo = S.cfg.demo;
     if (Array.isArray(S.demo)) S.demo = { steps: S.demo };
-    if (S.demo && !isObj(S.demo)) { warn('demo должен быть объектом { "steps": [...] }.'); S.demo = null; }
+    if (S.demo && !isObj(S.demo)) { warn('demo muss ein Objekt { "steps": [...] } sein.'); S.demo = null; }
     if (S.logo == null && S.cfg.logo) S.logo = S.cfg.logo;
-    let saved = null; try { saved = localStorage.getItem('moqup-mode'); } catch (e) { /* ок */ }
+    let saved = null; try { saved = localStorage.getItem('moqup-mode'); } catch (e) { /* ok */ }
     const pal = Object.assign({}, S.cfg.colors || {}, S.colorsParam || {});
     S.mode = saved || pal.mode || app.mode || app.theme || 'dark';
     if (S.mode !== 'light') S.mode = 'dark';
@@ -2439,7 +2439,7 @@ stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs,
     S.building = true;
     buildShell();
     await S.loading.tick(t('preparing'));
-    // пункты меню
+    // Menüpunkte
     const walkM = async items => { for (const it of arr(items)) { if (it.section) continue; await S.loading.tick('☰ ' + it.title); if (it.children) await walkM(it.children); } };
     await walkM(S.cfg.menu);
     for (const p of S.pageList) { S.buildingPage = p.id; await buildPage(p); }
@@ -2454,7 +2454,7 @@ stat, chart (line/area/bar/pie/donut), table (CRUD), form, list, timeline, logs,
     if (S.demo && S.demo.autoplay) setTimeout(startDemo, num(S.demo.delay, 1400));
   }
 
-  // глобальные клавиши и события
+  // globale Tasten und Ereignisse
   document.addEventListener('keydown', e => {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k' && S.shell) { e.preventDefault(); openPalette(); }
     if (e.key === 'Escape') {
